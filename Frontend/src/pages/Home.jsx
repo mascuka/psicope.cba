@@ -72,14 +72,17 @@ export default function Home() {
   };
 
   const procesarDestacados = async (configArr) => {
+    // Traemos también los campos de oferta y precio
     const { data: recientes } = await supabase.from("materiales")
-      .select("*")
+      .select("*, en_oferta, precio, porcentaje_descuento")
       .order("created_at", { ascending: false })
       .limit(3);
 
     const promesas = configArr.slice(0, 3).map(async (config, index) => {
       if (config.modo === "manual" && config.id) {
-        const { data } = await supabase.from("materiales").select("*").eq("id", config.id).single();
+        const { data } = await supabase.from("materiales")
+          .select("*, en_oferta, precio, porcentaje_descuento")
+          .eq("id", config.id).single();
         return data || recientes[index];
       }
       return recientes[index];
@@ -89,30 +92,21 @@ export default function Home() {
     setDestacados(resultados.filter(item => item !== null));
   };
 
-  // FUNCIÓN PARA SUBIR IMAGEN Y BORRAR LA ANTERIOR
   const handleImageUpload = async (file) => {
     if (!file) return null;
-    
     setUploadingImage(true);
     try {
-      // Borrar imagen anterior si existe
       if (content.hero_bg_url && content.hero_bg_url.includes('supabase')) {
         const oldPath = content.hero_bg_url.split('/').pop();
         await supabase.storage.from('materiales-didacticos').remove([`hero/${oldPath}`]);
       }
-
-      // Subir nueva imagen
       const fileName = `hero_${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from('materiales-didacticos')
         .upload(`hero/${fileName}`, file);
 
       if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('materiales-didacticos')
-        .getPublicUrl(`hero/${fileName}`);
-
+      const { data } = supabase.storage.from('materiales-didacticos').getPublicUrl(`hero/${fileName}`);
       setUploadingImage(false);
       return data.publicUrl;
     } catch (error) {
@@ -176,7 +170,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ==================== BENEFICIOS EDITABLES ==================== */}
+      {/* ==================== BENEFICIOS ==================== */}
       <section className="home-beneficios">
         <div className="beneficios-container">
           {editMode === 'beneficios_titulo' ? (
@@ -324,25 +318,48 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  item && (
-                    <>
-                      <div className="card-image-container">
-                        <img src={item.imagen_portada} alt={item.nombre} />
-                      </div>
-                      <div className="card-body">
-                        <h4>{item.nombre}</h4>
-                        <p>{item.descripcion || "Material psicopedagógico de calidad para potenciar el aprendizaje"}</p>
-                        <div className="home-card-actions">
-                          <button className="btn-home-muestra" onClick={() => setViewingPdf(item.preview_url)}>
-                            <FaEye /> Muestra
-                          </button>
-                          <Link to="/materiales" className="btn-home-comprar">
-                            <FaShoppingCart /> Comprar
-                          </Link>
+                  item && (() => {
+                    const precioDesc = item.en_oferta 
+                      ? (item.precio * (1 - item.porcentaje_descuento / 100)).toFixed(0) 
+                      : item.precio;
+
+                    return (
+                      <>
+                        <div className="card-image-container">
+                          <img src={item.imagen_portada} alt={item.nombre} />
+                          {item.en_oferta && (
+                            <div className="oferta-badge-home">
+                              -{item.porcentaje_descuento}%
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </>
-                  )
+                        <div className="card-body">
+                          <h4>{item.nombre}</h4>
+                          <p>{item.descripcion || "Material psicopedagógico de calidad para potenciar el aprendizaje"}</p>
+                          
+                          <div className="price-container-home">
+                            {item.en_oferta ? (
+                              <>
+                                <span className="price-old-home">${item.precio}</span>
+                                <span className="price-current-home">${precioDesc}</span>
+                              </>
+                            ) : (
+                              <span className="price-current-home">${item.precio}</span>
+                            )}
+                          </div>
+
+                          <div className="home-card-actions">
+                            <button className="btn-home-muestra" onClick={() => setViewingPdf(item.preview_url)}>
+                              <FaEye /> Muestra
+                            </button>
+                            <Link to="/materiales" className="btn-home-comprar">
+                              <FaShoppingCart /> Comprar
+                            </Link>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()
                 )}
               </div>
             );

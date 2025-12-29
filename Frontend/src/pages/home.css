@@ -215,47 +215,34 @@
   box-shadow: 0 20px 50px rgba(229, 179, 168, 0.16);
   border: 2px solid var(--rosa-soft);
   position: relative;
+  margin-top: 60px; 
+  padding-top: 50px; 
 }
 
 .info-card::before {
   content: '';
   position: absolute;
-  top: -55px; /* Ajustamos la altura para que luzca bien */
+  top: -55px;
   left: 50%;
   transform: translateX(-50%);
-  
   width: 120px;
   height: 60px; 
-  
-  /* ARCOIRIS INSPIRADO EN LA IMAGEN (Colores más presentes) */
   background: radial-gradient(
     circle at bottom,
     transparent 15%,
-    #ffadad 16%, #ffadad 28%, /* Rojo/Rosa fuerte */
-    #ffd6a5 29%, #ffd6a5 41%, /* Naranja pastel vibrante */
-    #fdffb6 42%, #fdffb6 54%, /* Amarillo */
-    #9bf6ff 55%, #9bf6ff 67%, /* Celeste/Azul */
-    #a0c4ff 68%, #a0c4ff 80%, /* Azul suave */
-    #bdb2ff 81%, #bdb2ff 92%, /* Violeta */
+    #ffadad 16%, #ffadad 28%,
+    #ffd6a5 29%, #ffd6a5 41%,
+    #fdffb6 42%, #fdffb6 54%,
+    #9bf6ff 55%, #9bf6ff 67%,
+    #a0c4ff 68%, #a0c4ff 80%,
+    #bdb2ff 81%, #bdb2ff 92%,
     transparent 93%
   );
-  
-  /* Forma de arco */
   border-radius: 120px 120px 0 0;
-  
-  /* ESTÉTICA FINAL */
   background-color: white; 
   padding: 6px;
-  /* El drop-shadow ayuda a que resalte sobre el fondo blanco */
   filter: drop-shadow(0 -3px 6px rgba(0,0,0,0.1));
   z-index: 10;
-}
-
-/* Ajuste para que la card tenga espacio suficiente para el arcoíris */
-.info-card {
-  position: relative;
-  margin-top: 60px; 
-  padding-top: 50px; /* Le damos aire al texto para que no choque con el arco */
 }
 
 .info-card h2 { 
@@ -272,7 +259,7 @@
 }
 
 /* ============================================
-   DESTACADOS - PERFECTAMENTE BALANCEADOS
+   DESTACADOS - CON PRECIOS Y OFERTAS
    ============================================ */
 .home-destacados {
   max-width: 1300px;
@@ -307,7 +294,6 @@
   margin-bottom: 30px;
 }
 
-/* CARDS OPTIMIZADAS */
 .home-destacados .material-card {
   background: white;
   border-radius: 24px;
@@ -348,8 +334,44 @@
   transition: transform 0.4s ease;
 }
 
-.home-destacados .material-card:hover .card-image-container img {
-  transform: scale(1.05);
+/* BADGE DE OFERTA EN HOME */
+.oferta-badge-home {
+  position: absolute;
+  top: 15px;
+  left: -5px;
+  background: #ff4757;
+  color: white;
+  padding: 5px 15px;
+  font-weight: 900;
+  font-size: 1.1rem;
+  border-radius: 0 50px 50px 0;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+/* CONTENEDOR DE PRECIOS EN HOME */
+.price-container-home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  padding: 8px;
+  background: var(--rosa-light);
+  border-radius: 12px;
+}
+
+.price-current-home {
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--texto-oscuro);
+}
+
+.price-old-home {
+  text-decoration: line-through;
+  color: var(--rosa);
+  font-size: 1.1rem;
+  opacity: 0.6;
 }
 
 .home-destacados .card-body { 
@@ -357,7 +379,7 @@
   text-align: center; 
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   flex-grow: 1;
   background: white;
 }
@@ -382,14 +404,14 @@
   line-height: 1.5 !important;
   flex-grow: 1;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2; /* Bajado a 2 líneas para dar espacio al precio */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 58px;
+  min-height: 40px;
 }
 
 .home-card-actions {
-  margin-top: 22px;
+  margin-top: 15px;
   display: flex;
   gap: 10px;
   justify-content: center;
@@ -397,19 +419,19 @@
 
 .btn-home-muestra {
   flex: 1;
-  padding: 12px 20px;
+  padding: 12px 10px;
   border-radius: 16px;
   border: 2.5px solid var(--rosa);
   background: white;
   color: var(--rosa);
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 800;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-home-muestra:hover {
@@ -421,18 +443,18 @@
 
 .btn-home-comprar {
   flex: 1.5;
-  padding: 12px 20px;
+  padding: 12px 10px;
   border-radius: 16px;
   background: var(--rosa);
   color: white !important;
   text-decoration: none;
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   box-shadow: 0 6px 22px rgba(229, 179, 168, 0.32);
 }
 
@@ -626,4 +648,6 @@
   }
   
   .frase-motivadora { font-size: 1.6rem; }
+
+  .price-current-home { font-size: 1.3rem; }
 }
