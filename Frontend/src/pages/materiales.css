@@ -1,0 +1,257 @@
+/* ===============================
+   VARIABLES Y BASE
+================================ */
+:root {
+  --rosa: #e5b3a8;
+  --rosa-oscuro: #d4a297;
+  --rosa-claro: #f9dfdf;
+  --texto-cafe: #6d5b57;
+  --gris-suave: #777;
+  --borde-card: #f4dcd6;
+  --fondo: #fdfaf9;
+}
+
+.materiales-page {
+  background: var(--fondo);
+  min-height: calc(100vh - 85px);
+  padding: 40px 20px 60px;
+}
+
+.materiales-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 35px;
+  align-items: flex-start;
+}
+
+/* ===============================
+   SIDEBAR
+================================ */
+.materiales-sidebar {
+  width: 270px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 120px;
+}
+
+.filter-card {
+  background: white;
+  padding: 25px;
+  border-radius: 24px;
+  border: 1px solid var(--borde-card);
+  box-shadow: 0 8px 20px rgba(229, 179, 168, 0.12);
+}
+
+.filter-card h3 {
+  font-family: 'Pompiere', cursive;
+  font-size: 1.7rem;
+  color: var(--rosa);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input-sidebar, .select-sidebar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+}
+
+.btn-nuevo-recurso {
+  width: 100%;
+  background: var(--rosa);
+  color: white;
+  border: none;
+  padding: 13px;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+/* ===============================
+   GRILLA Y CARDS
+================================ */
+.materiales-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.material-card {
+  background: white;
+  border-radius: 22px;
+  border: 1px solid var(--borde-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s ease;
+}
+
+.material-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
+
+.card-image-container-premium {
+  height: 210px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image-container-premium img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-age-badge-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--texto-cafe);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 5;
+}
+
+.oferta-ribbon-extra {
+  position: absolute;
+  top: 15px;
+  left: -5px;
+  background: #ff4757;
+  color: white;
+  padding: 6px 15px;
+  font-weight: 900;
+  font-size: 1rem;
+  border-radius: 0 50px 50px 0;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+.card-body { padding: 18px; display: flex; flex-direction: column; flex-grow: 1; }
+
+.card-title-premium {
+  font-size: 1.25rem;
+  color: var(--texto-cafe);
+  margin: 0 0 8px 0;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* 3 RENGLONES CON QUIEBRE FORZADO */
+.card-description {
+  font-size: 0.88rem;
+  color: var(--gris-suave);
+  line-height: 1.4;
+  margin-bottom: 12px;
+  height: 4.2em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* Evita que palabras infinitas rompan el marco */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.price-tag-centered-premium {
+  margin: 10px 0 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: #fff6f5;
+  border-radius: 16px;
+}
+
+.price-current-p { color: var(--texto-cafe); font-size: 1.3rem; font-weight: 800; }
+.price-old-p { text-decoration: line-through; color: var(--rosa-oscuro); font-size: 0.95rem; opacity: 0.5; }
+
+.card-actions { display: flex; gap: 10px; }
+.btn-action-outline, .btn-action-fill { padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; }
+.btn-action-fill { background: var(--rosa); color: white; }
+.btn-action-outline { background: white; border: 1.6px solid var(--rosa); color: var(--rosa); }
+
+/* ===============================
+   ADMIN BAR
+================================ */
+.admin-bar-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--borde-card);
+}
+
+.sales-info-pill {
+  margin-right: auto;
+  font-size: 0.8rem;
+  background: var(--rosa-claro);
+  color: var(--texto-cafe);
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-weight: 700;
+}
+
+.admin-btn-edit { color: var(--rosa); background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+.admin-btn-delete { color: #e57373; background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+
+/* ===============================
+   MODAL EDITOR
+================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-container {
+  background: white;
+  border-radius: 28px;
+  padding: 35px;
+  width: 95%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-container h3 { font-family: 'Pompiere', cursive; font-size: 2.2rem; color: var(--rosa); text-align: center; margin: 0; }
+.modal-container input, .modal-container textarea, .modal-container select { padding: 12px; border-radius: 12px; border: 1px solid #ddd; outline: none; }
+
+.char-count {
+  font-size: 0.75rem;
+  text-align: right;
+  color: var(--rosa-oscuro);
+  margin-top: -15px;
+  font-weight: 600;
+}
+
+.oferta-box-styled { background: #fff8f7; padding: 18px; border-radius: 18px; border: 1.5px dashed var(--rosa); }
+.file-section-modal { background: #fdfdfd; padding: 20px; border-radius: 18px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
+.file-item { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; font-weight: 700; color: var(--texto-cafe); }
+
+.btn-save-modal { background: var(--rosa); color: white; padding: 14px; border-radius: 50px; border: none; font-weight: 800; cursor: pointer; }
+.btn-cancel-modal { background: none; color: var(--gris-suave); border: none; cursor: pointer; font-weight: 600; text-decoration: underline; align-self: center; }
+
+.pdf-modal { width: 90%; height: 85vh; background: white; border-radius: 20px; overflow: hidden; }

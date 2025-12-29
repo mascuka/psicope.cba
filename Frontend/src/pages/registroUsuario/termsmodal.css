@@ -1,0 +1,91 @@
+/* Overlay (fondo oscuro) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Diálogo/Card del Modal */
+.modal-dialog {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; 
+}
+
+.modal-header {
+  padding: 15px 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Contenido Principal (donde se hace scroll) */
+.modal-content {
+  padding: 25px;
+  overflow-y: auto; 
+  flex-grow: 1; 
+  line-height: 1.6;
+  color: #555;
+}
+
+.modal-content p {
+    margin-bottom: 15px;
+}
+
+.modal-content p strong {
+    color: #333;
+}
+
+.modal-footer {
+  padding: 15px 25px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.btn-close-modal {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s;
+}
+
+.btn-close-modal:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.btn-close-modal:not(:disabled) {
+  background: #007bff;
+  color: white;
+}
+
+.btn-close-modal:not(:disabled):hover {
+  background: #005fcc;
+}
+
+.scroll-warning {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}

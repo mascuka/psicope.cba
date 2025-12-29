@@ -1,0 +1,629 @@
+:root {
+  --rosa: #e5b3a8;
+  --rosa-hover: #d4a297;
+  --rosa-soft: #f9dfdf;
+  --rosa-light: #fef5f4;
+  --texto: #444;
+  --texto-oscuro: #2c2c2c;
+}
+
+/* FUENTE POMPIERE PARA TODO */
+.home-container, 
+.home-container button, 
+.home-container input, 
+.home-container textarea, 
+.home-container select,
+.home-container a {
+  font-family: 'Pompiere', sans-serif !important;
+  color: var(--texto);
+}
+
+.home-container {
+  background: #fdfaf9;
+  padding-bottom: 0;
+  padding-top: 55px; /* Altura del navbar */
+  min-height: 100vh;
+}
+
+/* ============================================
+   HERO SECTION - SIN ESPACIO ARRIBA
+   ============================================ */
+.home-hero {
+  height: 85vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 1;
+}
+
+.hero-content {
+  background: rgba(255, 255, 255, 0.97);
+  padding: 50px 45px;
+  border-radius: 35px;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.7s ease-out;
+  border: 2px solid rgba(229, 179, 168, 0.25);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content h1 { 
+  font-size: 3.5rem; 
+  margin-bottom: 20px; 
+  color: var(--texto-oscuro);
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.hero-content p { 
+  font-size: 1.6rem; 
+  color: #666; 
+  margin-bottom: 38px;
+  line-height: 1.45;
+}
+
+.btn-cta-principal {
+  background: var(--rosa);
+  color: white !important;
+  padding: 16px 48px;
+  border-radius: 50px;
+  font-weight: 800;
+  text-decoration: none;
+  font-size: 1.5rem;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35);
+}
+
+.btn-cta-principal:hover {
+  background: var(--rosa-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45);
+}
+
+/* ============================================
+   BENEFICIOS - BALANCEADOS
+   ============================================ */
+.home-beneficios {
+  padding: 80px 20px;
+  background: white;
+  position: relative;
+}
+
+.beneficios-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.beneficios-titulo {
+  text-align: center;
+  font-size: 3rem;
+  color: var(--rosa);
+  margin-bottom: 60px;
+  font-weight: 800;
+}
+
+.beneficios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 35px;
+  margin-bottom: 50px;
+}
+
+.beneficio-item {
+  text-align: center;
+  padding: 35px 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--rosa-light) 100%);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.beneficio-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, var(--rosa), var(--rosa-hover));
+  transform: scaleX(0);
+  transition: transform 0.35s ease;
+}
+
+.beneficio-item:hover::before {
+  transform: scaleX(1);
+}
+
+.beneficio-item:hover {
+  transform: translateY(-10px) scale(1.01);
+  border-color: var(--rosa);
+  box-shadow: 0 18px 45px rgba(229, 179, 168, 0.25);
+  background: white;
+}
+
+.beneficio-icono {
+  font-size: 3.5rem;
+  color: var(--rosa);
+  margin-bottom: 22px;
+  transition: all 0.35s ease;
+}
+
+.beneficio-item:hover .beneficio-icono {
+  transform: scale(1.12) rotateY(360deg);
+}
+
+.beneficio-item h4 {
+  font-size: 1.9rem;
+  color: var(--texto-oscuro);
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.beneficio-item p {
+  font-size: 1.3rem;
+  color: #666;
+  line-height: 1.55;
+}
+
+/* ============================================
+   INFO CARD - PROPORCIONADA
+   ============================================ */
+.home-info { 
+  padding: 80px 20px; 
+  display: flex; 
+  justify-content: center; 
+  background: linear-gradient(to bottom, #fdfaf9 0%, white 100%);
+}
+
+.info-card {
+  background: white;
+  padding: 60px 45px;
+  border-radius: 35px;
+  max-width: 950px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(229, 179, 168, 0.16);
+  border: 2px solid var(--rosa-soft);
+  position: relative;
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: -55px; /* Ajustamos la altura para que luzca bien */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 120px;
+  height: 60px; 
+  
+  /* ARCOIRIS INSPIRADO EN LA IMAGEN (Colores más presentes) */
+  background: radial-gradient(
+    circle at bottom,
+    transparent 15%,
+    #ffadad 16%, #ffadad 28%, /* Rojo/Rosa fuerte */
+    #ffd6a5 29%, #ffd6a5 41%, /* Naranja pastel vibrante */
+    #fdffb6 42%, #fdffb6 54%, /* Amarillo */
+    #9bf6ff 55%, #9bf6ff 67%, /* Celeste/Azul */
+    #a0c4ff 68%, #a0c4ff 80%, /* Azul suave */
+    #bdb2ff 81%, #bdb2ff 92%, /* Violeta */
+    transparent 93%
+  );
+  
+  /* Forma de arco */
+  border-radius: 120px 120px 0 0;
+  
+  /* ESTÉTICA FINAL */
+  background-color: white; 
+  padding: 6px;
+  /* El drop-shadow ayuda a que resalte sobre el fondo blanco */
+  filter: drop-shadow(0 -3px 6px rgba(0,0,0,0.1));
+  z-index: 10;
+}
+
+/* Ajuste para que la card tenga espacio suficiente para el arcoíris */
+.info-card {
+  position: relative;
+  margin-top: 60px; 
+  padding-top: 50px; /* Le damos aire al texto para que no choque con el arco */
+}
+
+.info-card h2 { 
+  font-size: 3.2rem; 
+  color: var(--rosa); 
+  margin-bottom: 22px;
+  font-weight: 800;
+}
+
+.info-card p { 
+  font-size: 1.6rem; 
+  line-height: 1.55;
+  color: #555;
+}
+
+/* ============================================
+   DESTACADOS - PERFECTAMENTE BALANCEADOS
+   ============================================ */
+.home-destacados {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  background: white;
+}
+
+.destacados-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.destacados-header h3 { 
+  font-size: 3.2rem; 
+  color: var(--rosa); 
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.destacados-subtitulo {
+  font-size: 1.5rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.destacados-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 38px;
+  margin-bottom: 30px;
+}
+
+/* CARDS OPTIMIZADAS */
+.home-destacados .material-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.35s ease;
+  border: 2px solid #f5f5f5;
+}
+
+.home-destacados .material-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 38px rgba(229, 179, 168, 0.22);
+  border-color: var(--rosa-soft);
+}
+
+.home-destacados .card-image-container {
+  background: #fafafa;
+  width: 100%;
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  border-bottom: 3px solid var(--rosa-soft);
+  overflow: hidden;
+}
+
+.home-destacados .card-image-container img { 
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.home-destacados .material-card:hover .card-image-container img {
+  transform: scale(1.05);
+}
+
+.home-destacados .card-body { 
+  padding: 26px 24px 28px; 
+  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+  background: white;
+}
+
+.home-destacados .card-body h4 { 
+  font-size: 2rem !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  color: var(--texto-oscuro) !important;
+  letter-spacing: -0.3px;
+  min-height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-destacados .card-body p { 
+  font-size: 1.25rem !important; 
+  color: #777 !important;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 58px;
+}
+
+.home-card-actions {
+  margin-top: 22px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-home-muestra {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 2.5px solid var(--rosa);
+  background: white;
+  color: var(--rosa);
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: 800;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-home-muestra:hover {
+  background: var(--rosa);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(229, 179, 168, 0.3);
+}
+
+.btn-home-comprar {
+  flex: 1.5;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: var(--rosa);
+  color: white !important;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 22px rgba(229, 179, 168, 0.32);
+}
+
+.btn-home-comprar:hover {
+  background: var(--rosa-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 32px rgba(229, 179, 168, 0.45);
+}
+
+/* ============================================
+   FRASE Y BOTÓN VER TODOS
+   ============================================ */
+.ver-todo-seccion {
+  text-align: center;
+  margin-top: 70px;
+  padding: 50px 20px;
+  background: linear-gradient(135deg, var(--rosa-light) 0%, #ffffff 100%);
+  border-radius: 35px;
+  max-width: 850px;
+  margin: 70px auto 0;
+}
+
+.frase-motivadora {
+  font-size: 1.9rem;
+  color: var(--texto-oscuro);
+  margin-bottom: 32px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.btn-ver-todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--rosa);
+  color: white !important;
+  border: none;
+  padding: 16px 48px;
+  border-radius: 50px;
+  font-weight: 800;
+  text-decoration: none;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 26px rgba(229, 179, 168, 0.35);
+}
+
+.btn-ver-todo:hover {
+  background: var(--rosa-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(229, 179, 168, 0.45);
+}
+
+/* ============================================
+   ADMIN - EDITABLES
+   ============================================ */
+.admin-edit-card {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 22px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
+  border: 1px solid var(--rosa-soft);
+  max-width: 100%;
+  width: 90%;
+  margin: 18px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.admin-input, .admin-textarea, .admin-select {
+  padding: 11px 14px;
+  border-radius: 11px;
+  border: 2px solid #eee;
+  font-size: 1.3rem; 
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  background: #fafafa;
+}
+
+.admin-file-input {
+  padding: 10px;
+  border-radius: 11px;
+  border: 2px dashed var(--rosa);
+  background: var(--rosa-light);
+  cursor: pointer;
+}
+
+.btn-save-admin { 
+  background: #81c784; 
+  color: white; 
+  border: none; 
+  padding: 11px 23px; 
+  border-radius: 11px; 
+  cursor: pointer; 
+  font-size: 1.15rem;
+  transition: all 0.3s ease;
+}
+
+.btn-save-admin:hover {
+  background: #66bb6a;
+  transform: translateY(-2px);
+}
+
+.btn-cancel-admin { 
+  background: #ff8a80; 
+  color: white; 
+  border: none; 
+  padding: 11px 23px; 
+  border-radius: 11px; 
+  cursor: pointer; 
+  font-size: 1.15rem;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel-admin:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+}
+
+.btn-edit-float {
+  background: white;
+  border-radius: 50%;
+  padding: 10px;
+  border: 2px solid var(--rosa-soft);
+  cursor: pointer;
+  color: var(--rosa);
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.09);
+}
+
+.btn-edit-float:hover {
+  background: var(--rosa);
+  color: white;
+  transform: scale(1.12);
+  box-shadow: 0 5px 18px rgba(229, 179, 168, 0.28);
+}
+
+/* ============================================
+   MODAL PDF
+   ============================================ */
+.modal-overlay { 
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0, 0, 0, 0.55); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 2000; 
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.pdf-modal { 
+  width: 90%; 
+  height: 90%; 
+  background: white; 
+  border-radius: 18px; 
+  overflow: hidden;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
+}
+
+.pdf-modal iframe { 
+  width: 100%; 
+  height: 100%; 
+  border: none; 
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .home-container {
+    padding-top: 70px;
+  }
+  
+  .hero-content h1 { font-size: 2.2rem; }
+  .hero-content p { font-size: 1.3rem; }
+  .btn-cta-principal { padding: 14px 36px; font-size: 1.35rem; }
+  
+  .beneficios-titulo,
+  .destacados-header h3,
+  .info-card h2 { font-size: 2.3rem; }
+  
+  .home-destacados .card-body h4 { font-size: 1.8rem !important; }
+  
+  .destacados-grid,
+  .beneficios-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .frase-motivadora { font-size: 1.6rem; }
+}

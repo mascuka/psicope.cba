@@ -1,0 +1,84 @@
+
+
+:root {
+  --bg-page: #FCF8F8;
+  --bg-navbar: #F9DFDF;
+  --text-color: #333;
+
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Forzar fondo general */
+body {
+  background-color: var(--bg-page) !important;
+  color: var(--text-color);
+  width: 100%;
+  
+}
+
+
+/* -------------------------
+   LINKS
+-------------------------- */
+
+a {
+  color: #646cff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+
+/* -------------------------
+   NAVBAR (COMPATIBLE CON TU CÓDIGO)
+-------------------------- */
+
+.navbar {
+  width: 100%;
+  background-color: var(--bg-navbar);
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  height: 50px;
+}
+
+.brand {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-right .login-btn {
+  font-weight: 600;
+}
+
+CSS
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}

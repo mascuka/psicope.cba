@@ -1,0 +1,120 @@
+.perfil-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+}
+
+.perfil-card {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.perfil-header-simple {
+  border-bottom: 2px solid #f9dfdf;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+}
+
+.perfil-title {
+  font-family: 'Pompiere', cursive;
+  font-size: 35px;
+  color: #333;
+  margin: 0;
+}
+
+.perfil-subtitle {
+  color: #888;
+  font-size: 16px;
+}
+
+.perfil-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-row label {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.info-row p {
+  font-size: 18px;
+  color: #444;
+  margin: 0;
+}
+
+.field-readonly {
+  color: #888 !important;
+}
+
+.perfil-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+}
+
+.perfil-input:focus {
+  border-color: #f9dfdf;
+  box-shadow: 0 0 5px rgba(249, 223, 223, 0.5);
+}
+
+.perfil-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit, .btn-save {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  flex: 1;
+  transition: background 0.3s;
+}
+
+.btn-edit:hover, .btn-save:hover {
+  background-color: #333;
+}
+
+.btn-cancel {
+  background-color: #eee;
+  color: #666;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.perfil-alerta {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.loader-perfil {
+  text-align: center;
+  margin-top: 100px;
+  font-family: 'Pompiere', cursive;
+  font-size: 24px;
+}
