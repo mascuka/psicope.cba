@@ -1,120 +1,303 @@
+/* perfil.css MEJORADO - CONSISTENTE CON REGISTRO */
 .perfil-wrapper {
   display: flex;
   justify-content: center;
-  padding-top: 50px;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fdfaf9 0%, #fef5f4 100%);
+  padding: 130px 20px 60px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .perfil-card {
   background: white;
   width: 100%;
-  max-width: 500px;
-  padding: 40px;
+  max-width: 480px;
+  padding: 35px 30px;
+  border-radius: 28px;
+  border: 2px solid #f9dfdf;
+  box-shadow: 0 15px 40px rgba(229, 179, 168, 0.14);
+  animation: fadeInUp 0.5s ease-out;
+  position: relative;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-volver {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #f9dfdf;
+  color: #8a5e5e;
+  border: none;
+  padding: 8px 16px;
   border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  font-family: 'Pompiere', cursive;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.btn-volver:hover {
+  background: #e5b3a8;
+  color: white;
+  transform: translateX(-3px);
 }
 
 .perfil-header-simple {
-  border-bottom: 2px solid #f9dfdf;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .perfil-title {
   font-family: 'Pompiere', cursive;
-  font-size: 35px;
-  color: #333;
+  font-size: 2.8rem;
+  color: #e5b3a8;
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 800;
+  line-height: 1;
 }
 
-.perfil-subtitle {
-  color: #888;
-  font-size: 16px;
-}
-
+/* LISTA DE INFO - MISMO ESTILO QUE FORM-GROUP */
 .perfil-info-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+}
+
+/* INFO-ROW REDISEÑADO - COMO FORM-GROUP DE REGISTRO */
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .info-row label {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  text-transform: uppercase;
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-family: 'Pompiere', cursive;
+  font-size: 1.3rem;
+  color: #e5b3a8;
+  margin-left: 5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .info-row p {
-  font-size: 18px;
-  color: #444;
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: 2px solid #f9dfdf;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  color: #555;
+  background: #fafafa;
   margin: 0;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-.field-readonly {
-  color: #888 !important;
+.info-row p:hover {
+  border-color: #e5b3a8;
+  background: white;
 }
 
+/* INPUTS EN MODO EDICIÓN */
 .perfil-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: 2px solid #f9dfdf;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  color: #555;
   outline: none;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .perfil-input:focus {
-  border-color: #f9dfdf;
-  box-shadow: 0 0 5px rgba(249, 223, 223, 0.5);
+  border-color: #e5b3a8;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(229, 179, 168, 0.1);
 }
 
+/* ACCIONES - CONSISTENTE CON REGISTRO */
 .perfil-actions {
-  margin-top: 30px;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 22px;
+  align-items: center;
 }
 
-.btn-edit, .btn-save {
-  background-color: #555;
+.btn-edit,
+.btn-save {
+  background: #e5b3a8;
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-family: 'Pompiere', cursive;
+  font-size: 1.6rem;
+  font-weight: 800;
   cursor: pointer;
-  font-weight: bold;
-  flex: 1;
-  transition: background 0.3s;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35);
 }
 
-.btn-edit:hover, .btn-save:hover {
-  background-color: #333;
+.btn-edit:hover,
+.btn-save:hover {
+  background: #d4a297;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45);
 }
 
 .btn-cancel {
-  background-color: #eee;
-  color: #666;
+  background: none;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  color: #aaa;
+  text-decoration: underline;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
   cursor: pointer;
-  flex: 1;
+  padding: 6px;
+  transition: color 0.3s;
 }
 
-.perfil-alerta {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: 14px;
+.btn-cancel:hover {
+  color: #888;
 }
 
 .loader-perfil {
   text-align: center;
   margin-top: 100px;
   font-family: 'Pompiere', cursive;
-  font-size: 24px;
+  font-size: 2.2rem;
+  color: #e5b3a8;
+}
+
+/* SECCIÓN MIS COMPRAS */
+.compras-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.compra-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border: 2px solid #f9dfdf;
+  border-radius: 14px;
+  background: #fafafa;
+  transition: all 0.3s;
+}
+
+.compra-item:hover {
+  border-color: #e5b3a8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(229, 179, 168, 0.15);
+}
+
+.compra-item span {
+  font-weight: 600;
+  color: #555;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+}
+
+.btn-descarga {
+  background: #e5b3a8;
+  color: white;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Pompiere', cursive;
+  font-size: 1.3rem;
+  font-weight: 700;
+  transition: all 0.3s;
+  box-shadow: 0 3px 10px rgba(229, 179, 168, 0.25);
+}
+
+.btn-descarga:hover {
+  background: #d4a297;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(229, 179, 168, 0.35);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: #999;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .perfil-wrapper {
+    padding: 110px 15px 25px;
+  }
+
+  .perfil-card {
+    padding: 30px 22px;
+  }
+
+  .perfil-title {
+    font-size: 2.5rem;
+  }
+
+  .info-row label {
+    font-size: 1.3rem;
+  }
+
+  .compra-item {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .compra-item span {
+    width: 100%;
+  }
+
+  .btn-descarga {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-edit,
+  .btn-save {
+    font-size: 1.5rem;
+    padding: 13px 35px;
+  }
 }

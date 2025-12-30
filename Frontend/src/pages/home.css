@@ -21,7 +21,8 @@
 .home-container {
   background: #fdfaf9;
   padding-bottom: 0;
-  padding-top: 55px; /* Altura del navbar */
+  /* CAMBIA ESTO: 75px del Navbar + 55px de espacio = 130px */
+  padding-top: 130px; 
   min-height: 100vh;
 }
 
@@ -651,3 +652,4 @@
 
   .price-current-home { font-size: 1.3rem; }
 }
+

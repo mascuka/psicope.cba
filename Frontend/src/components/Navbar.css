@@ -2,7 +2,7 @@
   position: fixed;
   top: 0;
   width: 100%;
-  height: 85px;
+  height: 75px;
   background: linear-gradient(135deg, #f9dfdf 0%, #fce8e8 100%);
   display: flex;
   align-items: center;
@@ -18,10 +18,11 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  z-index: 1001;
 }
 
 .logo {
-  height: 65px;
+  height: 55px;
   width: auto;
   transition: transform 0.3s ease;
 }
@@ -31,16 +32,15 @@
 }
 
 .brand {
-  font-size: 1.95rem; 
+  font-size: 1.7rem; 
   font-family: 'Pompiere', cursive;
   color: #6d5b57;
   font-weight: 700;
   letter-spacing: 0.3px;
 }
 
-/* INPUTS EDITABLES PARA ADMIN */
 .brand-edit-input {
-  font-size: 1.95rem;
+  font-size: 1.7rem;
   font-family: 'Pompiere', cursive;
   color: #6d5b57;
   font-weight: 700;
@@ -52,7 +52,7 @@
 }
 
 .link-edit-input {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-family: 'Pompiere', cursive;
   color: #6d5b57;
   font-weight: 600;
@@ -69,11 +69,11 @@
   background: white;
   border: 2px solid #e5b3a8;
   color: #e5b3a8;
-  padding: 9px 18px;
-  border-radius: 22px;
+  padding: 8px 16px;
+  border-radius: 20px;
   cursor: pointer;
   font-family: 'Pompiere', cursive;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
   transition: all 0.3s ease;
   display: flex;
@@ -87,15 +87,34 @@
   transform: translateY(-2px);
 }
 
+/* BOTÓN HAMBURGUESA (oculto en desktop) */
+.mobile-menu-btn {
+  display: none;
+  background: white;
+  border: 2px solid #e5b3a8;
+  color: #e5b3a8;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 1001;
+}
+
+.mobile-menu-btn:hover {
+  background: #e5b3a8;
+  color: white;
+}
+
 .nav-right-side {
   display: flex;
   align-items: center;
-  gap: 45px;
+  gap: 40px;
 }
 
 .navbar-links {
   display: flex;
-  gap: 32px;
+  gap: 28px;
   align-items: center;
 }
 
@@ -103,7 +122,7 @@
   text-decoration: none;
   color: #6d5b57;
   font-family: 'Pompiere', cursive;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 600;
   position: relative;
   transition: all 0.3s ease;
@@ -129,30 +148,30 @@
   width: 100%;
 }
 
-/* --- USUARIO MENU --- */
 .navbar-right {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
 .user-menu-container {
   position: relative;
   border-left: 1px solid rgba(229, 179, 168, 0.3);
-  padding-left: 22px;
+  padding-left: 20px;
 }
 
 .user-name-button {
   background: white;
   border: 2px solid #e5b3a8;
   font-family: 'Pompiere', cursive;
-  font-size: 1.45rem;
+  font-size: 1.3rem;
   color: #6d5b57;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 20px;
-  border-radius: 26px;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: 22px;
   transition: all 0.3s ease;
   font-weight: 600;
   box-shadow: 0 2px 10px rgba(229, 179, 168, 0.16);
@@ -166,7 +185,7 @@
 }
 
 .arrow {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: transform 0.3s ease;
 }
 
@@ -174,18 +193,17 @@
   transform: rotate(180deg); 
 }
 
-/* --- DROPDOWN MENU --- */
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 14px);
+  top: calc(100% + 12px);
   right: 0;
   background: white;
   min-width: 200px;
-  border-radius: 20px;
+  border-radius: 18px;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.14);
   display: flex;
   flex-direction: column;
-  padding: 12px 0;
+  padding: 10px 0;
   overflow: hidden;
   animation: fadeInDropdown 0.28s ease-out;
   border: 2px solid #fce8e8;
@@ -194,7 +212,7 @@
 @keyframes fadeInDropdown {
   from { 
     opacity: 0; 
-    transform: translateY(-14px); 
+    transform: translateY(-12px); 
   }
   to { 
     opacity: 1; 
@@ -204,11 +222,11 @@
 
 .dropdown-menu a, 
 .dropdown-menu button {
-  padding: 13px 24px;
+  padding: 12px 22px;
   text-decoration: none;
   color: #6d5b57;
   font-family: 'Pompiere', cursive;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   text-align: left;
   background: none;
   border: none;
@@ -218,41 +236,41 @@
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
 }
 
 .dropdown-menu a:hover, 
 .dropdown-menu button:hover {
   background: linear-gradient(135deg, #fef5f4 0%, #fce8e8 100%);
   color: #e5b3a8;
-  padding-left: 28px;
+  padding-left: 26px;
 }
 
 .dropdown-divider {
   border: 0;
   border-top: 1px solid #fce8e8;
-  margin: 7px 0;
+  margin: 6px 0;
 }
 
+/* CERRAR SESIÓN - MÁS PROFESIONAL Y SUAVE */
 .logout-item {
-  color: #e74c3c !important;
+  color: #c89387 !important;
 }
 
 .logout-item:hover {
-  background: #fee !important;
-  color: #c0392b !important;
+  background: linear-gradient(135deg, #fef5f4 0%, #fce8e8 100%) !important;
+  color: #b67d70 !important;
 }
 
-/* BOTÓN LOGIN */
 .login-btn {
-  padding: 10px 28px;
+  padding: 8px 24px;
   border: 2px solid #e5b3a8;
-  border-radius: 26px;
+  border-radius: 22px;
   text-decoration: none;
   color: #6d5b57;
   font-weight: 700;
   font-family: 'Pompiere', cursive;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   background: white;
   transition: all 0.3s ease;
   box-shadow: 0 2px 10px rgba(229, 179, 168, 0.14);
@@ -265,79 +283,124 @@
   box-shadow: 0 4px 14px rgba(229, 179, 168, 0.28);
 }
 
-/* RESPONSIVE */
-@media (max-width: 1024px) {
-  .navbar {
-    padding: 0 25px;
-    height: 70px;
-  }
-  
-  .navbar-links {
-    gap: 22px;
-  }
-  
-  .navbar-links a {
-    font-size: 1.2rem;
-  }
-  
-  .brand, .brand-edit-input {
-    font-size: 1.5rem;
-  }
-  
-  .logo {
-    height: 50px;
-  }
-}
-
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    height: auto;
-    padding: 15px 20px;
-    gap: 12px;
-  }
-  
-  .nav-right-side {
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-  }
-  
-  .navbar-links {
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .user-menu-container {
-    border-left: none;
-    padding-left: 0;
-    border-top: 1px solid rgba(229, 179, 168, 0.3);
-    padding-top: 12px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .btn-edit-nav {
-    margin-right: 0 !important;
-  }
-}
-
 .dropdown-icon {
-  font-size: 1.1rem;
-  color: #e5b3a8; /* El color rosa suave de tu estética */
+  font-size: 1rem;
+  color: #e5b3a8;
   transition: color 0.2s ease;
 }
 
+/* ICONO DE CERRAR SESIÓN - MISMO TONO QUE EL TEXTO */
 .logout-item .dropdown-icon {
-  color: #e74c3c; /* Color rojo suave para cerrar sesión */
+  color: #c89387;
 }
 
-/* Asegura que el texto y el icono se alineen perfectamente */
-.dropdown-menu a, 
-.dropdown-menu button {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Espacio entre el icono y el texto */
+/* ====== RESPONSIVE MÓVIL ====== */
+@media (max-width: 968px) {
+  .navbar {
+    height: 65px;
+    padding: 0 20px;
+  }
+
+  .logo {
+    height: 45px;
+  }
+
+  .brand {
+    font-size: 1.4rem;
+  }
+
+  /* Mostrar botón hamburguesa */
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  /* Ocultar menú por defecto en móvil */
+  .nav-right-side {
+    position: fixed;
+    top: 65px;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    gap: 0;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    max-height: calc(100vh - 65px);
+    overflow-y: auto;
+  }
+
+  /* Mostrar menú cuando está abierto */
+  .nav-right-side.mobile-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    border-bottom: 1px solid #f9dfdf;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  .navbar-links a {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 1.3rem;
+  }
+
+  .navbar-links a:hover {
+    background: #fef5f4;
+  }
+
+  .navbar-right {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .user-menu-container {
+    border-left: none;
+    padding-left: 0;
+    width: 100%;
+  }
+
+  .user-name-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: 1px solid #fce8e8;
+    margin-top: 10px;
+  }
+
+  .btn-edit-nav {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .login-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  .logo {
+    height: 40px;
+  }
 }

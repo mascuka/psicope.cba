@@ -11,7 +11,7 @@ import Materiales from "./pages/Materiales";
 import Psicopedagogiando from "./pages/Psicopedagogiando";
 import Login from "./pages/Login";
 import Perfil from "./pages/Perfil"; 
-import MisCompras from "./pages/MisCompras"; // <-- Nuevo componente
+import MisCompras from "./pages/MisCompras";
 import RegistroForm from "./pages/registroUsuario/RegistroForm";
 
 export default function App() {
@@ -33,15 +33,10 @@ export default function App() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: "#FCF8F8" }}>
       <Navbar />
       
-      <div
-        style={{
-          marginTop: "100px",
-          padding: "20px",
-          flex: "1 0 auto",
-          display: "flex",
-          flexDirection: "column"
-        }}
-      >
+      {/* Eliminamos el marginTop de 100px y el padding fijo que causaba el desfasaje.
+          flex: 1 asegura que este contenido ocupe el espacio sobrante y empuje el footer al fondo.
+      */}
+      <main style={{ flex: "1", display: "flex", flexDirection: "column" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/quien-soy" element={<QuienSoy />} />
@@ -49,7 +44,7 @@ export default function App() {
           <Route path="/psicopedagogiando" element={<Psicopedagogiando />} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<Perfil />} />
-          <Route path="/mis-compras" element={<MisCompras />} /> {/* <-- Nueva Ruta */}
+          <Route path="/mis-compras" element={<MisCompras />} />
           <Route 
             path="/registro" 
             element={
@@ -60,7 +55,7 @@ export default function App() {
             } 
           />
         </Routes>
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -1,15 +1,17 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaUserCircle, FaShoppingBag, FaSignOutAlt } from "react-icons/fa";
+import { FaEdit, FaUserCircle, FaShoppingBag, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "./Navbar.css";
 import logoImage from "../assets/logo.png";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -34,8 +36,10 @@ export default function Navbar() {
       setUser(currentUser);
       if (currentUser) {
         checkIfAdmin(currentUser);
+        fetchUserName(currentUser.id);
       } else {
         setIsAdmin(false);
+        setUserName("");
       }
     });
 
@@ -56,7 +60,23 @@ export default function Navbar() {
     const { data: { session } } = await supabase.auth.getSession();
     const currentUser = session?.user ?? null;
     setUser(currentUser);
-    if (currentUser) checkIfAdmin(currentUser);
+    if (currentUser) {
+      checkIfAdmin(currentUser);
+      fetchUserName(currentUser.id);
+    }
+  };
+
+  const fetchUserName = async (userId) => {
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("nombre")
+      .eq("id", userId)
+      .single();
+    
+    if (data && !error) {
+      const primerNombre = data.nombre.split(' ')[0];
+      setUserName(primerNombre);
+    }
   };
 
   const checkIfAdmin = async (currentUser) => {
@@ -101,7 +121,13 @@ export default function Navbar() {
     await supabase.auth.signOut();
     setMenuOpen(false);
     setIsAdmin(false);
+    setUserName("");
+    setMobileMenuOpen(false);
     navigate("/");
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -122,7 +148,13 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <div className="nav-right-side">
+      {/* BOTÓN HAMBURGUESA MÓVIL */}
+      <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+      </button>
+
+      {/* MENÚ PRINCIPAL */}
+      <div className={`nav-right-side ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="navbar-links">
           {editMode ? (
             <>
@@ -133,10 +165,10 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/">{navContent.link_inicio}</Link>
-              <Link to="/quien-soy">{navContent.link_quien_soy}</Link>
-              <Link to="/materiales">{navContent.link_materiales}</Link>
-              <Link to="/psicopedagogiando">{navContent.link_psicopedagogiando}</Link>
+              <Link to="/" onClick={closeMobileMenu}>{navContent.link_inicio}</Link>
+              <Link to="/quien-soy" onClick={closeMobileMenu}>{navContent.link_quien_soy}</Link>
+              <Link to="/materiales" onClick={closeMobileMenu}>{navContent.link_materiales}</Link>
+              <Link to="/psicopedagogiando" onClick={closeMobileMenu}>{navContent.link_psicopedagogiando}</Link>
             </>
           )}
         </div>
@@ -146,7 +178,6 @@ export default function Navbar() {
             <button 
               className="btn-edit-nav" 
               onClick={() => editMode ? handleSave() : setEditMode(true)}
-              style={{marginRight: user ? '20px' : '0'}}
             >
               {editMode ? '✓ Guardar' : <FaEdit />}
             </button>
@@ -158,16 +189,16 @@ export default function Navbar() {
                 className="user-name-button" 
                 onClick={() => setMenuOpen(!menuOpen)}
               >
-                {user.user_metadata?.nombre?.split(' ')[0] || "Usuario"}
+                {userName || "Usuario"}
                 <span className={`arrow ${menuOpen ? 'up' : 'down'}`}>▾</span>
               </button>
 
               {menuOpen && (
                 <div className="dropdown-menu">
-                  <Link to="/perfil" onClick={() => setMenuOpen(false)}>
+                  <Link to="/perfil" onClick={() => {setMenuOpen(false); closeMobileMenu();}}>
                     <FaUserCircle className="dropdown-icon" /> Ver perfil
                   </Link>
-                  <Link to="/mis-compras" onClick={() => setMenuOpen(false)}>
+                  <Link to="/mis-compras" onClick={() => {setMenuOpen(false); closeMobileMenu();}}>
                     <FaShoppingBag className="dropdown-icon" /> Mis compras
                   </Link>
                   <hr className="dropdown-divider" />
@@ -178,7 +209,7 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <Link className="login-btn" to="/login">Iniciar Sesión</Link>
+            <Link className="login-btn" to="/login" onClick={closeMobileMenu}>Iniciar Sesión</Link>
           )}
         </div>
       </div>

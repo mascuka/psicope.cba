@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2'; 
-import { FaUser, FaCalendarAlt, FaGlobe, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt, FaGlobe, FaPhone, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
 import "./perfil.css";
 
 export default function Perfil() {
+  const navigate = useNavigate();
   const [perfil, setPerfil] = useState({ 
     nombre: "", 
     email: "", 
@@ -73,24 +75,25 @@ export default function Perfil() {
   return (
     <div className="perfil-wrapper">
       <div className="perfil-card">
+        <button className="btn-volver" onClick={() => navigate("/")}>
+          <FaArrowLeft /> Volver
+        </button>
+
         <div className="perfil-header-simple">
           <h2 className="perfil-title"><FaUser /> Mi Perfil</h2>
         </div>
 
         <div className="perfil-info-list">
-          {/* Nombre */}
           <div className="info-row">
             <label>Nombre Completo</label>
-            <p style={{ color: '#444' }}>{perfil.nombre || "No disponible"}</p>
+            <p>{perfil.nombre || "No disponible"}</p>
           </div>
           
-          {/* Fecha de Nacimiento - NOMBRE CORREGIDO */}
           <div className="info-row">
             <label><FaCalendarAlt /> Fecha de Nacimiento</label>
-            <p style={{ color: '#444' }}>{perfil.fecha_nacimiento || "No registrada"}</p>
+            <p>{perfil.fecha_nacimiento || "No registrada"}</p>
           </div>
 
-          {/* Email */}
           <div className="info-row">
             <label><FaEnvelope /> Email</label>
             {editMode ? (
@@ -100,11 +103,10 @@ export default function Perfil() {
                 onChange={e => setPerfil({...perfil, email: e.target.value})} 
               />
             ) : (
-              <p style={{ color: '#444' }}>{perfil.email}</p>
+              <p>{perfil.email}</p>
             )}
           </div>
 
-          {/* Teléfono */}
           <div className="info-row">
             <label><FaPhone /> Teléfono</label>
             {editMode ? (
@@ -114,11 +116,10 @@ export default function Perfil() {
                 onChange={e => setPerfil({...perfil, telefono: e.target.value})} 
               />
             ) : (
-              <p style={{ color: '#444' }}>{perfil.telefono || "No registrado"}</p>
+              <p>{perfil.telefono || "No registrado"}</p>
             )}
           </div>
 
-          {/* País */}
           <div className="info-row">
             <label><FaGlobe /> País</label>
             {editMode ? (
@@ -128,7 +129,7 @@ export default function Perfil() {
                 onChange={e => setPerfil({...perfil, pais: e.target.value})} 
               />
             ) : (
-              <p style={{ color: '#444' }}>{perfil.pais || "No registrado"}</p>
+              <p>{perfil.pais || "No registrado"}</p>
             )}
           </div>
         </div>
@@ -136,7 +137,7 @@ export default function Perfil() {
         <div className="perfil-actions">
           {editMode ? (
             <>
-              <button onClick={handleUpdate} className="btn-save">Guardar Cambios</button>
+              <button onClick={handleUpdate} className="btn-save">Guardar</button>
               <button onClick={() => setEditMode(false)} className="btn-cancel">Cancelar</button>
             </>
           ) : (

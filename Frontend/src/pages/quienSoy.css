@@ -4,12 +4,12 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 30px 20px 60px 20px; 
+  /* CAMBIO: 75px del Navbar + 55px de espacio = 130px arriba */
+  padding: 130px 20px 60px 20px; 
   background: #fdfaf9;
   min-height: calc(100vh - 85px);
   font-family: 'Montserrat', sans-serif;
 }
-
 .loading-container {
   display: flex;
   justify-content: center;

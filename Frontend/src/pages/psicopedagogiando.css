@@ -1,5 +1,6 @@
 .psico-page {
-  padding-top: 55px;
+  /* 75px del Navbar + 55px de espacio libre = 130px */
+  padding-top: 130px; 
   background: #fdfaf9;
   min-height: 100vh;
   font-family: 'Pompiere', cursive;

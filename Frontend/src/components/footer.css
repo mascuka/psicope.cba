@@ -1,3 +1,10 @@
+/* Reset básico para evitar espacios externos */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 .footer-container {
   background: linear-gradient(135deg, #f9dfdf 0%, #fce8e8 100%);
   padding: 20px 0;
@@ -5,7 +12,9 @@
   border-top: 3px solid rgba(229, 179, 168, 0.3);
   position: relative;
   overflow: hidden;
-  margin: 0; /* IMPORTANTE: Sin margen */
+  margin: 0;
+  display: block; /* Asegura que no se comporte como inline-block */
+  vertical-align: bottom; /* Elimina espacio de línea base si hay texto cerca */
 }
 
 .footer-container::before {
@@ -129,43 +138,66 @@
   border-color: #25D366;
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE MÓVIL - MÁS COMPACTO */
 @media (max-width: 768px) {
+  .footer-container {
+    padding: 12px 0;
+  }
+
   .footer-content {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     text-align: center;
-    padding: 15px 20px;
+    padding: 0 15px;
   }
   
   .footer-brand {
-    flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+  }
+
+  .footer-logo {
+    font-size: 1.15rem;
+  }
+
+  .footer-separator {
+    font-size: 1rem;
+  }
+
+  .footer-tagline {
+    font-size: 1rem;
   }
   
-  .footer-separator {
-    display: none;
+  .footer-heart {
+    font-size: 0.95rem;
+    padding-top: 6px;
+    border-top: 1px solid rgba(138, 94, 94, 0.12);
+  }
+
+  .heart-icon {
+    font-size: 1rem;
   }
   
   .footer-socials {
-    justify-content: center;
-    flex-wrap: wrap;
+    gap: 10px;
   }
-  
-  .footer-center {
-    order: 3;
-    padding: 10px 0 0;
-    border-top: 1px solid rgba(138, 94, 94, 0.15);
+
+  .social-link {
+    font-size: 1rem;
+    padding: 6px 12px;
+  }
+
+  .social-link svg {
+    font-size: 1.1rem;
   }
 }
 
-/* ASEGURAR QUE NO HAYA ESPACIOS */
-body {
-  margin: 0;
-  padding: 0;
-}
+@media (max-width: 480px) {
+  .footer-brand {
+    flex-direction: column;
+    gap: 3px;
+  }
 
-#root {
-  margin: 0;
-  padding: 0;
+  .footer-separator {
+    display: none;
+  }
 }

@@ -14,7 +14,8 @@
 .materiales-page {
   background: var(--fondo);
   min-height: calc(100vh - 85px);
-  padding: 40px 20px 60px;
+  /* 75px navbar + 55px espacio = 130px arriba */
+  padding: 130px 20px 60px; 
 }
 
 .materiales-content {
