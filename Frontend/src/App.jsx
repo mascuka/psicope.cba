@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Perfil from "./pages/Perfil"; 
 import MisCompras from "./pages/MisCompras";
 import RegistroForm from "./pages/registroUsuario/RegistroForm";
+import Success from "./pages/Success"; // <--- Nueva Importación
 
 export default function App() {
   const navigate = useNavigate();
@@ -30,13 +31,9 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: "#FCF8F8" }}>
+    <div className="app-container">
       <Navbar />
-      
-      {/* Eliminamos el marginTop de 100px y el padding fijo que causaba el desfasaje.
-          flex: 1 asegura que este contenido ocupe el espacio sobrante y empuje el footer al fondo.
-      */}
-      <main style={{ flex: "1", display: "flex", flexDirection: "column" }}>
+      <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/quien-soy" element={<QuienSoy />} />
@@ -45,6 +42,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/mis-compras" element={<MisCompras />} />
+          
+          {/* --- Nueva Ruta para Mercado Pago --- */}
+          <Route path="/success" element={<Success />} />
+
           <Route 
             path="/registro" 
             element={
@@ -56,7 +57,6 @@ export default function App() {
           />
         </Routes>
       </main>
-
       <Footer />
     </div>
   );

@@ -1,12 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Pompiere&display=swap');
+
+/* ===============================
+   BASE Y ESTRUCTURA
+================================ */
 .psico-page {
-  /* 75px del Navbar + 55px de espacio libre = 130px */
   padding-top: 130px; 
   background: #fdfaf9;
   min-height: 100vh;
   font-family: 'Pompiere', cursive;
+  display: flex;
+  flex-direction: column;
 }
 
-/* CARGANDO */
+/* ===============================
+   LOADING
+================================ */
 .psico-loading-screen {
   height: 80vh;
   display: flex;
@@ -29,7 +37,9 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* HEADER Y TITULO EDITABLE */
+/* ===============================
+   HEADER PRINCIPAL
+================================ */
 .psico-header-section {
   max-width: 1100px;
   margin: 0 auto 35px;
@@ -37,11 +47,11 @@
 }
 
 .title-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-top: -15px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: -15px; 
 }
 
 .psico-main-title {
@@ -52,21 +62,24 @@
 }
 
 .btn-edit-header-small {
-    background: #fef5f4;
-    color: #e5b3a8;
-    border: 1px solid #f9dfdf;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.3s;
-    font-size: 0.9rem;
+  background: #fef5f4;
+  color: #e5b3a8;
+  border: 1px solid #f9dfdf;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.9rem;
 }
 
-.btn-edit-header-small:hover { background: #e5b3a8; color: white; }
+.btn-edit-header-small:hover { 
+  background: #e5b3a8; 
+  color: white; 
+}
 
 .psico-sub-phrase {
   font-family: 'Montserrat', sans-serif;
@@ -76,7 +89,9 @@
   font-style: italic;
 }
 
-/* MODO EDICIÓN DEL HEADER - MEJORADO */
+/* ===============================
+   EDICIÓN DE HEADER
+================================ */
 .header-edit-box {
   background: white;
   border: 2px solid #f9dfdf;
@@ -155,7 +170,9 @@
   background: #f0cdc7;
 }
 
-/* BUSCADOR */
+/* ===============================
+   TOOLBAR (BÚSQUEDA Y NUEVO)
+================================ */
 .psico-toolbar {
   display: flex;
   justify-content: center;
@@ -191,18 +208,32 @@
   cursor: pointer;
   font-size: 1.2rem;
   transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* CARDS */
+.btn-new-psico:hover {
+  background: #d19a8e;
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   LISTA DE POSTS
+================================ */
 .psico-list {
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 0 auto 60px;
   display: flex;
   flex-direction: column;
   gap: 40px;
   padding: 0 20px;
+  flex: 1;
 }
 
+/* ===============================
+   CARDS DE POST
+================================ */
 .psico-item {
   display: flex;
   background: white;
@@ -210,11 +241,14 @@
   overflow: hidden;
   border: 1px solid #f2e1de;
   box-shadow: 0 12px 30px rgba(229, 179, 168, 0.08);
-  min-height: 380px;
+  height: 400px;
 }
 
-.psico-item.rev { flex-direction: row-reverse; }
+.psico-item.rev { 
+  flex-direction: row-reverse; 
+}
 
+/* Parte visual (imagen/video) */
 .psico-visual {
   flex: 1;
   min-width: 45%;
@@ -230,12 +264,21 @@
   display: block;
 }
 
-.video-full-wrapper { width: 100%; min-height: 380px; }
-.video-full-wrapper iframe { width: 100%; height: 100%; border: none; }
+.video-full-wrapper { 
+  width: 100%; 
+  height: 100%; 
+}
 
+.video-full-wrapper iframe { 
+  width: 100%; 
+  height: 100%; 
+  border: none; 
+}
+
+/* Parte de texto */
 .psico-content {
   flex: 1.2;
-  padding: 35px;
+  padding: 35px 45px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -257,12 +300,22 @@
   word-break: break-word;
 }
 
-/* FOOTER CARD */
+/* ===============================
+   FOOTER DEL CARD
+================================ */
 .psico-footer-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 25px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-btns-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn-noticia-rosa {
@@ -279,11 +332,24 @@
   gap: 6px;
   border: none;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.admin-btns-bottom { display: flex; gap: 10px; }
+.btn-noticia-rosa:hover {
+  background: #d19a8e;
+  transform: translateY(-2px);
+}
 
-.btn-edit-ps, .btn-del-ps {
+/* Botones de admin */
+.admin-btns-bottom { 
+  display: flex; 
+  gap: 10px;
+  margin-right: 15px; 
+  margin-bottom: 10px;
+}
+
+.btn-edit-ps, 
+.btn-del-ps {
   background: #fef5f4;
   color: #e5b3a8;
   border: 1px solid #f9dfdf;
@@ -291,12 +357,23 @@
   height: 38px;
   border-radius: 50%;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.btn-edit-ps:hover { background: #e5b3a8; color: white; }
-.btn-del-ps:hover { background: #c0392b; color: white; border-color: #c0392b; }
+.btn-edit-ps:hover { 
+  background: #e5b3a8; 
+  color: white; 
+}
 
-/* MODAL MEJORADO */
+.btn-del-ps:hover { 
+  background: #c0392b; 
+  color: white; 
+  border-color: #c0392b; 
+}
+
+/* ===============================
+   MODAL
+================================ */
 .modal-psico-overlay {
   position: fixed;
   inset: 0;
@@ -319,16 +396,24 @@
   overflow-y: auto;
 }
 
-.modal-label {
-    display: block;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
-    color: #8a5e5e;
-    margin-bottom: 5px;
-    margin-left: 5px;
+.modal-title {
+  font-size: 2.5rem;
+  color: #e5b3a8;
+  margin-bottom: 25px;
+  text-align: center;
 }
 
-.ps-input, .ps-area {
+.modal-label {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  color: #8a5e5e;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+.ps-input, 
+.ps-area {
   width: 100%;
   margin-bottom: 15px;
   padding: 12px;
@@ -336,6 +421,13 @@
   border-radius: 12px;
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.ps-input:focus,
+.ps-area:focus {
+  outline: none;
+  border-color: #e5b3a8;
 }
 
 .ps-btn-main {
@@ -348,24 +440,40 @@
   cursor: pointer;
   font-family: 'Pompiere', cursive;
   border: none;
+  transition: 0.3s;
+}
+
+.ps-btn-main:hover {
+  background: #d19a8e;
+  transform: translateY(-2px);
 }
 
 .close-x {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    color: #e5b3a8;
-    cursor: pointer;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #e5b3a8;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
+.close-x:hover {
+  color: #d19a8e;
+  transform: rotate(90deg);
+}
+
+/* ===============================
+   PAGINACIÓN
+================================ */
 .pagination {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 50px 0;
+  padding: 40px 0 25px 0;
+  margin-top: auto;
 }
 
 .pagination button {
@@ -377,29 +485,109 @@
   font-size: 1.3rem;
   color: #6d5b57;
   font-family: 'Pompiere', cursive;
+  transition: 0.3s;
 }
 
-.pagination button.active { background: #e5b3a8; color: white; border-color: #e5b3a8; }
+.pagination button:hover:not(:disabled) {
+  background: #f9dfdf;
+  transform: translateY(-2px);
+}
 
+.pagination button.active { 
+  background: #e5b3a8; 
+  color: white; 
+  border-color: #e5b3a8; 
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
 @media (max-width: 800px) {
-  .psico-item { flex-direction: column; min-height: auto; }
-  .psico-visual { min-width: 100%; height: 280px; }
-  
+  .psico-main-title {
+    font-size: 2.8rem;
+  }
+
+  .psico-sub-phrase {
+    font-size: 1rem;
+  }
+
+  .psico-toolbar {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+
+  .psico-search {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .psico-search input {
+    width: 100%;
+  }
+
+  .btn-new-psico {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+
   .header-edit-box {
     padding: 20px;
   }
-  
+
   .input-header-title {
     font-size: 1.5rem;
   }
-  
+
   .header-edit-buttons {
     flex-direction: column;
   }
-  
+
   .btn-save-header,
   .btn-cancel-header {
     width: 100%;
     justify-content: center;
+  }
+
+  .psico-list {
+    margin-bottom: 40px;
+  }
+
+  .psico-item { 
+    flex-direction: column !important; 
+    height: auto !important;
+  }
+  
+  .psico-visual { 
+    width: 100% !important;
+    aspect-ratio: 16 / 9; 
+    height: auto !important;
+    min-width: 100% !important;
+    flex: none;
+  }
+
+  .psico-content {
+    padding: 25px !important;
+    min-height: 250px; 
+  }
+
+  .text-wrapper h2 { 
+    font-size: 1.8rem; 
+  }
+  
+  .psico-footer-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .admin-btns-bottom {
+    width: 100%;
+    justify-content: flex-start;
+    margin: 0;
   }
 }

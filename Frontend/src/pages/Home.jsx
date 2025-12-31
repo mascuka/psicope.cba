@@ -128,7 +128,15 @@ export default function Home() {
     }
   };
 
-  if (loading) return <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', fontSize:'2rem', color:'#e5b3a8'}}>Cargando...</div>;
+ if (loading) {
+  return (
+    <div className="home-container">
+      <div className="loading-container">
+        <p>Cargando...</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="home-container">

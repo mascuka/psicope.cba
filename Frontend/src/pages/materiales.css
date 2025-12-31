@@ -14,20 +14,23 @@
 .materiales-page {
   background: var(--fondo);
   min-height: calc(100vh - 85px);
-  /* 75px navbar + 55px espacio = 130px arriba */
-  padding: 130px 20px 60px; 
+  padding: 130px 55px 60px; 
+  display: flex;
+  justify-content: flex-start; 
+  box-sizing: border-box;
 }
 
 .materiales-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 1600px; 
+  width: 100%;
+  margin: 0;
   display: flex;
   gap: 35px;
   align-items: flex-start;
 }
 
 /* ===============================
-   SIDEBAR
+   SIDEBAR (Filtros)
 ================================ */
 .materiales-sidebar {
   width: 270px;
@@ -38,30 +41,31 @@
 
 .filter-card {
   background: white;
-  padding: 25px;
-  border-radius: 24px;
+  padding: 15px 20px;
+  border-radius: 20px;
   border: 1px solid var(--borde-card);
   box-shadow: 0 8px 20px rgba(229, 179, 168, 0.12);
 }
 
 .filter-card h3 {
   font-family: 'Pompiere', cursive;
-  font-size: 1.7rem;
+  font-size: 1.35rem;
   color: var(--rosa);
-  margin-bottom: 20px;
+  margin: 0 0 12px 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.search-input-sidebar, .select-sidebar {
+.search-input-sidebar, 
+.select-sidebar {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 14px;
+  padding: 11px 13px;
   border-radius: 12px;
   border: 1px solid #eee;
   font-size: 0.9rem;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .btn-nuevo-recurso {
@@ -69,7 +73,7 @@
   background: var(--rosa);
   color: white;
   border: none;
-  padding: 13px;
+  padding: 12px;
   border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
@@ -87,7 +91,8 @@
   flex: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
+  gap: 25px;
+  width: 100%;
 }
 
 .material-card {
@@ -98,17 +103,29 @@
   display: flex;
   flex-direction: column;
   transition: 0.3s ease;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
-.material-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
+.material-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
 
 .card-image-container-premium {
   height: 210px;
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
-.card-image-container-premium img { width: 100%; height: 100%; object-fit: cover; }
+.card-image-container-premium img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
 .card-age-badge-overlay {
   position: absolute;
@@ -138,7 +155,12 @@
   z-index: 10;
 }
 
-.card-body { padding: 18px; display: flex; flex-direction: column; flex-grow: 1; }
+.card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 
 .card-title-premium {
   font-size: 1.25rem;
@@ -148,7 +170,6 @@
   line-height: 1.2;
 }
 
-/* 3 RENGLONES CON QUIEBRE FORZADO */
 .card-description {
   font-size: 0.88rem;
   color: var(--gris-suave);
@@ -159,7 +180,6 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  /* Evita que palabras infinitas rompan el marco */
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-all;
@@ -176,13 +196,49 @@
   border-radius: 16px;
 }
 
-.price-current-p { color: var(--texto-cafe); font-size: 1.3rem; font-weight: 800; }
-.price-old-p { text-decoration: line-through; color: var(--rosa-oscuro); font-size: 0.95rem; opacity: 0.5; }
+.price-current-p {
+  color: var(--texto-cafe);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
 
-.card-actions { display: flex; gap: 10px; }
-.btn-action-outline, .btn-action-fill { padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; }
-.btn-action-fill { background: var(--rosa); color: white; }
-.btn-action-outline { background: white; border: 1.6px solid var(--rosa); color: var(--rosa); }
+.price-old-p {
+  text-decoration: line-through;
+  color: var(--rosa-oscuro);
+  font-size: 0.95rem;
+  opacity: 0.5;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-action-outline,
+.btn-action-fill {
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  transition: 0.2s;
+}
+
+.btn-action-fill {
+  background: var(--rosa);
+  color: white;
+}
+
+.btn-action-outline {
+  background: white;
+  border: 1.6px solid var(--rosa);
+  color: var(--rosa);
+}
 
 /* ===============================
    ADMIN BAR
@@ -207,11 +263,24 @@
   font-weight: 700;
 }
 
-.admin-btn-edit { color: var(--rosa); background: none; border: none; cursor: pointer; font-size: 1.1rem; }
-.admin-btn-delete { color: #e57373; background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+.admin-btn-edit,
+.admin-btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.admin-btn-edit {
+  color: var(--rosa);
+}
+
+.admin-btn-delete {
+  color: #e57373;
+}
 
 /* ===============================
-   MODAL EDITOR
+   MODAL FORMULARIO
 ================================ */
 .modal-overlay {
   position: fixed;
@@ -237,8 +306,22 @@
   gap: 18px;
 }
 
-.modal-container h3 { font-family: 'Pompiere', cursive; font-size: 2.2rem; color: var(--rosa); text-align: center; margin: 0; }
-.modal-container input, .modal-container textarea, .modal-container select { padding: 12px; border-radius: 12px; border: 1px solid #ddd; outline: none; }
+.modal-container h3 {
+  font-family: 'Pompiere', cursive;
+  font-size: 2.2rem;
+  color: var(--rosa);
+  text-align: center;
+  margin: 0;
+}
+
+.modal-container input,
+.modal-container textarea,
+.modal-container select {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  outline: none;
+}
 
 .char-count {
   font-size: 0.75rem;
@@ -248,11 +331,607 @@
   font-weight: 600;
 }
 
-.oferta-box-styled { background: #fff8f7; padding: 18px; border-radius: 18px; border: 1.5px dashed var(--rosa); }
-.file-section-modal { background: #fdfdfd; padding: 20px; border-radius: 18px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
-.file-item { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; font-weight: 700; color: var(--texto-cafe); }
+.oferta-box-styled {
+  background: #fff8f7;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1.5px dashed var(--rosa);
+}
 
-.btn-save-modal { background: var(--rosa); color: white; padding: 14px; border-radius: 50px; border: none; font-weight: 800; cursor: pointer; }
-.btn-cancel-modal { background: none; color: var(--gris-suave); border: none; cursor: pointer; font-weight: 600; text-decoration: underline; align-self: center; }
+.file-section-modal {
+  background: #fdfdfd;
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-.pdf-modal { width: 90%; height: 85vh; background: white; border-radius: 20px; overflow: hidden; }
+.file-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--texto-cafe);
+}
+
+.btn-save-modal {
+  background: var(--rosa);
+  color: white;
+  padding: 14px;
+  border-radius: 50px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-cancel-modal {
+  background: none;
+  color: var(--gris-suave);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  align-self: center;
+}
+
+/* ===============================
+   MODAL DE PREVIEW - SIN VENTANA
+================================ */
+.modal-overlay-preview {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 60px 20px 40px;
+  box-sizing: border-box;
+}
+
+.preview-content {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Imágenes: ocupan todo el ancho disponible, se ajustan verticalmente */
+.preview-content img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* PDFs: mantienen ventana blanca */
+.preview-content iframe {
+  width: 100%;
+  max-width: 1200px;
+  height: 85vh;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Botón de cerrar fijo */
+.modal-overlay-preview .close-preview-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+}
+
+.modal-overlay-preview .close-preview-btn:hover {
+  background: var(--rosa);
+  color: white;
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 1280px) {
+  .materiales-page {
+     padding: 130px 40px 60px;
+  }
+}
+
+@media (max-width: 900px) {
+  .materiales-page {
+    padding: 95px 15px 40px; 
+    justify-content: center;
+  }
+
+  .materiales-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    max-width: 400px; 
+    margin: 0 auto;
+  }
+
+  .materiales-sidebar {
+    width: 100%;
+    max-width: 100%; 
+    position: static;
+  }
+
+  .filter-card {
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .materiales-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .material-card {
+    width: 100%;
+    max-width: 100%; 
+  }
+
+  /* Preview responsive tablets */
+  .modal-overlay-preview {
+    padding: 50px 15px 30px;
+  }
+
+  .modal-overlay-preview .close-preview-btn {
+    width: 45px;
+    height: 45px;
+    top: 12px;
+    right: 12px;
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 550px) {
+  .materiales-page {
+    padding: 85px 10px 30px;
+  }
+
+  .card-image-container-premium {
+    height: 190px;
+  }
+
+  .card-title-premium {
+    font-size: 1.15rem;
+  }
+
+  .btn-action-outline,
+  .btn-action-fill {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Preview responsive móviles */
+  .modal-overlay-preview {
+    padding: 50px 10px 30px;
+  }
+
+  .preview-content {
+    max-width: 100%;
+  }
+
+  .modal-overlay-preview .close-preview-btn {
+    width: 42px;
+    height: 42px;
+    top: 10px;
+    right: 10px;
+    font-size: 1.3rem;
+  }
+}
+
+/* ===============================
+   FIX PREVIEW RESPONSIVE REAL
+   (Agregar al FINAL del CSS)
+================================ */
+
+/* Overlay: centra y controla tamaño real */
+.modal-overlay-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+/* Contenedor limita ancho y alto */
+.preview-content {
+  width: 100%;
+  max-width: 1100px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* IMÁGENES: siempre entran completas */
+.preview-content img {
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* PDF: tamaño controlado, sin espacio blanco */
+.preview-content iframe {
+  width: 100%;
+  height: calc(100vh - 140px);
+  max-height: 900px;
+  border-radius: 10px;
+}
+
+/* MOBILE FIRST */
+@media (max-width: 600px) {
+
+  .modal-overlay-preview {
+    padding: 50px 10px 20px;
+  }
+
+  .preview-content {
+    max-height: calc(100vh - 90px);
+  }
+
+  .preview-content img {
+    max-height: calc(100vh - 100px);
+  }
+
+  .preview-content iframe {
+    height: calc(100vh - 100px);
+  }
+
+  .modal-overlay-preview .close-preview-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+}
+
+
+
+
+/* =============================================================
+   VISTA PREVIA "PERFECT FIT" - SOLUCIÓN FINAL
+   (Copiar y pegar al final de materiales.css)
+   ============================================================= */
+
+/* 1. EL FONDO (Overlay) */
+/* Usamos fixed para "escapar" del #root y sus restricciones */
+.modal-overlay-preview {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  
+  /* Fondo oscuro semi-transparente profesional */
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(5px); /* Efecto borroso suave */
+  
+  /* Centrado matemático absoluto */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  z-index: 2147483647 !important; /* El valor más alto posible en CSS */
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important; /* Bloquea scroll en el fondo */
+}
+
+/* 2. EL CONTENEDOR (Wrapper) */
+/* No tiene tamaño propio, solo envuelve */
+.preview-content {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  /* Reseteo total para evitar cajas blancas */
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  /* Permite que la imagen dicte el tamaño pero sin pasarse */
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+/* 3. LA IMAGEN (La Clave) */
+.preview-content img {
+  display: block !important;
+  
+  /* Lógica: "Sé tan grande como quieras, PERO..." */
+  width: auto !important;
+  height: auto !important;
+  
+  /* "...NUNCA superes el 95% del ancho de la pantalla" */
+  max-width: 95vw !important; 
+  /* "...NUNCA superes el 90% del alto de la pantalla" */
+  max-height: 90vh !important;
+  
+  /* Ajuste visual */
+  object-fit: contain !important; /* Asegura que se vea entera */
+  border-radius: 4px !important;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+}
+
+/* 4. EL PDF (Iframe) */
+.preview-content iframe {
+  width: 90vw !important;
+  height: 90vh !important;
+  background: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+/* 5. BOTÓN CERRAR (Fijo en pantalla) */
+/* Lo fijamos a la pantalla, no a la imagen, para que siempre esté en el mismo lugar */
+.close-preview-btn {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  font-size: 24px !important;
+  cursor: pointer !important;
+  z-index: 2147483648 !important; /* Encima del overlay */
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.3s ease !important;
+}
+
+.close-preview-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* RESPONSIVE (Móviles) */
+@media (max-width: 768px) {
+  /* En celular, damos un poco más de margen lateral */
+  .preview-content img {
+    max-width: 92vw !important; /* Ocupa casi todo el ancho */
+    max-height: 80vh !important; /* Deja lugar arriba para la X */
+  }
+
+  .close-preview-btn {
+    top: 15px !important;
+    right: 15px !important;
+    background: rgba(0, 0, 0, 0.5) !important; /* Más contraste en móvil */
+  }
+}
+
+/* =============================================================
+   VISTA PREVIA "PERFECT FIT" - SOLUCIÓN FINAL ÚNICA
+   ============================================================= */
+
+.modal-overlay-preview {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.92) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important; /* CENTRADO HORIZONTAL */
+  z-index: 9999999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.preview-content {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important; /* CENTRADO INTERNO */
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+}
+
+.preview-content img {
+  display: block !important;
+  /* El secreto para que no se pegue a la izquierda: */
+  margin: auto !important; 
+  
+  /* Se adapta a cualquier pantalla sin salirse */
+  max-width: 95vw !important;
+  max-height: 85vh !important;
+  width: auto !important;
+  height: auto !important;
+  
+  object-fit: contain !important;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  animation: zoomEntrada 0.3s ease-out;
+}
+
+.preview-content iframe {
+  width: 90vw !important;
+  height: 85vh !important;
+  background: white;
+  border-radius: 12px;
+  border: none;
+}
+
+.close-preview-btn {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 45px !important;
+  height: 45px !important;
+  background: white !important;
+  color: black !important;
+  border-radius: 50% !important;
+  border: none !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  z-index: 10000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+@keyframes zoomEntrada {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* RESPONSIVE CELULARES */
+@media (max-width: 768px) {
+  .preview-content img {
+    max-width: 98vw !important;
+    max-height: 75vh !important; /* Más chico en alto para que entre la X */
+  }
+  .close-preview-btn {
+    top: 15px !important;
+    right: 15px !important;
+  }
+}
+
+/* =============================================================
+   REFINAMIENTO DE MIS COMPRAS (ESTILO FINO)
+   ============================================================= */
+
+/* Título y Subtítulo con Pompiere */
+.perfil-title {
+  font-family: 'Pompiere', cursive !important;
+  font-size: 2.2rem !important;
+  color: var(--rosa) !important;
+  letter-spacing: 1px;
+}
+
+.perfil-subtitle {
+  font-family: 'Pompiere', cursive !important;
+  font-size: 1.4rem !important;
+  color: var(--texto-cafe) !important;
+  margin-top: -5px;
+}
+
+/* Contenedor del item más refinado */
+.compra-item-fino {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border: none;
+  border-bottom: 1px solid var(--rosa-claro); /* Solo línea divisoria para que sea más fino */
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.compra-item-fino:hover {
+  background: #fff8f7;
+}
+
+/* Tipografía de los textos internos */
+.compra-nombre-fino {
+  font-weight: 600;
+  color: var(--texto-cafe);
+  font-size: 1.05rem;
+  display: block;
+}
+
+.compra-detalles-fina {
+  display: flex;
+  gap: 15px;
+  margin-top: 4px;
+}
+
+.detalle-dato {
+  font-size: 0.85rem;
+  color: var(--gris-suave);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.detalle-dato-importe {
+  font-size: 0.85rem;
+  color: var(--texto-cafe);
+  background: none; /* Quitamos el fondo gris para que sea más liviano */
+  padding: 0;
+}
+
+.detalle-dato-importe strong {
+  color: var(--rosa-oscuro);
+  font-weight: 700;
+}
+
+/* Botón de descarga más sutil */
+.btn-descarga-fina {
+  background: transparent !important;
+  color: var(--rosa) !important;
+  border: 1px solid var(--rosa) !important;
+  padding: 6px 15px !important;
+  border-radius: 50px !important; /* Más redondeado */
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-descarga-fina:hover {
+  background: var(--rosa) !important;
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(229, 179, 168, 0.3);
+}
+
+/* Ajuste móvil para que no se amontone */
+@media (max-width: 600px) {
+  .compra-item-fino {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 10px;
+  }
+  
+  .btn-descarga-fina {
+    width: 100%;
+    justify-content: center;
+  }
+}

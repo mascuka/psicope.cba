@@ -217,12 +217,15 @@ export default function Psicopedagogiando() {
   const currentPosts = postsFiltrados.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
   const totalPages = Math.ceil(postsFiltrados.length / postsPerPage);
 
-  if (loading) return (
-    <div className="psico-loading-screen">
-      <div className="psico-spinner"></div>
-      <p>Cargando Psicopedagogiando...</p>
-    </div>
-  );
+    if (loading) {
+      return (
+        <div className="materiales-page">
+          <div className="loading-container">
+            <p>Cargando...</p>
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="psico-page">
