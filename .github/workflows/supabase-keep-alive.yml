@@ -1,0 +1,19 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Se ejecuta todos los lunes a las 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Esto permite probarlo manualmente
+
+jobs:
+  ping_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar Ping SQL
+        run: |
+          curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{"last_ping": "now()"}'
