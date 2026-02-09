@@ -13,7 +13,7 @@ jobs:
       - name: Ejecutar Ping SQL
         run: |
           curl -i -X POST "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/_maintenance_ping" \
-          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA3Mjk2MzkxMn0.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
-          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA3Mjk2MzkxMn0.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
+          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
           -H "Content-Type: application/json" \
           -d "{}"
