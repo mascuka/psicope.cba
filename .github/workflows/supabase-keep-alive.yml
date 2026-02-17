@@ -2,7 +2,8 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 0,8,16 * * *'
+    # Se ejecuta todos los días a las 00:00 UTC
+    - cron: '0 0 * * *'
   workflow_dispatch: 
 
 jobs:
@@ -12,8 +13,8 @@ jobs:
       - name: 1. Limpiar TODA la tabla de mantenimiento
         run: |
           curl -i -X DELETE "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/_maintenance_ping" \
-          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
           -H "Content-Type: application/json"
 
       - name: 2. Insertar 5 registros de actividad
@@ -22,8 +23,8 @@ jobs:
           do
             echo "Insertando registro $i..."
             curl -i -X POST "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/_maintenance_ping" \
-            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=minimal" \
             -d "{ \"last_ping\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" }"
