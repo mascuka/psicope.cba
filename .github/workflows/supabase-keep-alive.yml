@@ -2,18 +2,29 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # Se ejecuta todos los lunes a las 00:00 UTC
-    - cron: '0 0 * * 1'
-  workflow_dispatch: # Permite probarlo manualmente
+    # Se ejecuta 3 veces al día: 00:00, 08:00 y 16:00 UTC
+    - cron: '0 0,8,16 * * *'
+  workflow_dispatch: 
 
 jobs:
-  ping_db:
+  keep_active:
     runs-on: ubuntu-latest
     steps:
-      - name: Ejecutar Ping SQL
+      - name: Insertar registro de actividad
         run: |
-          curl -i -X POST "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/_maintenance_ping" \
-          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
-          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
+          curl -i -X POST "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/keep_alive" \
+          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
           -H "Content-Type: application/json" \
-          -d "{}"
+          -H "Prefer: return=minimal" \
+          -d '{ "created_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'" }'
+
+      - name: Limpiar registros antiguos (Mayores a 24h)
+        run: |
+          # Calculamos la fecha de ayer para borrar lo anterior
+          YESTERDAY=$(date -u -d "24 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+          
+          curl -i -X DELETE "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/keep_alive?created_at=lt.$YESTERDAY" \
+          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+          -H "Content-Type: application/json"
