@@ -2,8 +2,8 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 00:00 UTC
-    - cron: '0 0 * * *'
+    # Se ejecuta 3 veces al día: 00:00, 08:00 y 16:00 UTC
+    - cron: '0 0,8,16 * * *'
   workflow_dispatch: 
 
 jobs:
@@ -12,13 +12,15 @@ jobs:
     steps:
       - name: 1. Limpiar TODA la tabla de mantenimiento
         run: |
+          # Borrado masivo sin filtros para vaciar la tabla primero
           curl -i -X DELETE "https://heqktnablvpymjepgmvy.supabase.co/rest/v1/_maintenance_ping" \
           -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
           -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlcWt0bmFibHZweW1qZXBnbXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNjI4NDcsImV4cCI6MjA4MDYzODg0N30.kb5ROl8d0Ek1pR39t0t2icWF4FMC-VLxx-6JOvkHbuI" \
           -H "Content-Type: application/json"
 
-      - name: 2. Insertar 5 registros de actividad
+      - name: 2. Insertar 5 registros nuevos
         run: |
+          # Bucle para asegurar actividad de escritura repetida
           for i in {1..5}
           do
             echo "Insertando registro $i..."
