@@ -3,66 +3,37 @@ name: Supabase Keep Alive
 on:
   schedule:
     # Cada 30 minutos
-    - cron: "*/30 * * * *"
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
-  keep_alive:
+  keep_active:
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Verificar conexión
+      - name: Limpiar tabla de mantenimiento
         run: |
-          echo "Iniciando Keep Alive..."
-          date
-
-      - name: Leer tabla
-        run: |
-          curl --fail --silent \
-          "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping?select=id,last_ping&limit=5" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
-
-      - name: Esperar 5 segundos
-        run: sleep 5
-
-      - name: Insertar registro
-        run: |
-          curl --fail --silent \
-          -X POST \
-          "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping" \
+          curl -X DELETE "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping?id=gt.0" \
           -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -H "Prefer: return=minimal" \
-          -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+          -H "Content-Type: application/json"
 
-      - name: Esperar 5 segundos
-        run: sleep 5
-
-      - name: Actualizar registros
+      - name: Insertar 5 registros
         run: |
-          curl --fail --silent \
-          -X PATCH \
-          "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping?id=gt.0" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d "{\"last_ping\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+          for i in {1..5}
+          do
+            echo "Insertando registro $i..."
 
-      - name: Esperar 5 segundos
-        run: sleep 5
+            curl -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{ \"last_ping\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" }"
 
-      - name: Eliminar registros viejos
-        run: |
-          curl --fail --silent \
-          -X DELETE \
-          "${{ secrets.SUPABASE_URL }}/rest/v1/_maintenance_ping?id=lt.1000000" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+            sleep 1
+          done
 
       - name: Finalizado
-        run: |
-          echo "Keep Alive ejecutado correctamente."
-          date
+        run: echo "Keep Alive ejecutado correctamente."
