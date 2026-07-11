@@ -61,76 +61,33 @@ export default function Materiales() {
     if (error) console.error("Error al borrar de storage:", error);
   };
 
-  // --- FUNCIÓN DE COMPRA CORREGIDA Y SIMPLIFICADA PARA EVITAR EL ERROR 400 ---
+  // --- FUNCIÓN DE COMPRA: ahora llama a la Edge Function segura de Supabase ---
   const handleComprar = async (material) => {
     if (!user) return Swal.fire("Atención", "Inicia sesión para poder comprar este material.", "info");
-    
+
     setCargandoPago(material.id);
-    
-    const precioFinal = material.en_oferta 
-      ? (material.precio * (1 - material.porcentaje_descuento / 100)) 
-      : material.precio;
 
     try {
-      const rawToken = import.meta.env.VITE_MP_ACCESS_TOKEN;
-      if (!rawToken) throw new Error("Token MP no configurado.");
-      const token = rawToken.trim();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // Construcción robusta de la URL
-      const origin = window.location.origin;
-      const esLocal = origin.includes("localhost");
-
-      // Objeto base de la preferencia
-      const body = {
-        items: [
-          { 
-            id: String(material.id), 
-            title: material.nombre, 
-            unit_price: Number(parseFloat(precioFinal).toFixed(2)), 
-            quantity: 1, 
-            currency_id: "ARS"
-          }
-        ],
-        back_urls: { 
-          success: `${origin}/success`, 
-          failure: `${origin}/materiales`,
-          pending: `${origin}/materiales`
-        },
-        external_reference: String(material.id),
-        payer: { email: user.email },
-        binary_mode: true
-      };
-
-      // CRUCIAL: Mercado Pago falla en localhost si activas auto_return
-      // Solo lo agregamos si NO es local
-      if (!esLocal) {
-        body.auto_return = "approved";
-      }
-
-      const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json", 
-            "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify(body)
+      const { data, error } = await supabase.functions.invoke("crear-preferencia", {
+        body: { material_id: material.id },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
-      const data = await response.json();
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      if (!response.ok) {
-        console.error("Detalle error MP:", data);
-        throw new Error(data.message || "Error al crear la preferencia");
-      }
-
-      if (data.init_point) {
+      if (data?.init_point) {
         window.location.href = data.init_point;
+      } else {
+        throw new Error("No se recibió el link de pago.");
       }
-    } catch (error) { 
+    } catch (error) {
       console.error("Error completo handleComprar:", error);
-      Swal.fire("Error de Conexión", `Mercado Pago dice: ${error.message}`, "error"); 
-    } finally { 
-      setCargandoPago(null); 
+      Swal.fire("Error de Conexión", `Mercado Pago dice: ${error.message}`, "error");
+    } finally {
+      setCargandoPago(null);
     }
   };
 
