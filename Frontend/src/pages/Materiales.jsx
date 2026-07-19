@@ -5,7 +5,14 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { PDFDocument } from "pdf-lib";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import "./materiales.css";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+
+const PAGINAS_MUESTRA = 4; // cantidad de hojas que se usan para el PDF de "muestra"
+const ANCHO_PORTADA_PX = 900; // ancho al que se renderiza la imagen de portada
 
 export default function Materiales() {
   const [materiales, setMateriales] = useState([]);
@@ -19,6 +26,7 @@ export default function Materiales() {
   const [showModal, setShowModal] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [generandoAuto, setGenerandoAuto] = useState(false);
   const [viewingPdf, setViewingPdf] = useState(null);
   const [cargandoPago, setCargandoPago] = useState(null);
 
@@ -55,6 +63,62 @@ export default function Materiales() {
     setMateriales(data || []);
   };
 
+  // Renderiza la primera hoja del PDF como imagen JPG, para usarla de portada.
+  const generarPortadaDesdePDF = async (file) => {
+    const bytes = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    const pagina = await pdf.getPage(1);
+    const viewportBase = pagina.getViewport({ scale: 1 });
+    const escala = ANCHO_PORTADA_PX / viewportBase.width;
+    const viewport = pagina.getViewport({ scale: escala });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await pagina.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.88));
+    return new File([blob], "portada.jpg", { type: "image/jpeg" });
+  };
+
+  // Arma un PDF nuevo con las primeras N hojas del material, para usarlo de muestra.
+  const generarMuestraDesdePDF = async (file, titulo) => {
+    const bytes = await file.arrayBuffer();
+    const origen = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    const totalPaginas = origen.getPageCount();
+    const cantidad = Math.min(PAGINAS_MUESTRA, totalPaginas);
+    const indices = Array.from({ length: cantidad }, (_, i) => i);
+
+    const nuevo = await PDFDocument.create();
+    const copiadas = await nuevo.copyPages(origen, indices);
+    copiadas.forEach(p => nuevo.addPage(p));
+    nuevo.setTitle(`${titulo || "Material"} - Muestra`);
+    const nuevosBytes = await nuevo.save();
+    return new File([nuevosBytes], "muestra.pdf", { type: "application/pdf" });
+  };
+
+  // Se dispara al elegir el PDF completo: genera portada y muestra solas,
+  // salvo que el admin ya haya elegido versiones manuales.
+  const handleArchivoPrincipalChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setNuevoMaterial(prev => ({ ...prev, archivo: file }));
+    setGenerandoAuto(true);
+    try {
+      const titulo = nuevoMaterial.nombre_descarga || nuevoMaterial.nombre;
+      const [portadaAuto, muestraAuto] = await Promise.all([
+        generarPortadaDesdePDF(file),
+        generarMuestraDesdePDF(file, titulo)
+      ]);
+      setNuevoMaterial(prev => ({ ...prev, portada: portadaAuto, preview: muestraAuto }));
+    } catch (err) {
+      console.error("Error generando portada/muestra automática:", err);
+      Swal.fire("Atención", "No se pudo generar la portada y la muestra automáticamente. Podés subirlas manualmente más abajo.", "warning");
+    } finally {
+      setGenerandoAuto(false);
+    }
+  };
+
   const eliminarArchivoStorage = async (path, bucket) => {
     if (!path) return;
     const fileName = path.includes('/') ? path.split('/').pop().split('?')[0] : path;
@@ -79,8 +143,51 @@ export default function Materiales() {
   };
 
   // --- FUNCIÓN DE COMPRA: ahora llama a la Edge Function segura de Supabase ---
+  // Acredita el material directo en la base, sin pasar por Mercado Pago.
+  // La usan tanto el click normal de admin como el "simular compra" (click derecho).
+  const registrarCompraSimulada = async (materialId) => {
+    const material = materiales.find(m => m.id === materialId);
+    const { data: perfil } = await supabase.from("usuarios").select("nombre, email").eq("id", user.id).single();
+
+    const precioFinal = material.en_oferta
+      ? (material.precio * (1 - material.porcentaje_descuento / 100))
+      : material.precio;
+
+    const { error } = await supabase.from("compras").insert([
+      {
+        usuario_id: user.id,
+        material_id: materialId,
+        nombre_usuario: perfil?.nombre || "Admin",
+        email_usuario: perfil?.email || user.email,
+        nombre_material: material.nombre,
+        precio_pagado: precioFinal,
+        status: "approved",
+        payment_id: "ADMIN_" + Date.now()
+      }
+    ]);
+
+    if (error) throw error;
+    setMisCompras(prev => [...prev, materialId]);
+    fetchMateriales();
+  };
+
   const handleComprar = async (material) => {
     if (!user) return Swal.fire("Atención", "Inicia sesión para poder comprar este material.", "info");
+
+    // Si sos admin, te lo acredita directo (sin Mercado Pago) para poder probar que todo funcione.
+    if (isAdmin) {
+      setCargandoPago(material.id);
+      try {
+        await registrarCompraSimulada(material.id);
+        Swal.fire("¡Listo!", "Material acreditado automáticamente (modo admin, sin pasar por Mercado Pago).", "success");
+      } catch (error) {
+        console.error("Error acreditando compra de admin:", error);
+        Swal.fire("Error", "No se pudo acreditar el material.", "error");
+      } finally {
+        setCargandoPago(null);
+      }
+      return;
+    }
 
     setCargandoPago(material.id);
 
@@ -126,33 +233,8 @@ export default function Materiales() {
     setCargandoPago(materialId);
 
     try {
-      const material = materiales.find(m => m.id === materialId);
-      const { data: perfil } = await supabase.from("usuarios").select("nombre, email").eq("id", user.id).single();
-
-      const precioFinal = material.en_oferta 
-        ? (material.precio * (1 - material.porcentaje_descuento / 100)) 
-        : material.precio;
-
-      const { error } = await supabase.from("compras").insert([
-        { 
-          usuario_id: user.id, 
-          material_id: materialId,
-          nombre_usuario: perfil?.nombre || "Admin (Simulado)",
-          email_usuario: perfil?.email || user.email,
-          nombre_material: material.nombre,
-          precio_pagado: precioFinal,
-          status: "approved",
-          payment_id: "SIM_" + Date.now()
-        }
-      ]);
-
-      if (!error) {
-        Swal.fire("¡Éxito!", "Simulación exitosa.", "success");
-        setMisCompras(prev => [...prev, materialId]);
-        fetchMateriales();
-      } else {
-        throw error;
-      }
+      await registrarCompraSimulada(materialId);
+      Swal.fire("¡Éxito!", "Simulación exitosa.", "success");
     } catch (error) {
       Swal.fire("Error", "No se pudo completar la simulación.", "error");
     } finally {
@@ -395,23 +477,40 @@ export default function Materiales() {
 
             <div className="file-section-modal">
                 <div className="file-item">
-                    <span>PDF Completo (Privado):</span>
-                    <input type="file" onChange={e => setNuevoMaterial({...nuevoMaterial, archivo: e.target.files[0]})} />
+                    <span>PDF Completo del material:</span>
+                    <input type="file" accept="application/pdf" onChange={handleArchivoPrincipalChange} />
                     {editandoId && !nuevoMaterial.archivo && <small className="file-current-name">Actual: {nuevoMaterial.archivo_actual}</small>}
+                    <small style={{color:'#888', fontWeight:400}}>
+                        La portada y la muestra se generan solas a partir de este PDF: la 1° hoja se usa como portada, y las primeras {PAGINAS_MUESTRA} hojas como muestra.
+                    </small>
+                    {generandoAuto && <small style={{color:'var(--rosa-oscuro)', fontWeight:700}}>Generando portada y muestra automáticamente...</small>}
+                    {!generandoAuto && nuevoMaterial.portada && nuevoMaterial.preview && (
+                        <small style={{color:'#5a9c6f', fontWeight:700}}>✓ Portada y muestra listas.</small>
+                    )}
                 </div>
-                <div className="file-item">
-                    <span>Imagen Portada (Público):</span>
-                    <input type="file" onChange={e => setNuevoMaterial({...nuevoMaterial, portada: e.target.files[0]})} />
-                    {editandoId && !nuevoMaterial.portada && <small className="file-current-name">Actual: {nuevoMaterial.portada_actual}</small>}
-                </div>
-                <div className="file-item">
-                    <span>PDF Preview (Público):</span>
-                    <input type="file" onChange={e => setNuevoMaterial({...nuevoMaterial, preview: e.target.files[0]})} />
-                    {editandoId && !nuevoMaterial.preview && <small className="file-current-name">Actual: {nuevoMaterial.preview_actual}</small>}
-                </div>
+
+                <details style={{marginTop:'8px'}}>
+                    <summary style={{cursor:'pointer', fontSize:'0.85rem', color:'var(--gris-suave)'}}>
+                        ¿Preferís elegir la portada o la muestra manualmente?
+                    </summary>
+                    <div style={{display:'flex', flexDirection:'column', gap:'12px', marginTop:'12px'}}>
+                        <div className="file-item">
+                            <span>Imagen Portada (reemplaza a la automática):</span>
+                            <input type="file" accept="image/*" onChange={e => setNuevoMaterial({...nuevoMaterial, portada: e.target.files[0]})} />
+                            {editandoId && <small className="file-current-name">Actual: {nuevoMaterial.portada_actual}</small>}
+                        </div>
+                        <div className="file-item">
+                            <span>PDF Preview (reemplaza a la automática):</span>
+                            <input type="file" accept="application/pdf" onChange={e => setNuevoMaterial({...nuevoMaterial, preview: e.target.files[0]})} />
+                            {editandoId && <small className="file-current-name">Actual: {nuevoMaterial.preview_actual}</small>}
+                        </div>
+                    </div>
+                </details>
             </div>
 
-            <button type="submit" className="btn-save-modal" disabled={subiendo}>{subiendo ? "Subiendo archivos..." : "Guardar Cambios"}</button>
+            <button type="submit" className="btn-save-modal" disabled={subiendo || generandoAuto}>
+                {generandoAuto ? "Generando portada y muestra..." : subiendo ? "Subiendo archivos..." : "Guardar Cambios"}
+            </button>
             <button type="button" onClick={resetForm} className="btn-cancel-modal">Cancelar</button>
           </form>
         </div>
