@@ -4,6 +4,7 @@ import {
   FaPlus, FaTrash, FaEye, FaSearch, FaEdit, FaShoppingCart, FaDownload, FaTag
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { PDFDocument } from "pdf-lib";
 import "./materiales.css";
 
 export default function Materiales() {
@@ -24,7 +25,7 @@ export default function Materiales() {
   const [nuevoMaterial, setNuevoMaterial] = useState({
     nombre: "", descripcion: "", edad: "Todas las edades", precio: "", 
     en_oferta: false, porcentaje_descuento: 0, archivo: null, portada: null, preview: null,
-    archivo_actual: "", portada_actual: "", preview_actual: "" 
+    archivo_actual: "", portada_actual: "", preview_actual: "", nombre_descarga: ""
   });
 
   const MAX_DESC = 147;
@@ -59,6 +60,22 @@ export default function Materiales() {
     const fileName = path.includes('/') ? path.split('/').pop().split('?')[0] : path;
     const { error } = await supabase.storage.from(bucket).remove([fileName]);
     if (error) console.error("Error al borrar de storage:", error);
+  };
+
+  // Reescribe el metadato "Título" que trae el PDF (el que Chrome muestra en la
+  // pestaña al abrirlo), para que coincida con el nombre que eligió el admin.
+  const renombrarTituloPdf = async (file, tituloNuevo) => {
+    try {
+      const bytes = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      pdfDoc.setTitle(tituloNuevo || "Material");
+      pdfDoc.setAuthor("Lic. Brenda Grossi");
+      const nuevosBytes = await pdfDoc.save();
+      return new File([nuevosBytes], file.name, { type: "application/pdf" });
+    } catch (err) {
+      console.error("No se pudo reescribir el título del PDF, se sube el original:", err);
+      return file; // si falla, subimos el archivo tal cual para no bloquear la carga
+    }
   };
 
   // --- FUNCIÓN DE COMPRA: ahora llama a la Edge Function segura de Supabase ---
@@ -143,11 +160,20 @@ export default function Materiales() {
     }
   };
 
-  const descargarArchivoSeguro = async (path) => {
+  const descargarArchivoSeguro = async (path, nombreDeseado) => {
     if (!path) return Swal.fire("Error", "No hay archivo configurado.", "error");
     try {
       const fileName = path.includes('/') ? path.split('/').pop().split('?')[0] : path;
-      const { data, error } = await supabase.storage.from('materiales-privados').createSignedUrl(fileName, 60);
+      // Nombre final con el que se va a descargar el archivo (sin caracteres raros)
+      const nombreLimpio = (nombreDeseado || "material")
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, "")
+        .slice(0, 100);
+      const nombreDescarga = `${nombreLimpio || "material"}.pdf`;
+
+      const { data, error } = await supabase.storage
+        .from('materiales-privados')
+        .createSignedUrl(fileName, 60, { download: nombreDescarga });
       if (error) throw error;
       window.open(data.signedUrl, '_blank');
     } catch (error) { 
@@ -163,11 +189,13 @@ export default function Materiales() {
       let archivo_url = original?.archivo_url || "";
       let imagen_portada = original?.imagen_portada || "";
       let preview_url = original?.preview_url || "";
+      const tituloPdf = nuevoMaterial.nombre_descarga || nuevoMaterial.nombre;
 
       if (nuevoMaterial.archivo) {
         if (editandoId && original?.archivo_url) await eliminarArchivoStorage(original.archivo_url, "materiales-privados");
         const fileName = `${Date.now()}_full.pdf`;
-        const { error: upErr } = await supabase.storage.from("materiales-privados").upload(fileName, nuevoMaterial.archivo);
+        const archivoRenombrado = await renombrarTituloPdf(nuevoMaterial.archivo, tituloPdf);
+        const { error: upErr } = await supabase.storage.from("materiales-privados").upload(fileName, archivoRenombrado);
         if (upErr) throw new Error("Error subiendo PDF privado");
         archivo_url = fileName;
       }
@@ -183,7 +211,8 @@ export default function Materiales() {
       if (nuevoMaterial.preview) {
         if (editandoId && original?.preview_url) await eliminarArchivoStorage(original.preview_url, "materiales-didacticos");
         const fileName = `${Date.now()}_preview.pdf`;
-        const { error: upErr } = await supabase.storage.from("materiales-didacticos").upload(fileName, nuevoMaterial.preview);
+        const previewRenombrado = await renombrarTituloPdf(nuevoMaterial.preview, `${tituloPdf} - Muestra`);
+        const { error: upErr } = await supabase.storage.from("materiales-didacticos").upload(fileName, previewRenombrado);
         if (upErr) throw new Error("Error subiendo preview");
         preview_url = supabase.storage.from("materiales-didacticos").getPublicUrl(fileName).data.publicUrl;
       }
@@ -197,7 +226,8 @@ export default function Materiales() {
         porcentaje_descuento: parseInt(nuevoMaterial.porcentaje_descuento || 0),
         archivo_url, 
         imagen_portada, 
-        preview_url
+        preview_url,
+        nombre_descarga: nuevoMaterial.nombre_descarga || nuevoMaterial.nombre
       };
 
       const { error } = editandoId 
@@ -275,7 +305,7 @@ export default function Materiales() {
                     <div className="card-actions">
                       <button className="btn-action-outline" onClick={() => setViewingPdf(m.preview_url)}><FaEye /> Muestra</button>
                       {comprado ? (
-                        <button onClick={() => descargarArchivoSeguro(m.archivo_url)} className="btn-action-fill"><FaDownload /> Descargar</button>
+                        <button onClick={() => descargarArchivoSeguro(m.archivo_url, m.nombre_descarga || m.nombre)} className="btn-action-fill"><FaDownload /> Descargar</button>
                       ) : (
                         <button 
                           className="btn-action-fill" 
@@ -297,7 +327,8 @@ export default function Materiales() {
                                 archivo: null, portada: null, preview: null,
                                 archivo_actual: m.archivo_url,
                                 portada_actual: m.imagen_portada?.split('/').pop().split('?')[0],
-                                preview_actual: m.preview_url?.split('/').pop().split('?')[0]
+                                preview_actual: m.preview_url?.split('/').pop().split('?')[0],
+                                nombre_descarga: m.nombre_descarga || m.nombre
                             }); 
                             setShowModal(true); 
                         }}><FaEdit /></button>
@@ -339,17 +370,27 @@ export default function Materiales() {
                 </div>
             </div>
 
-            <div className="oferta-box-styled">
+            <div className="oferta-box-styled" style={{display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px'}}>
                 <label style={{display:'flex', gap:'10px', alignItems:'center', cursor:'pointer', fontWeight:'700', color:'var(--texto-cafe)'}}>
                     <input type="checkbox" checked={nuevoMaterial.en_oferta} onChange={e => setNuevoMaterial({...nuevoMaterial, en_oferta: e.target.checked})} />
                     Activar Oferta
                 </label>
                 {nuevoMaterial.en_oferta && (
-                    <div style={{marginTop:'12px', display:'flex', alignItems:'center', gap:'10px'}}>
+                    <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                         <input style={{width:'75px'}} type="number" value={nuevoMaterial.porcentaje_descuento} onChange={e => setNuevoMaterial({...nuevoMaterial, porcentaje_descuento: e.target.value})} />
                         <span style={{fontSize:'0.9rem'}}>% de descuento</span>
                     </div>
                 )}
+            </div>
+
+            <div className="file-item">
+                <label>Nombre del archivo al descargar:</label>
+                <input
+                  placeholder="Ej: Cuadernillo-Emociones-3-5-años"
+                  value={nuevoMaterial.nombre_descarga}
+                  onChange={e => setNuevoMaterial({...nuevoMaterial, nombre_descarga: e.target.value})}
+                />
+                <small style={{color:'#888'}}>Así se va a llamar el PDF cuando el usuario lo descargue (no hace falta poner .pdf).</small>
             </div>
 
             <div className="file-section-modal">
