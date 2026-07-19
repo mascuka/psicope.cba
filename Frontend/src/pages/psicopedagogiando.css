@@ -264,6 +264,15 @@
   display: block;
 }
 
+.media-clickable {
+  cursor: zoom-in;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.media-clickable:hover {
+  filter: brightness(0.92);
+}
+
 .video-full-wrapper { 
   width: 100%; 
   height: 100%; 

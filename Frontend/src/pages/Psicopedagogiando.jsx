@@ -213,6 +213,19 @@ export default function Psicopedagogiando() {
     });
   };
 
+  const abrirImagenGrande = (url, titulo) => {
+    if (!url) return;
+    Swal.fire({
+      imageUrl: url,
+      imageAlt: titulo || 'Imagen',
+      title: titulo ? `<span style="font-family: 'Pompiere', cursive; font-size: 1.8rem; color: #e5b3a8;">${titulo}</span>` : undefined,
+      showConfirmButton: false,
+      showCloseButton: true,
+      background: '#fff',
+      width: 'min(90vw, 800px)',
+    });
+  };
+
   const postsFiltrados = posts.filter(p => p.titulo?.toLowerCase().includes(searchTerm.toLowerCase()));
   const currentPosts = postsFiltrados.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
   const totalPages = Math.ceil(postsFiltrados.length / postsPerPage);
@@ -291,7 +304,14 @@ export default function Psicopedagogiando() {
           return (
             <article key={post.id} className={`psico-item ${index % 2 !== 0 ? 'rev' : ''}`}>
               <div className="psico-visual">
-                {post.tipo === 'imagen' && <img src={post.url_media} alt="" className="media-full" />}
+                {post.tipo === 'imagen' && (
+                  <img
+                    src={post.url_media}
+                    alt=""
+                    className="media-full media-clickable"
+                    onClick={() => abrirImagenGrande(post.url_media, post.titulo)}
+                  />
+                )}
                 {post.tipo === 'video' && videoId && (
                   <div className="video-full-wrapper">
                     <iframe 
@@ -307,7 +327,14 @@ export default function Psicopedagogiando() {
                     <p>ID de video no válido</p>
                   </div>
                 )}
-                {post.tipo === 'noticia' && <img src={post.url_media || 'https://via.placeholder.com/500x300?text=Noticia'} alt="" className="media-full" />}
+                {post.tipo === 'noticia' && (
+                  <img
+                    src={post.url_media || 'https://via.placeholder.com/500x300?text=Noticia'}
+                    alt=""
+                    className="media-full media-clickable"
+                    onClick={() => abrirImagenGrande(post.url_media, post.titulo)}
+                  />
+                )}
               </div>
               
               <div className="psico-content">
