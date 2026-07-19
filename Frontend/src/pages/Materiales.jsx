@@ -333,14 +333,46 @@ export default function Materiales() {
   const handleDelete = async (m) => {
     const res = await Swal.fire({ title: "¿Eliminar material?", text: "Esta acción no se puede deshacer.", icon: "warning", showCancelButton: true, confirmButtonColor: '#e5b3a8' });
     if (!res.isConfirmed) return;
+
+    Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
     try {
-      await eliminarArchivoStorage(m.archivo_url, "materiales-privados");
-      await eliminarArchivoStorage(m.imagen_portada, "materiales-didacticos");
-      await eliminarArchivoStorage(m.preview_url, "materiales-didacticos");
-      await supabase.from("materiales").delete().eq("id", m.id);
+      // Borra los 3 archivos del storage y anota si alguno falla (no corta el proceso).
+      const erroresStorage = [];
+      for (const [path, bucket] of [
+        [m.archivo_url, "materiales-privados"],
+        [m.imagen_portada, "materiales-didacticos"],
+        [m.preview_url, "materiales-didacticos"]
+      ]) {
+        if (!path) continue;
+        const fileName = path.includes('/') ? path.split('/').pop().split('?')[0] : path;
+        const { error } = await supabase.storage.from(bucket).remove([fileName]);
+        if (error) erroresStorage.push(`${bucket}: ${error.message}`);
+      }
+
+      const { error: errorDelete } = await supabase.from("materiales").delete().eq("id", m.id);
+      if (errorDelete) throw errorDelete;
+
       setMateriales(prev => prev.filter(item => item.id !== m.id));
-      Swal.fire("Eliminado", "El material ha sido quitado.", "success");
-    } catch (e) { Swal.fire("Error", "No se pudo eliminar.", "error"); }
+
+      if (erroresStorage.length > 0) {
+        Swal.fire("Eliminado con avisos", `El material se borró de la base de datos, pero algunos archivos no se pudieron borrar del storage:\n${erroresStorage.join('\n')}`, "warning");
+      } else {
+        Swal.fire("Eliminado", "El material y todos sus archivos fueron eliminados correctamente.", "success");
+      }
+    } catch (e) {
+      console.error("Error eliminando material:", e);
+      const esConflicto = e.code === '23503' || /foreign key|violat/i.test(e.message || '');
+      Swal.fire(
+        "No se pudo eliminar",
+        esConflicto
+          ? "Este material tiene compras registradas asociadas y la base de datos está bloqueando el borrado por seguridad. Corré el ajuste de base de datos (restricción de la tabla 'compras') y volvé a intentar."
+          : (e.message || "Ocurrió un error al eliminar."),
+        "error"
+      );
+      // Refrescamos por si el estado local quedó desincronizado con la base
+      fetchMateriales();
+    }
   };
 
   if (loading) return <div className="materiales-page"><div className="loading-container"><p>Cargando materiales...</p></div></div>;

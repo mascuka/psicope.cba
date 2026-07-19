@@ -140,6 +140,28 @@ export default function MisCompras() {
     }
   };
 
+  const eliminarCompra = async (compraId) => {
+    const res = await Swal.fire({
+      title: '¿Quitar esta compra de prueba?',
+      text: "Vas a poder volver a comprarlo (o acreditártelo) para seguir probando.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e5b3a8',
+      confirmButtonText: 'Sí, quitar'
+    });
+    if (!res.isConfirmed) return;
+
+    try {
+      const { error } = await supabase.from("compras").delete().eq("id", compraId);
+      if (error) throw error;
+      setCompras(prev => prev.filter(c => c.id !== compraId));
+      Swal.fire({ icon: 'success', title: 'Listo', timer: 1500, showConfirmButton: false });
+    } catch (error) {
+      console.error("Error quitando compra:", error);
+      Swal.fire("Error", "No se pudo quitar la compra.", "error");
+    }
+  };
+
   const DynamicIcon = Icons[iconName] || FaShoppingBag;
 
   if (loading) return <div className="perfil-wrapper"><div className="loader-perfil">Cargando...</div></div>;
@@ -220,12 +242,34 @@ export default function MisCompras() {
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => descargarArchivo(compra.materiales?.archivo_url, compra.nombre_material)}
-                  className="btn-descarga"
-                >
-                  <FaDownload />
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button 
+                    onClick={() => descargarArchivo(compra.materiales?.archivo_url, compra.nombre_material)}
+                    className="btn-descarga"
+                  >
+                    <FaDownload />
+                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => eliminarCompra(compra.id)}
+                      title="Quitar compra de prueba"
+                      style={{
+                        background: 'transparent',
+                        border: '1.5px solid #e57373',
+                        color: '#e57373',
+                        borderRadius: '8px',
+                        width: '38px',
+                        height: '38px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Icons.FaTrash size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
