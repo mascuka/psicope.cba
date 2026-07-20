@@ -32,7 +32,7 @@ export default function Materiales() {
 
   const [nuevoMaterial, setNuevoMaterial] = useState({
     nombre: "", descripcion: "", edad: "Todas las edades", precio: "", 
-    en_oferta: false, porcentaje_descuento: 0, archivo: null, portada: null, preview: null,
+    en_oferta: false, porcentaje_descuento: 0, es_gratis: false, archivo: null, portada: null, preview: null,
     archivo_actual: "", portada_actual: "", preview_actual: "", nombre_descarga: ""
   });
 
@@ -144,8 +144,8 @@ export default function Materiales() {
 
   // --- FUNCIÓN DE COMPRA: ahora llama a la Edge Function segura de Supabase ---
   // Acredita el material directo en la base, sin pasar por Mercado Pago.
-  // La usan tanto el click normal de admin como el "simular compra" (click derecho).
-  const registrarCompraSimulada = async (materialId) => {
+  // La usan: el click normal de admin, el "simular compra" (click derecho), y la adquisición de materiales gratis.
+  const registrarCompraSimulada = async (materialId, prefijoPago = "ADMIN") => {
     const material = materiales.find(m => m.id === materialId);
     const { data: perfil } = await supabase.from("usuarios").select("nombre, email").eq("id", user.id).single();
 
@@ -157,12 +157,12 @@ export default function Materiales() {
       {
         usuario_id: user.id,
         material_id: materialId,
-        nombre_usuario: perfil?.nombre || "Admin",
+        nombre_usuario: perfil?.nombre || (prefijoPago === "GRATIS" ? "Usuario" : "Admin"),
         email_usuario: perfil?.email || user.email,
         nombre_material: material.nombre,
         precio_pagado: precioFinal,
         status: "approved",
-        payment_id: "ADMIN_" + Date.now()
+        payment_id: `${prefijoPago}_${Date.now()}`
       }
     ]);
 
@@ -178,11 +178,26 @@ export default function Materiales() {
     if (isAdmin) {
       setCargandoPago(material.id);
       try {
-        await registrarCompraSimulada(material.id);
+        await registrarCompraSimulada(material.id, "ADMIN");
         Swal.fire("¡Listo!", "Material acreditado automáticamente (modo admin, sin pasar por Mercado Pago).", "success");
       } catch (error) {
         console.error("Error acreditando compra de admin:", error);
         Swal.fire("Error", "No se pudo acreditar el material.", "error");
+      } finally {
+        setCargandoPago(null);
+      }
+      return;
+    }
+
+    // Si el material es gratuito, se acredita directo, sin pasar por Mercado Pago.
+    if (Number(material.precio) === 0) {
+      setCargandoPago(material.id);
+      try {
+        await registrarCompraSimulada(material.id, "GRATIS");
+        Swal.fire("¡Listo!", "El material gratuito ya está en tu cuenta. Ya lo podés descargar.", "success");
+      } catch (error) {
+        console.error("Error adquiriendo material gratis:", error);
+        Swal.fire("Error", "No se pudo adquirir el material.", "error");
       } finally {
         setCargandoPago(null);
       }
@@ -303,8 +318,8 @@ export default function Materiales() {
         nombre: nuevoMaterial.nombre, 
         descripcion: nuevoMaterial.descripcion, 
         edad: nuevoMaterial.edad,
-        precio: parseFloat(nuevoMaterial.precio) || 0, 
-        en_oferta: nuevoMaterial.en_oferta,
+        precio: nuevoMaterial.es_gratis ? 0 : (parseFloat(nuevoMaterial.precio) || 0), 
+        en_oferta: nuevoMaterial.es_gratis ? false : nuevoMaterial.en_oferta,
         porcentaje_descuento: parseInt(nuevoMaterial.porcentaje_descuento || 0),
         archivo_url, 
         imagen_portada, 
@@ -326,7 +341,7 @@ export default function Materiales() {
   };
 
   const resetForm = () => {
-    setNuevoMaterial({ nombre: "", descripcion: "", edad: "Todas las edades", precio: "", en_oferta: false, porcentaje_descuento: 0, archivo: null, portada: null, preview: null, archivo_actual: "", portada_actual: "", preview_actual: "" });
+    setNuevoMaterial({ nombre: "", descripcion: "", edad: "Todas las edades", precio: "", en_oferta: false, porcentaje_descuento: 0, es_gratis: false, archivo: null, portada: null, preview: null, archivo_actual: "", portada_actual: "", preview_actual: "" });
     setEditandoId(null); setShowModal(false);
   };
 
@@ -399,6 +414,7 @@ export default function Materiales() {
             .filter(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()) && (filtroEdad === "" || m.edad === filtroEdad))
             .map(m => {
               const comprado = misCompras.includes(m.id);
+              const esGratis = Number(m.precio) === 0;
               const precioDesc = m.en_oferta ? (m.precio * (1 - m.porcentaje_descuento / 100)).toFixed(0) : m.precio;
 
               return (
@@ -406,13 +422,16 @@ export default function Materiales() {
                   <div className="card-image-container-premium">
                     <img src={m.imagen_portada || "https://via.placeholder.com/300x400?text=Sin+Portada"} alt={m.nombre} />
                     <div className="card-age-badge-overlay">{m.edad}</div>
-                    {m.en_oferta && <div className="oferta-ribbon-extra">-{m.porcentaje_descuento}%</div>}
+                    {m.en_oferta && !esGratis && <div className="oferta-ribbon-extra">-{m.porcentaje_descuento}%</div>}
+                    {esGratis && <div className="oferta-ribbon-extra ribbon-gratis">Gratis</div>}
                   </div>
                   <div className="card-body">
                     <h4 className="card-title-premium">{m.nombre}</h4>
                     <p className="card-description">{m.descripcion}</p>
                     <div className="price-tag-centered-premium">
-                        {m.en_oferta ? (
+                        {esGratis ? (
+                          <span className="price-current-p">¡Gratis!</span>
+                        ) : m.en_oferta ? (
                           <><span className="price-old-p">${m.precio}</span><span className="price-current-p">${precioDesc}</span></>
                         ) : <span className="price-current-p">${m.precio}</span>}
                     </div>
@@ -427,7 +446,7 @@ export default function Materiales() {
                           onContextMenu={(e) => isAdmin && handleSimularCompra(e, m.id)}
                           disabled={cargandoPago === m.id}
                         >
-                          {cargandoPago === m.id ? "Procesando..." : <><FaShoppingCart /> Comprar</>}
+                          {cargandoPago === m.id ? "Procesando..." : esGratis ? <><FaDownload /> Adquirir</> : <><FaShoppingCart /> Comprar</>}
                         </button>
                       )}
                     </div>
@@ -442,7 +461,8 @@ export default function Materiales() {
                                 archivo_actual: m.archivo_url,
                                 portada_actual: m.imagen_portada?.split('/').pop().split('?')[0],
                                 preview_actual: m.preview_url?.split('/').pop().split('?')[0],
-                                nombre_descarga: m.nombre_descarga || m.nombre
+                                nombre_descarga: m.nombre_descarga || m.nombre,
+                                es_gratis: Number(m.precio) === 0
                             }); 
                             setShowModal(true); 
                         }}><FaEdit /></button>
@@ -480,22 +500,40 @@ export default function Materiales() {
                     </select>
                 </div>
                 <div className="file-item"><label>Precio ($):</label>
-                    <input type="number" value={nuevoMaterial.precio} onChange={e => setNuevoMaterial({...nuevoMaterial, precio: e.target.value})} />
+                    <input type="number" value={nuevoMaterial.precio} disabled={nuevoMaterial.es_gratis} placeholder={nuevoMaterial.es_gratis ? "Gratis" : ""} onChange={e => setNuevoMaterial({...nuevoMaterial, precio: e.target.value})} />
                 </div>
             </div>
 
-            <div className="oferta-box-styled" style={{display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px'}}>
+            <div className="oferta-box-styled" style={{display:'flex', alignItems:'center', gap:'10px'}}>
                 <label style={{display:'flex', gap:'10px', alignItems:'center', cursor:'pointer', fontWeight:'700', color:'var(--texto-cafe)'}}>
-                    <input type="checkbox" checked={nuevoMaterial.en_oferta} onChange={e => setNuevoMaterial({...nuevoMaterial, en_oferta: e.target.checked})} />
-                    Activar Oferta
+                    <input 
+                        type="checkbox" 
+                        checked={nuevoMaterial.es_gratis} 
+                        onChange={e => setNuevoMaterial({
+                            ...nuevoMaterial, 
+                            es_gratis: e.target.checked,
+                            precio: e.target.checked ? "0" : "",
+                            en_oferta: e.target.checked ? false : nuevoMaterial.en_oferta
+                        })} 
+                    />
+                    Este material es gratuito
                 </label>
-                {nuevoMaterial.en_oferta && (
-                    <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                        <input style={{width:'75px'}} type="number" value={nuevoMaterial.porcentaje_descuento} onChange={e => setNuevoMaterial({...nuevoMaterial, porcentaje_descuento: e.target.value})} />
-                        <span style={{fontSize:'0.9rem'}}>% de descuento</span>
-                    </div>
-                )}
             </div>
+
+            {!nuevoMaterial.es_gratis && (
+                <div className="oferta-box-styled" style={{display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px'}}>
+                    <label style={{display:'flex', gap:'10px', alignItems:'center', cursor:'pointer', fontWeight:'700', color:'var(--texto-cafe)'}}>
+                        <input type="checkbox" checked={nuevoMaterial.en_oferta} onChange={e => setNuevoMaterial({...nuevoMaterial, en_oferta: e.target.checked})} />
+                        Activar Oferta
+                    </label>
+                    {nuevoMaterial.en_oferta && (
+                        <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                            <input style={{width:'75px'}} type="number" value={nuevoMaterial.porcentaje_descuento} onChange={e => setNuevoMaterial({...nuevoMaterial, porcentaje_descuento: e.target.value})} />
+                            <span style={{fontSize:'0.9rem'}}>% de descuento</span>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="file-item">
                 <label>Nombre del archivo al descargar:</label>

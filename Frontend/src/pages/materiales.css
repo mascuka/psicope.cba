@@ -131,13 +131,14 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid var(--rosa);
   color: var(--texto-cafe);
   padding: 5px 12px;
   border-radius: 50px;
   font-size: 0.75rem;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   z-index: 5;
 }
 
@@ -153,6 +154,11 @@
   border-radius: 0 50px 50px 0;
   box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
   z-index: 10;
+}
+
+.oferta-ribbon-extra.ribbon-gratis {
+  background: linear-gradient(135deg, #ff8fb3, #ff5c93);
+  color: #ffffff;
 }
 
 .card-body {
