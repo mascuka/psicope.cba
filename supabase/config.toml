@@ -473,3 +473,8 @@ import_map = "./functions/verificar-compra/deno.json"
 enabled = true
 verify_jwt = false
 import_map = "./functions/adquirir-material-gratis/deno.json"
+
+[functions.solicitar-reset-password]
+enabled = true
+verify_jwt = false
+import_map = "./functions/solicitar-reset-password/deno.json"

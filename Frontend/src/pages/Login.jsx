@@ -21,6 +21,49 @@ export default function Login() {
     });
   };
 
+  const handleOlvidoPassword = async () => {
+    const { value: email } = await Swal.fire({
+      title: "Recuperar contraseña",
+      input: "email",
+      inputLabel: "Ingresá el correo con el que te registraste",
+      inputPlaceholder: "tu@email.com",
+      showCancelButton: true,
+      confirmButtonText: "Enviar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#D48CA6",
+      inputValidator: (value) => {
+        if (!value) return "Ingresá tu correo";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "El correo no es válido";
+      },
+    });
+    if (!email) return;
+
+    // Vía función propia (no supabase.auth.resetPasswordForEmail): esa
+    // manda el mail con el remitente por defecto de Supabase
+    // ("...@mail.app.supabase.io"), que no se ve profesional -- esta
+    // arma el mismo link de recuperación pero lo manda con el Gmail real
+    // de Brenda, mismo remitente que el resto de los mails del sitio.
+    try {
+      const { error } = await supabase.functions.invoke("solicitar-reset-password", {
+        body: { email },
+      });
+      if (error) console.error("Error pidiendo reset de contraseña:", error);
+    } catch (err) {
+      console.error("Error pidiendo reset de contraseña:", err);
+    }
+
+    // Mensaje siempre igual, haya o no una cuenta con ese correo -- si
+    // dijéramos explícito "ese correo no existe", cualquiera podría usar
+    // este formulario para ir probando qué correos están registrados en
+    // el sitio (enumeración de cuentas).
+    Swal.fire({
+      icon: "success",
+      title: "Listo",
+      text: "Si ese correo está registrado, te llegó un mail con un link para elegir una contraseña nueva.",
+      confirmButtonColor: "#D48CA6",
+    });
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -104,6 +147,14 @@ export default function Login() {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
+
+          <button
+            type="button"
+            className="link-olvido-password"
+            onClick={handleOlvidoPassword}
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
 
           <button
             type="submit"

@@ -77,6 +77,54 @@ const obtenerFondoCacheado = async (clave, dibujar) => {
   return entrada;
 };
 
+// Misma fórmula de clave que usa componerImagenPost para guardar el fondo
+// ya dibujado -- se comparte acá para que la vista previa en vivo del
+// arrastre (ver dibujarPreviewEnVivo) pueda encontrar el MISMO fondo ya
+// cacheado sin tener que recalcularlo.
+const calcularClaveFondo = (post) => {
+  if (post._tipoFondo === "foto_real") {
+    return `foto:${post._fotoFondoReal?.url}:${post._seed}`;
+  }
+  const p = post._paleta || {};
+  return `ilustrado:${post._fondoIdx}:${post._seed}:${p.fondo1}:${p.fondo2}:${p.acento}:${p.texto}`;
+};
+
+// Vista previa EN VIVO mientras se arrastra/gira un texto -- a diferencia
+// de procesarPost (async, recarga fuentes, puede tardar), esto es 100%
+// sincrónico: pega el fondo ya cacheado y dibuja los dos textos con la
+// posición/giro del momento, sin esperar nada. Se llama en cada pixel de
+// movimiento del mouse -- tiene que ser instantáneo para que el arrastre
+// se sienta fluido (tipo Instagram), no de a saltos. Devuelve false si
+// todavía no hay nada cacheado para este fondo (pasa solo en el primerísimo
+// frame de la sesión, antes de que exista una imagen ya compuesta) -- ahí
+// quien llama se queda con lo que ya había en el <img> hasta el próximo
+// recompute real.
+const dibujarPreviewEnVivo = (canvasEl, post, { offsetP, offsetS, rotP, rotS }) => {
+  const clave = calcularClaveFondo(post);
+  const cacheado = fondoCache.get(clave);
+  if (!cacheado) return false;
+
+  const ctx = canvasEl.getContext("2d");
+  ctx.setTransform(ESCALA_EXPORT, 0, 0, ESCALA_EXPORT, 0, 0);
+  ctx.drawImage(cacheado.canvas, 0, 0, ANCHO, ALTO);
+
+  const principal = post.texto_imagen_principal || "";
+  const secundario = post.texto_imagen_secundario || "";
+  const fuentes = post._fuentes;
+  const colorPrincipal = post._colorPrincipal;
+  const colorSecundario = post._colorSecundario;
+
+  if (post._tipoFondo === "foto_real") {
+    const acento = "#F0AFC8";
+    const variante = ESTILOS_TEXTO_FOTO[post._estiloFotoIdx % ESTILOS_TEXTO_FOTO.length];
+    dibujarConSemilla(post._seed, () => variante(ctx, principal, secundario, fuentes, acento, colorPrincipal, colorSecundario, offsetP, offsetS, rotP, rotS));
+  } else {
+    const estilo = ESTILOS_TEXTO[post._estiloIdx % ESTILOS_TEXTO.length];
+    estilo(ctx, post._paleta, principal, secundario, fuentes, colorPrincipal, colorSecundario, offsetP, offsetS, rotP, rotS);
+  }
+  return true;
+};
+
 // Todas las funciones de fondo (blobs, garabatos, stickers, confeti...) y
 // alguna decoración de texto (el óvalo/onda que resalta la secundaria en
 // foto real) usan Math.random() para variar cada vez que se dibujan -- eso
@@ -1490,7 +1538,7 @@ const componerImagenPost = async (imagenUrl, principal, secundario, fondoIdx = 0
       // del cache (ver arriba) -- no hace falta recargar/redibujar la
       // foto en cada recomposición, solo cuando cambia la foto o la
       // semilla (que fija dónde cae el sparkle).
-      const claveFondo = `foto:${fotoFondoReal.url}:${semilla}`;
+      const claveFondo = calcularClaveFondo({ _tipoFondo: "foto_real", _fotoFondoReal: fotoFondoReal, _seed: semilla });
       const { canvas: fondoCacheado } = await obtenerFondoCacheado(claveFondo, async (ctxFondo) => {
         const img = await cargarImagen(fotoFondoReal.url);
         dibujarConSemilla(semilla, () => dibujarFondoFotoReal(ctxFondo, img));
@@ -1508,7 +1556,7 @@ const componerImagenPost = async (imagenUrl, principal, secundario, fondoIdx = 0
       // otro). El fondo (con sus blobs/garabatos/stickers, lo más pesado
       // de dibujar) sale del cache -- solo se redibuja de verdad la
       // primera vez que se ve esta combinación de fondo+semilla.
-      const claveFondo = `ilustrado:${fondoIdx}:${semilla}:${paleta.fondo1}:${paleta.fondo2}:${paleta.acento}:${paleta.texto}`;
+      const claveFondo = calcularClaveFondo({ _tipoFondo: "ilustrado", _fondoIdx: fondoIdx, _seed: semilla, _paleta: paleta });
       const { canvas: fondoCacheado, extra: pillInfo } = await obtenerFondoCacheado(claveFondo, (ctxFondo) => {
         const fondo = FONDOS[fondoIdx % FONDOS.length];
         return dibujarConSemilla(semilla, () => fondo(ctxFondo, paleta));
@@ -1716,6 +1764,11 @@ export default function AsistenteIA({ onPublicar }) {
   // Con qué tema generar la próxima tanda -- si se deja vacío, el asistente
   // elige solo (modo automático).
   const [temaManual, setTemaManual] = useState("");
+
+  // Canvas que se muestra EN VEZ de la <img> mientras se arrastra/gira un
+  // texto -- ver dibujarPreviewEnVivo. Solo puede haber una tarjeta a la
+  // vez (MAX_SLOTS=1), así que una sola referencia alcanza.
+  const canvasArrastreRef = useRef(null);
 
   // Referencia siempre actualizada de "slots" para leer dentro de funciones
   // async sin quedarse con una copia vieja (closures de React) -- crítico
@@ -2007,16 +2060,13 @@ export default function AsistenteIA({ onPublicar }) {
   // que devolvió la función de estilo (_centroPrincipal/_centroSecundario)
   // -- así que acá `bloque` ya viene sabido de antemano.
   //
-  // Mientras se arrastra, el cuadradito se mueve YA (mutando su estilo
-  // directo, sin pasar por React) para que se sienta instantáneo -- la
-  // imagen entera recompone en paralelo, coalescida (si un recompuesto
-  // todavía está en curso cuando llega un movimiento nuevo, no dispara uno
-  // en paralelo, guarda el último pedido pendiente y lo dispara apenas
-  // termina el anterior), que sí puede tardar un rato porque es un canvas
-  // grande con texto y decoración -- antes el cuadradito esperaba lo mismo
-  // que la imagen y se sentía lento. Solo guarda en la base UNA vez, al
-  // soltar. No aplica a una foto subida a mano (esa usa otra composición,
-  // sin este concepto de "bloque de texto" independiente).
+  // Mientras se arrastra NO se toca la <img> ni React para nada -- se
+  // pinta directo sobre un <canvas> propio (dibujarPreviewEnVivo, 100%
+  // sincrónico, sin awaits) que reemplaza a la imagen mientras dura el
+  // gesto, tipo Instagram: se ve al toque, sin el salto/demora que tenía
+  // antes al ir recomponiendo la imagen completa (canvas 2x + PNG) en
+  // cada pixel de movimiento. Recién al soltar se hace la composición
+  // real (la que sí queda guardada) y se vuelve a mostrar la <img>.
   const manejarArrastreTexto = (e, post, bloque) => {
     if (post.imagen_url || generandoId !== null) return;
     e.preventDefault();
@@ -2037,53 +2087,65 @@ export default function AsistenteIA({ onPublicar }) {
     const yInicial = e.clientY;
     const offsetInicial = post[campoOffset] || 0;
     let offsetActual = offsetInicial;
-    let componiendo = false;
-    let pendiente = false;
     let seMovio = false;
 
     setArrastrandoTextoId(post.id);
 
-    const recomponer = async () => {
-      if (componiendo) { pendiente = true; return; }
-      componiendo = true;
-      const procesado = await procesarPost({ ...post, [campoOffset]: offsetActual }, {
-        forzar: true,
-        tipoFondo: post._tipoFondo || "ilustrado",
-        fondoIdx: post._fondoIdx,
-        estiloIdx: post._estiloIdx,
-        estiloFotoIdx: post._estiloFotoIdx,
-        paleta: post._paleta,
-        fuentes: post._fuentes,
-        colorPrincipal: post._colorPrincipal,
-        colorSecundario: post._colorSecundario,
-        offsetP: esPrincipal ? offsetActual : (post._offsetP || 0),
-        offsetS: esPrincipal ? (post._offsetS || 0) : offsetActual,
-        semilla: post._seed,
-      });
-      setSlots((prev) => prev.map((s) => (s.id === post.id ? procesado : s)));
-      componiendo = false;
-      if (pendiente) { pendiente = false; recomponer(); }
-    };
+    const valoresActuales = () => ({
+      offsetP: esPrincipal ? offsetActual : (post._offsetP || 0),
+      offsetS: esPrincipal ? (post._offsetS || 0) : offsetActual,
+      rotP: post._rotP || 0,
+      rotS: post._rotS || 0,
+    });
+
+    // Primer dibujado YA (sincrónico, sin esperar ni al próximo frame) --
+    // el canvas ya está montado en el DOM aunque todavía esté oculto, así
+    // que para cuando React lo muestre ya tiene el contenido correcto
+    // dibujado adentro. Antes esto esperaba a requestAnimationFrame, que
+    // sumaba un salto perceptible justo al agarrar.
+    if (canvasArrastreRef.current) dibujarPreviewEnVivo(canvasArrastreRef.current, post, valoresActuales());
+
+    // Tope: no se dejaba bajar/subir más de 500px lógicos desde donde
+    // arrancó el texto, así que si arrancaba cerca del centro no llegaba
+    // ni cerca de los bordes. Ahora el tope es la posición final dentro
+    // del canvas (un margen chico para que no se vaya del todo afuera),
+    // no la distancia recorrida -- se puede llevar de punta a punta.
+    const MARGEN_BORDE = 60;
+    const offsetMin = MARGEN_BORDE - anclaBase;
+    const offsetMax = ALTO - MARGEN_BORDE - anclaBase;
 
     const alMover = (ev) => {
       seMovio = true;
       const deltaPantalla = ev.clientY - yInicial;
-      // Tope para que no se pueda arrastrar tanto que el texto termine
-      // afuera del todo del canvas (1920 de alto lógico).
-      offsetActual = Math.max(-500, Math.min(500, offsetInicial + deltaPantalla * escala));
+      offsetActual = Math.max(offsetMin, Math.min(offsetMax, offsetInicial + deltaPantalla * escala));
       if (handleEl) handleEl.style.top = `${((anclaBase + offsetActual - ZONA_TEXTO_ALTO / 2) / ALTO) * 100}%`;
-      recomponer();
+      if (canvasArrastreRef.current) dibujarPreviewEnVivo(canvasArrastreRef.current, post, valoresActuales());
     };
 
     const alSoltar = async () => {
       document.removeEventListener("pointermove", alMover);
       document.removeEventListener("pointerup", alSoltar);
-      setArrastrandoTextoId(null);
-      if (!seMovio) return;
+      if (!seMovio) { setArrastrandoTextoId(null); return; }
       try {
+        const procesado = await procesarPost({ ...post, [campoOffset]: offsetActual }, {
+          forzar: true,
+          tipoFondo: post._tipoFondo || "ilustrado",
+          fondoIdx: post._fondoIdx,
+          estiloIdx: post._estiloIdx,
+          estiloFotoIdx: post._estiloFotoIdx,
+          paleta: post._paleta,
+          fuentes: post._fuentes,
+          colorPrincipal: post._colorPrincipal,
+          colorSecundario: post._colorSecundario,
+          semilla: post._seed,
+          ...valoresActuales(),
+        });
+        setSlots((prev) => prev.map((s) => (s.id === post.id ? procesado : s)));
         await supabase.from("asistente_ig_posts").update({ [campoOffsetDb]: Math.round(offsetActual) }).eq("id", post.id);
       } catch (err) {
         console.error("No se pudo guardar la posición del texto:", err);
+      } finally {
+        setArrastrandoTextoId(null);
       }
     };
 
@@ -2095,8 +2157,8 @@ export default function AsistenteIA({ onPublicar }) {
   // recuadro de cada texto (ver JSX, ia-handle-rotar). Arrastrar hacia la
   // derecha inclina en sentido horario, hacia la izquierda en sentido
   // antihorario -- tope de ±45° para que nunca quede ilegible. Mismo
-  // patrón que mover: recompone coalescido, solo guarda en la base al
-  // soltar.
+  // esquema que mover (ver manejarArrastreTexto): vista previa en vivo por
+  // canvas propio, sin tocar React hasta soltar.
   const manejarRotarTexto = (e, post, bloque) => {
     if (post.imagen_url || generandoId !== null) return;
     e.preventDefault();
@@ -2109,33 +2171,18 @@ export default function AsistenteIA({ onPublicar }) {
     const xInicial = e.clientX;
     const rotInicial = post[campoRot] || 0;
     let rotActual = rotInicial;
-    let componiendo = false;
-    let pendiente = false;
     let seMovio = false;
 
     setArrastrandoTextoId(post.id);
 
-    const recomponer = async () => {
-      if (componiendo) { pendiente = true; return; }
-      componiendo = true;
-      const procesado = await procesarPost({ ...post, [campoRot]: rotActual }, {
-        forzar: true,
-        tipoFondo: post._tipoFondo || "ilustrado",
-        fondoIdx: post._fondoIdx,
-        estiloIdx: post._estiloIdx,
-        estiloFotoIdx: post._estiloFotoIdx,
-        paleta: post._paleta,
-        fuentes: post._fuentes,
-        colorPrincipal: post._colorPrincipal,
-        colorSecundario: post._colorSecundario,
-        semilla: post._seed,
-        rotP: esPrincipal ? rotActual : (post._rotP || 0),
-        rotS: esPrincipal ? (post._rotS || 0) : rotActual,
-      });
-      setSlots((prev) => prev.map((s) => (s.id === post.id ? procesado : s)));
-      componiendo = false;
-      if (pendiente) { pendiente = false; recomponer(); }
-    };
+    const valoresActuales = () => ({
+      offsetP: post._offsetP || 0,
+      offsetS: post._offsetS || 0,
+      rotP: esPrincipal ? rotActual : (post._rotP || 0),
+      rotS: esPrincipal ? (post._rotS || 0) : rotActual,
+    });
+
+    if (canvasArrastreRef.current) dibujarPreviewEnVivo(canvasArrastreRef.current, post, valoresActuales());
 
     const alMover = (ev) => {
       seMovio = true;
@@ -2143,18 +2190,33 @@ export default function AsistenteIA({ onPublicar }) {
       // ~0.15° por pixel arrastrado -- un recorrido de 300px hace el giro
       // completo de un extremo al otro.
       rotActual = Math.max(-45, Math.min(45, rotInicial + deltaPantalla * 0.15));
-      recomponer();
+      if (canvasArrastreRef.current) dibujarPreviewEnVivo(canvasArrastreRef.current, post, valoresActuales());
     };
 
     const alSoltar = async () => {
       document.removeEventListener("pointermove", alMover);
       document.removeEventListener("pointerup", alSoltar);
-      setArrastrandoTextoId(null);
-      if (!seMovio) return;
+      if (!seMovio) { setArrastrandoTextoId(null); return; }
       try {
+        const procesado = await procesarPost({ ...post, [campoRot]: rotActual }, {
+          forzar: true,
+          tipoFondo: post._tipoFondo || "ilustrado",
+          fondoIdx: post._fondoIdx,
+          estiloIdx: post._estiloIdx,
+          estiloFotoIdx: post._estiloFotoIdx,
+          paleta: post._paleta,
+          fuentes: post._fuentes,
+          colorPrincipal: post._colorPrincipal,
+          colorSecundario: post._colorSecundario,
+          semilla: post._seed,
+          ...valoresActuales(),
+        });
+        setSlots((prev) => prev.map((s) => (s.id === post.id ? procesado : s)));
         await supabase.from("asistente_ig_posts").update({ [campoRotDb]: Math.round(rotActual) }).eq("id", post.id);
       } catch (err) {
         console.error("No se pudo guardar el giro del texto:", err);
+      } finally {
+        setArrastrandoTextoId(null);
       }
     };
 
@@ -2286,7 +2348,23 @@ export default function AsistenteIA({ onPublicar }) {
                     <div key={post.id} className="ia-slot ia-slot-lleno">
                       {post.imagen_compuesta ? (
                         <div className={`ia-imagen-wrap${arrastrandoTextoId === post.id ? " ia-imagen-arrastrando" : ""}`}>
-                          <img src={post.imagen_compuesta} alt="" draggable={false} />
+                          <img
+                            src={post.imagen_compuesta}
+                            alt=""
+                            draggable={false}
+                            style={{ visibility: arrastrandoTextoId === post.id ? "hidden" : "visible" }}
+                          />
+                          {/* Mientras se arrastra/gira un texto, este canvas reemplaza a
+                              la <img> de arriba -- ver dibujarPreviewEnVivo y
+                              manejarArrastreTexto/manejarRotarTexto. Queda siempre en el
+                              DOM (oculto) para no perder la referencia entre gestos. */}
+                          <canvas
+                            ref={canvasArrastreRef}
+                            className="ia-canvas-arrastre"
+                            width={ANCHO * ESCALA_EXPORT}
+                            height={ALTO * ESCALA_EXPORT}
+                            style={{ display: arrastrandoTextoId === post.id ? "block" : "none" }}
+                          />
                           {post.imagen_url && (
                             <span className="ia-credito">Foto subida por vos</span>
                           )}

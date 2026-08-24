@@ -95,6 +95,23 @@
   background: white;
 }
 
+.link-olvido-password {
+  background: none;
+  border: none;
+  color: #999;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.82rem;
+  text-align: right;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-top: -6px;
+}
+
+.link-olvido-password:hover {
+  color: var(--color-texto-oscuro);
+}
+
 .toggle-password {
   position: absolute;
   right: 16px;

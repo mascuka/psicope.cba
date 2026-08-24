@@ -29,6 +29,13 @@ Deno.serve(async (req) => {
     // completa (mismo criterio que descargarArchivoSeguro en el frontend).
     const fileName = archivo_url.includes("/") ? archivo_url.split("/").pop().split("?")[0] : archivo_url;
     const extension = fileName.includes(".") ? fileName.split(".").pop() : "pdf";
+    // Se había sacado la ñ/tildes acá pensando que el visor de PDF de
+    // Gmail no las manejaba bien, pero "años" -> "anos" queda mal (cambia
+    // el significado). En realidad esa corrupción del nombre venía de
+    // OTRO bug ya arreglado (el asunto del mail con caracteres raros de
+    // Intl.DateTimeFormat rompía el correo entero, MIME incluido) -- con
+    // ese arreglado, la ñ/tildes no hace falta sacarlas: mismo criterio
+    // que el botón "Descargar" de la web, que siempre las dejó bien.
     const nombreLimpio = (nombre_descarga || nombre_material || "material")
       .trim()
       .replace(/[\\/:*?"<>|]/g, "")
@@ -74,11 +81,26 @@ Deno.serve(async (req) => {
       },
     });
 
+    // La hora al final del asunto rompe el agrupado en un solo hilo que
+    // hace Gmail (y otros webmails) cuando el asunto es IDÉNTICO -- si el
+    // mismo comprador se lleva el mismo material dos veces (o lo compra
+    // de nuevo más adelante), antes el mail nuevo quedaba escondido abajo
+    // del viejo en el mismo hilo, dando la sensación de que no había
+    // llegado nada nuevo.
+    // OJO: armada a mano (no con Intl.DateTimeFormat) a propósito -- esa
+    // devuelve "02:28 p. m." con espacios angostos Unicode invisibles
+    // (típico del formato en español) que rompieron la codificación del
+    // asunto del mail (RFC 2047) y de paso el mensaje entero, mostrando
+    // código MIME crudo en vez del correo. Argentina no tiene horario de
+    // verano desde 2009, así que el offset fijo -3 siempre es correcto.
+    const horaArg = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const horaCompra = `${String(horaArg.getUTCHours()).padStart(2, "0")}:${String(horaArg.getUTCMinutes()).padStart(2, "0")}`;
+
     try {
       await client.send({
         from: `Psicope.cba <${gmailUser}>`,
         to: email,
-        subject: `Tu material "${nombre_material || ""}" ya está listo`,
+        subject: `Tu material "${nombre_material || ""}" ya está listo (${horaCompra})`,
         content: "Tu cliente de correo no puede mostrar el mensaje en HTML.",
         html,
       });

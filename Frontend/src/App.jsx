@@ -8,6 +8,7 @@ import QuienSoy from "./pages/QuienSoy";
 import Materiales from "./pages/Materiales";
 import Psicopedagogiando from "./pages/Psicopedagogiando";
 import Login from "./pages/Login";
+import RestablecerContrasena from "./pages/RestablecerContrasena";
 import Perfil from "./pages/Perfil"; 
 import MisCompras from "./pages/MisCompras";
 import RegistroForm from "./pages/registroUsuario/RegistroForm";
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/materiales" element={<Materiales />} />
           <Route path="/psicopedagogiando" element={<Psicopedagogiando />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/mis-compras" element={<MisCompras />} />
           <Route path="/turnos" element={<Turnos />} />
