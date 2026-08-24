@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2'; 
 import { FaUser, FaCalendarAlt, FaGlobe, FaPhone, FaEnvelope, FaArrowLeft } from 'react-icons/fa';
+import Loader from "../components/Loader";
 import "./perfil.css";
 
 export default function Perfil() {
@@ -70,7 +71,7 @@ export default function Perfil() {
     }
   };
 
-  if (loading) return <div className="perfil-wrapper"><div className="loader-perfil">Cargando perfil...</div></div>;
+  if (loading) return <div className="perfil-wrapper"><Loader /></div>;
 
   return (
     <div className="perfil-wrapper">

@@ -6,61 +6,58 @@ html, body {
 }
 
 .footer-container {
-  background: linear-gradient(135deg, #f9dfdf 0%, #fce8e8 100%);
-  padding: 20px 0;
+  background: var(--bg-navbar, #FDFBFD);
+  padding: 16px 0;
   width: 100%;
-  border-top: 3px solid rgba(229, 179, 168, 0.3);
+  border-top: 1px solid var(--color-borde-sutil, #EFE3D8);
   position: relative;
   overflow: hidden;
   margin: 0;
-  display: block; /* Asegura que no se comporte como inline-block */
-  vertical-align: bottom; /* Elimina espacio de línea base si hay texto cerca */
-}
-
-.footer-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #e5b3a8, transparent);
+  display: block;
+  vertical-align: bottom;
 }
 
 .footer-content {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 40px;
-  gap: 40px;
+  padding: 0 70px;
+  gap: 30px;
+  box-sizing: border-box;
 }
 
 .footer-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.footer-logo-icon {
+  height: 22px;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .footer-logo {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.4rem;
-  color: #8a5e5e;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.98rem;
+  color: var(--color-texto-oscuro, #2B2530);
+  font-weight: 700;
+  letter-spacing: 0.1px;
 }
 
 .footer-separator {
-  color: #d1b1b1;
-  font-size: 1.2rem;
+  color: var(--color-borde-sutil, #EFE3D8);
+  font-size: 0.95rem;
   font-weight: 300;
 }
 
 .footer-tagline {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.2rem;
-  color: #a07878;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.92rem;
+  color: var(--color-texto, #4A4350);
   font-weight: 400;
 }
 
@@ -69,9 +66,9 @@ html, body {
 }
 
 .footer-heart {
-  font-size: 1.1rem;
-  color: #8a5e5e;
-  font-family: 'Pompiere', cursive;
+  font-size: 0.88rem;
+  color: var(--color-texto, #4A4350);
+  font-family: 'Manrope', sans-serif;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -79,8 +76,8 @@ html, body {
 }
 
 .heart-icon {
-  color: #e5b3a8;
-  font-size: 1.2rem;
+  color: #E8A0A8;
+  font-size: 0.95rem;
   animation: heartbeat 1.5s ease-in-out infinite;
 }
 
@@ -92,7 +89,7 @@ html, body {
 
 .footer-socials {
   display: flex;
-  gap: 15px;
+  gap: 6px;
 }
 
 .social-link {
@@ -100,42 +97,26 @@ html, body {
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  color: #8a5e5e;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.15rem;
+  color: var(--color-texto, #4A4350);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.88rem;
   font-weight: 600;
-  padding: 8px 15px;
-  border-radius: 20px;
-  background: white;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 2px solid transparent;
-  box-shadow: 0 3px 10px rgba(138, 94, 94, 0.1);
+  padding: 7px 13px;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s ease;
+  border: none;
 }
 
 .social-link:hover {
-  transform: translateY(-3px);
-  border-color: #e5b3a8;
-  box-shadow: 0 6px 16px rgba(229, 179, 168, 0.25);
-  background: #fef5f4;
+  color: var(--color-texto-oscuro, #2B2530);
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(43, 37, 48, 0.08);
 }
 
 .social-link svg {
-  font-size: 1.25rem;
-  transition: transform 0.3s ease;
-}
-
-.social-link:hover svg {
-  transform: rotate(10deg) scale(1.1);
-}
-
-.social-link.instagram:hover {
-  color: #E4405F;
-  border-color: #E4405F;
-}
-
-.social-link.whatsapp:hover {
-  color: #25D366;
-  border-color: #25D366;
+  font-size: 1rem;
+  transition: none;
 }
 
 /* RESPONSIVE MÓVIL - MÁS COMPACTO */
@@ -155,39 +136,43 @@ html, body {
     gap: 8px;
   }
 
+  .footer-logo-icon {
+    height: 19px;
+  }
+
   .footer-logo {
-    font-size: 1.15rem;
+    font-size: 0.92rem;
   }
 
   .footer-separator {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
 
   .footer-tagline {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
   
   .footer-heart {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     padding-top: 6px;
-    border-top: 1px solid rgba(138, 94, 94, 0.12);
+    border-top: 1px solid var(--color-borde-sutil, #EFE3D8);
   }
 
   .heart-icon {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
   
   .footer-socials {
-    gap: 10px;
+    gap: 4px;
   }
 
   .social-link {
-    font-size: 1rem;
-    padding: 6px 12px;
+    font-size: 0.85rem;
+    padding: 6px 11px;
   }
 
   .social-link svg {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
 }
 

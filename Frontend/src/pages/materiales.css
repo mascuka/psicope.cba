@@ -1,27 +1,22 @@
 /* ===============================
-   VARIABLES Y BASE
+   BASE
+   (paleta compartida en index.css: --color-acento, --color-texto, etc.
+   No se redeclara acá para evitar el mismo choque de colores que tuvo
+   Home cuando esta hoja definía su propio :root con --rosa)
 ================================ */
-:root {
-  --rosa: #e5b3a8;
-  --rosa-oscuro: #d4a297;
-  --rosa-claro: #f9dfdf;
-  --texto-cafe: #6d5b57;
-  --gris-suave: #777;
-  --borde-card: #f4dcd6;
-  --fondo: #fdfaf9;
-}
 
 .materiales-page {
-  background: var(--fondo);
+  background: var(--color-crema);
   min-height: calc(100vh - 85px);
-  padding: 130px 55px 60px; 
+  padding: 130px 55px 60px;
   display: flex;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   box-sizing: border-box;
+  font-family: 'Manrope', sans-serif;
 }
 
 .materiales-content {
-  max-width: 1600px; 
+  max-width: 1600px;
   width: 100%;
   margin: 0;
   display: flex;
@@ -43,38 +38,41 @@
   background: white;
   padding: 15px 20px;
   border-radius: 20px;
-  border: 1px solid var(--borde-card);
-  box-shadow: 0 8px 20px rgba(229, 179, 168, 0.12);
+  border: 1px solid var(--color-borde-sutil);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.06);
 }
 
 .filter-card h3 {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.35rem;
-  color: var(--rosa);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--color-texto-oscuro);
   margin: 0 0 12px 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.search-input-sidebar, 
+.search-input-sidebar,
 .select-sidebar {
   width: 100%;
   box-sizing: border-box;
   padding: 11px 13px;
   border-radius: 12px;
   border: 1px solid #eee;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
   margin-bottom: 14px;
 }
 
 .btn-nuevo-recurso {
   width: 100%;
-  background: var(--rosa);
-  color: white;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 12px;
   border-radius: 50px;
+  font-family: 'Manrope', sans-serif;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -82,6 +80,12 @@
   justify-content: center;
   gap: 8px;
   transition: 0.3s;
+}
+
+.btn-nuevo-recurso:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 /* ===============================
@@ -97,8 +101,8 @@
 
 .material-card {
   background: white;
-  border-radius: 22px;
-  border: 1px solid var(--borde-card);
+  border-radius: 16px;
+  border: 1px solid var(--color-borde-sutil);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -110,21 +114,37 @@
 
 .material-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 14px 28px rgba(43, 37, 48, 0.1);
+  border-color: var(--color-borde-sutil);
 }
 
+/* aspect-ratio (no una altura fija): así la imagen escala proporcional al
+   ancho real de la card, igual que en Home, en vez de quedar "achicada"
+   cuando la card es más angosta. */
 .card-image-container-premium {
-  height: 210px;
+  aspect-ratio: 4 / 3;
   position: relative;
   overflow: hidden;
   width: 100%;
+  background: #FAF6F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  box-sizing: border-box;
 }
 
+/* object-fit: contain (no "cover") -- las portadas suelen ser páginas de
+   PDF verticales; recortarlas en un marco horizontal les cortaba contenido. */
 .card-image-container-premium img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   display: block;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.14);
 }
 
 .card-age-badge-overlay {
@@ -132,8 +152,8 @@
   top: 12px;
   right: 12px;
   background: rgba(255, 255, 255, 0.95);
-  border: 1.5px solid var(--rosa);
-  color: var(--texto-cafe);
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
   padding: 5px 12px;
   border-radius: 50px;
   font-size: 0.75rem;
@@ -142,43 +162,147 @@
   z-index: 5;
 }
 
+/* Listón diagonal, mismo lenguaje que el de Home. Cada tipo tiene su propio
+   color (onda arcoíris, como el logo) en vez de que todos compartan el
+   mismo tono rosa/violeta del resto del sitio -- así se distinguen de un
+   vistazo: oferta en rojo, gratis en verde, pack en índigo. */
 .oferta-ribbon-extra {
   position: absolute;
-  top: 15px;
-  left: -5px;
-  background: #ff4757;
+  top: 16px;
+  left: -38px;
+  width: 150px;
+  background: #E5484D;
   color: white;
-  padding: 6px 15px;
-  font-weight: 900;
-  font-size: 1rem;
-  border-radius: 0 50px 50px 0;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  padding: 5px 0;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.4px;
+  text-align: center;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 10px rgba(229, 72, 77, 0.4);
   z-index: 10;
 }
 
 .oferta-ribbon-extra.ribbon-gratis {
-  background: linear-gradient(135deg, #ff8fb3, #ff5c93);
-  color: #ffffff;
+  background: #2FB767;
+  box-shadow: 0 3px 10px rgba(47, 183, 103, 0.4);
+}
+
+.oferta-ribbon-extra.ribbon-pack {
+  background: #5B5FC7;
+  box-shadow: 0 3px 10px rgba(91, 95, 199, 0.4);
+}
+
+/* ---------- Selector de materiales para armar un Pack ---------- */
+.pack-lista-materiales {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.pack-item-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.pack-item-check:hover {
+  background: #FAF6F0;
+}
+
+.pack-item-check.activo {
+  background: #FAF6F0;
+  border: 1px solid var(--color-borde-sutil);
+}
+
+.pack-item-check input[type="checkbox"] {
+  accent-color: var(--color-acento);
+  cursor: pointer;
+}
+
+.pack-item-nombre {
+  flex: 1;
+  font-size: 0.92rem;
+  color: var(--color-texto-oscuro);
+}
+
+.pack-item-precio {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  white-space: nowrap;
+}
+
+.pack-item-precio small {
+  font-weight: 500;
+  color: #999;
+}
+
+.pack-resumen-precio {
+  background: #FAF6F0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pack-resumen-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  color: var(--color-texto);
+}
+
+.pack-resumen-fila strong {
+  color: var(--color-texto-oscuro);
+  font-size: 1rem;
+}
+
+.pack-resumen-final strong {
+  color: var(--color-texto-oscuro);
+  font-size: 1.3rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .card-body {
   padding: 18px;
+  text-align: left;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
+/* Alto reservado a 2 líneas (line-clamp) para que títulos de distinto largo
+   no hagan que unas cards queden más altas que otras. */
 .card-title-premium {
-  font-size: 1.25rem;
-  color: var(--texto-cafe);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  color: var(--color-texto-oscuro);
   margin: 0 0 8px 0;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
 }
 
 .card-description {
   font-size: 0.88rem;
-  color: var(--gris-suave);
+  color: #82717a;
   line-height: 1.4;
   margin-bottom: 12px;
   height: 4.2em;
@@ -189,30 +313,46 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-all;
+  cursor: pointer;
 }
 
+.card-description strong {
+  color: var(--color-texto-oscuro);
+}
+
+/* Tachado arriba, chico; precio final abajo, grande -- estilo Mercado Pago,
+   igual que en Home. Sin cuadro de fondo, como en Home. A la izquierda,
+   salvo cuando es gratis (ahí sí centrado). */
 .price-tag-centered-premium {
   margin: 10px 0 15px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.price-tag-centered-premium.es-gratis {
   align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background: #fff6f5;
-  border-radius: 16px;
 }
 
 .price-current-p {
-  color: var(--texto-cafe);
+  color: var(--color-texto-oscuro);
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 1.3rem;
   font-weight: 800;
 }
 
 .price-old-p {
   text-decoration: line-through;
-  color: var(--rosa-oscuro);
-  font-size: 0.95rem;
-  opacity: 0.5;
+  color: #b399a8;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Sin oferta: se reserva el mismo alto (visibility, no display) para que
+   los botones de abajo queden a la misma altura en todas las cards. */
+.price-old-p--oculto {
+  visibility: hidden;
 }
 
 .card-actions {
@@ -222,28 +362,48 @@
 
 .btn-action-outline,
 .btn-action-fill {
-  padding: 10px;
   border-radius: 12px;
+  font-family: 'Manrope', sans-serif;
   font-weight: 700;
   cursor: pointer;
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   border: none;
   transition: 0.2s;
 }
 
 .btn-action-fill {
-  background: var(--rosa);
-  color: white;
+  flex: 1;
+  padding: 10px;
+  gap: 6px;
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
 }
 
+.btn-action-fill:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+/* Botón "Muestra": ícono chico y fijo, igual que en Home -- no compite en
+   tamaño con "Comprar", que es la acción principal de la card. */
 .btn-action-outline {
+  flex: 0 0 auto;
+  width: 44px;
+  padding: 0;
+  font-size: 1.05rem;
   background: white;
-  border: 1.6px solid var(--rosa);
-  color: var(--rosa);
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto);
+}
+
+.btn-action-outline:hover {
+  border-color: var(--color-borde-sutil);
+  background: #FAF6F0;
 }
 
 /* ===============================
@@ -256,14 +416,14 @@
   gap: 15px;
   margin-top: 15px;
   padding-top: 12px;
-  border-top: 1px dashed var(--borde-card);
+  border-top: 1px dashed var(--color-borde-sutil);
 }
 
 .sales-info-pill {
   margin-right: auto;
   font-size: 0.8rem;
-  background: var(--rosa-claro);
-  color: var(--texto-cafe);
+  background: #FAF6F0;
+  color: var(--color-texto-oscuro);
   padding: 4px 10px;
   border-radius: 50px;
   font-weight: 700;
@@ -278,7 +438,7 @@
 }
 
 .admin-btn-edit {
-  color: var(--rosa);
+  color: var(--color-texto-oscuro);
 }
 
 .admin-btn-delete {
@@ -301,7 +461,7 @@
 
 .modal-container {
   background: white;
-  border-radius: 28px;
+  border-radius: 26px;
   padding: 35px;
   width: 95%;
   max-width: 550px;
@@ -313,9 +473,10 @@
 }
 
 .modal-container h3 {
-  font-family: 'Pompiere', cursive;
-  font-size: 2.2rem;
-  color: var(--rosa);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--color-texto-oscuro);
   text-align: center;
   margin: 0;
 }
@@ -337,7 +498,7 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  accent-color: var(--rosa);
+  accent-color: var(--color-acento);
   cursor: pointer;
 }
 
@@ -350,16 +511,16 @@
 .char-count {
   font-size: 0.75rem;
   text-align: right;
-  color: var(--rosa-oscuro);
+  color: var(--color-texto-oscuro);
   margin-top: -15px;
   font-weight: 600;
 }
 
 .oferta-box-styled {
-  background: #fff8f7;
+  background: #FAF6F0;
   padding: 18px;
   border-radius: 18px;
-  border: 1.5px dashed var(--rosa);
+  border: 1.5px dashed var(--color-borde-sutil);
 }
 
 .file-section-modal {
@@ -378,22 +539,30 @@
   gap: 5px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--texto-cafe);
+  color: var(--color-texto-oscuro);
 }
 
 .btn-save-modal {
-  background: var(--rosa);
-  color: white;
+  background: white;
+  color: var(--color-texto-oscuro);
   padding: 14px;
   border-radius: 50px;
-  border: none;
+  border: 1.5px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
   cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-save-modal:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 .btn-cancel-modal {
   background: none;
-  color: var(--gris-suave);
+  color: #999;
   border: none;
   cursor: pointer;
   font-weight: 600;
@@ -467,8 +636,8 @@
 }
 
 .modal-overlay-preview .close-preview-btn:hover {
-  background: var(--rosa);
-  color: white;
+  background: #FDFAF6;
+  color: var(--color-texto-oscuro);
   transform: rotate(90deg) scale(1.1);
 }
 
@@ -483,7 +652,7 @@
 
 @media (max-width: 900px) {
   .materiales-page {
-    padding: 95px 15px 40px; 
+    padding: 95px 15px 40px;
     justify-content: center;
   }
 
@@ -491,13 +660,13 @@
     flex-direction: column;
     align-items: center;
     gap: 25px;
-    max-width: 400px; 
+    max-width: 400px;
     margin: 0 auto;
   }
 
   .materiales-sidebar {
     width: 100%;
-    max-width: 100%; 
+    max-width: 100%;
     position: static;
   }
 
@@ -515,7 +684,7 @@
 
   .material-card {
     width: 100%;
-    max-width: 100%; 
+    max-width: 100%;
   }
 
   /* Preview responsive tablets */
@@ -537,15 +706,10 @@
     padding: 85px 10px 30px;
   }
 
-  .card-image-container-premium {
-    height: 190px;
-  }
-
   .card-title-premium {
     font-size: 1.15rem;
   }
 
-  .btn-action-outline,
   .btn-action-fill {
     padding: 10px;
     font-size: 0.9rem;
@@ -653,16 +817,16 @@
   bottom: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  
+
   /* Fondo oscuro semi-transparente profesional */
   background: rgba(0, 0, 0, 0.9) !important;
   backdrop-filter: blur(5px); /* Efecto borroso suave */
-  
+
   /* Centrado matemático absoluto */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  
+
   z-index: 2147483647 !important; /* El valor más alto posible en CSS */
   padding: 0 !important;
   margin: 0 !important;
@@ -676,14 +840,14 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  
+
   /* Reseteo total para evitar cajas blancas */
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
-  
+
   /* Permite que la imagen dicte el tamaño pero sin pasarse */
   width: auto !important;
   height: auto !important;
@@ -694,16 +858,16 @@
 /* 3. LA IMAGEN (La Clave) */
 .preview-content img {
   display: block !important;
-  
+
   /* Lógica: "Sé tan grande como quieras, PERO..." */
   width: auto !important;
   height: auto !important;
-  
+
   /* "...NUNCA superes el 95% del ancho de la pantalla" */
-  max-width: 95vw !important; 
+  max-width: 95vw !important;
   /* "...NUNCA superes el 90% del alto de la pantalla" */
   max-height: 90vh !important;
-  
+
   /* Ajuste visual */
   object-fit: contain !important; /* Asegura que se vea entera */
   border-radius: 4px !important;
@@ -725,18 +889,18 @@
   position: fixed !important;
   top: 20px !important;
   right: 20px !important;
-  
+
   background: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  
+
   width: 44px !important;
   height: 44px !important;
   border-radius: 50% !important;
   font-size: 24px !important;
   cursor: pointer !important;
   z-index: 2147483648 !important; /* Encima del overlay */
-  
+
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -795,14 +959,14 @@
 .preview-content img {
   display: block !important;
   /* El secreto para que no se pegue a la izquierda: */
-  margin: auto !important; 
-  
+  margin: auto !important;
+
   /* Se adapta a cualquier pantalla sin salirse */
   max-width: 95vw !important;
   max-height: 85vh !important;
   width: auto !important;
   height: auto !important;
-  
+
   object-fit: contain !important;
   border-radius: 8px;
   box-shadow: 0 0 40px rgba(0,0,0,0.6);
@@ -858,18 +1022,19 @@
    REFINAMIENTO DE MIS COMPRAS (ESTILO FINO)
    ============================================================= */
 
-/* Título y Subtítulo con Pompiere */
 .perfil-title {
-  font-family: 'Pompiere', cursive !important;
-  font-size: 2.2rem !important;
-  color: var(--rosa) !important;
-  letter-spacing: 1px;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 1.9rem !important;
+  color: var(--color-texto-oscuro) !important;
+  letter-spacing: -0.2px;
 }
 
 .perfil-subtitle {
-  font-family: 'Pompiere', cursive !important;
-  font-size: 1.4rem !important;
-  color: var(--texto-cafe) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1.05rem !important;
+  color: var(--color-texto-oscuro) !important;
   margin-top: -5px;
 }
 
@@ -880,19 +1045,19 @@
   align-items: center;
   padding: 12px 20px;
   border: none;
-  border-bottom: 1px solid var(--rosa-claro); /* Solo línea divisoria para que sea más fino */
+  border-bottom: 1px solid var(--color-borde-sutil); /* Solo línea divisoria para que sea más fino */
   background: transparent;
   transition: all 0.2s ease;
 }
 
 .compra-item-fino:hover {
-  background: #fff8f7;
+  background: #FAF6F0;
 }
 
 /* Tipografía de los textos internos */
 .compra-nombre-fino {
   font-weight: 600;
-  color: var(--texto-cafe);
+  color: var(--color-texto-oscuro);
   font-size: 1.05rem;
   display: block;
 }
@@ -905,7 +1070,7 @@
 
 .detalle-dato {
   font-size: 0.85rem;
-  color: var(--gris-suave);
+  color: #82717a;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -913,23 +1078,24 @@
 
 .detalle-dato-importe {
   font-size: 0.85rem;
-  color: var(--texto-cafe);
+  color: var(--color-texto-oscuro);
   background: none; /* Quitamos el fondo gris para que sea más liviano */
   padding: 0;
 }
 
 .detalle-dato-importe strong {
-  color: var(--rosa-oscuro);
+  color: var(--color-texto-oscuro);
   font-weight: 700;
 }
 
 /* Botón de descarga más sutil */
 .btn-descarga-fina {
   background: transparent !important;
-  color: var(--rosa) !important;
-  border: 1px solid var(--rosa) !important;
+  color: var(--color-texto-oscuro) !important;
+  border: 1px solid var(--color-borde-sutil) !important;
   padding: 6px 15px !important;
   border-radius: 50px !important; /* Más redondeado */
+  font-family: 'Manrope', sans-serif !important;
   font-size: 0.85rem !important;
   font-weight: 600 !important;
   cursor: pointer;
@@ -940,9 +1106,10 @@
 }
 
 .btn-descarga-fina:hover {
-  background: var(--rosa) !important;
-  color: white !important;
-  box-shadow: 0 4px 10px rgba(229, 179, 168, 0.3);
+  background: #FDFAF6 !important;
+  border-color: var(--color-borde-sutil) !important;
+  color: var(--color-texto-oscuro) !important;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 /* Ajuste móvil para que no se amontone */
@@ -953,9 +1120,158 @@
     gap: 12px;
     padding: 15px 10px;
   }
-  
+
   .btn-descarga-fina {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ===============================
+   MODAL "COMPRAR SIN CUENTA" (SweetAlert2)
+================================ */
+.mp-guest-popup {
+  border-radius: 24px !important;
+}
+
+.mp-guest-intro {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+  font-size: 0.92rem;
+  margin: -8px 0 18px;
+}
+
+.mp-guest-form {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mp-guest-popup .mp-guest-field label {
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 5px;
+  margin-left: 4px;
+}
+
+.mp-guest-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  color: var(--color-texto-oscuro);
+  background: #fafafa;
+  box-sizing: border-box;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.mp-guest-input:focus {
+  outline: none;
+  border-color: var(--color-borde-sutil);
+  background: white;
+}
+
+/* Botón de Mercado Pago: outline con el color de la marca (no relleno, no
+   el rosa del sitio), con su ícono a la izquierda del texto. El selector
+   doble (en vez de una sola clase) es a propósito: hay una regla global
+   ".swal2-confirm" con !important que pinta de rosa todos los botones de
+   confirmación de SweetAlert2 del sitio, y hace falta más especificidad
+   para ganarle. */
+.mp-guest-popup .mp-btn-confirm {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  background: white !important;
+  color: #009EE3 !important;
+  border: 2px solid #009EE3 !important;
+  box-shadow: none !important;
+}
+
+.mp-guest-popup .mp-btn-confirm:hover {
+  background: #009EE3 !important;
+  color: white !important;
+  box-shadow: 0 6px 18px rgba(0, 158, 227, 0.3) !important;
+}
+
+.mp-btn-confirm svg {
+  flex-shrink: 0;
+}
+
+/* ===============================
+   ELEGIR MÉTODO DE PAGO (QR / Mercado Pago)
+================================ */
+.mp-metodo-elegir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mp-metodo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-borde-sutil);
+  background: white;
+  color: var(--color-texto-oscuro);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mp-metodo-btn:hover {
+  background: #FAF6F0;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+/* Dentro del formulario de "comprar sin cuenta" -- separado de los campos
+   de arriba, sin el margen que trae la versión sola (elegirMetodoPago). */
+.mp-metodo-elegir-form {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-borde-sutil);
+}
+
+/* ===============================
+   ESPERANDO EL PAGO / TU TURNO
+================================ */
+.mp-espera-popup .swal2-html-container {
+  color: var(--color-texto);
+  font-family: 'Manrope', sans-serif;
+}
+
+/* ===============================
+   QR PARA PAGAR
+================================ */
+.mp-qr-popup .swal2-html-container {
+  color: var(--color-texto);
+  font-family: 'Manrope', sans-serif;
+}
+
+.mp-qr-nota {
+  font-size: 0.85rem;
+  margin: 6px 0;
+}
+
+.mp-qr-imagen {
+  display: block;
+  width: 220px;
+  height: 220px;
+  margin: 12px auto;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-borde-sutil);
 }

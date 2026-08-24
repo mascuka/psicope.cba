@@ -1,50 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Pompiere&display=swap');
-
 .quien-soy-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   /* CAMBIO: 75px del Navbar + 55px de espacio = 130px arriba */
-  padding: 130px 20px 60px 20px; 
-  background: #fdfaf9;
+  padding: 130px 20px 60px 20px;
+  background: var(--color-crema);
   min-height: calc(100vh - 85px);
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
 }
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-  width: 100%;
-  color: #e5b3a8;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.8rem;
-}
-
-.loading-container::after {
-  content: "";
-  width: 25px;
-  height: 25px;
-  border: 2px solid #f9dfdf;
-  border-top-color: #e5b3a8;
-  border-radius: 50%;
-  animation: spinner 0.8s linear infinite;
-  margin-left: 15px;
-}
-
-@keyframes spinner {
-  to { transform: rotate(360deg); }
-}
-
 .quien-soy-card {
   display: flex;
   background: white;
-  border-radius: 40px;
+  border-radius: 28px;
   padding: 45px;
   max-width: 1050px;
   width: 95%;
   gap: 50px;
-  box-shadow: 0 15px 40px rgba(229, 179, 168, 0.15);
+  box-shadow: 0 15px 40px rgba(43, 37, 48, 0.1);
   margin-top: 10px;
 }
 
@@ -59,8 +31,8 @@
   width: 100%;
   max-width: 350px;
   aspect-ratio: 3/4;
-  border: 10px solid #f9dfdf;
-  border-radius: 25px;
+  border: 8px solid var(--color-borde-sutil);
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0,0,0,0.06);
   transition: transform 0.4s ease;
@@ -81,19 +53,21 @@
 }
 
 .titulo-principal {
-  font-family: 'Pompiere', cursive !important;
-  font-size: 3.8rem;
-  color: #e5b3a8;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
   margin: 0 0 20px 0;
 }
 
 /* Estilo para el input de edición del título */
 .input-titulo-edit {
-  font-family: 'Pompiere', cursive !important;
-  font-size: 3.5rem;
-  color: #e5b3a8;
-  border: 1px dashed #e5b3a8;
-  background: #fef5f4;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+  border: 1px dashed var(--color-borde-sutil);
+  background: #FAF6F0;
   width: 100%;
   margin-bottom: 20px;
   padding: 5px 15px;
@@ -104,7 +78,7 @@
 .texto-mostrado {
   font-size: 1.1rem;
   line-height: 1.7;
-  color: #555;
+  color: var(--color-texto);
   white-space: pre-wrap;
 }
 
@@ -113,8 +87,8 @@
   min-height: 250px;
   padding: 15px;
   border-radius: 15px;
-  border: 2px solid #f9dfdf;
-  font-family: 'Montserrat', sans-serif;
+  border: 2px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
   font-size: 1rem;
 }
 
@@ -124,10 +98,13 @@
   gap: 12px;
 }
 
-.btn-confirmar { background: #e5b3a8; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Pompiere', cursive; font-size: 1.4rem; }
-.btn-cancelar { background: #eee; color: #777; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Pompiere', cursive; font-size: 1.4rem; }
-.btn-editar-texto { background: #f9dfdf; color: #6d5b57; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Pompiere', cursive; font-size: 1.4rem; }
-.btn-subir-foto { background: white; border: 2px solid #e5b3a8; color: #e5b3a8; margin-top: 15px; padding: 8px 20px; border-radius: 25px; cursor: pointer; font-family: 'Pompiere', cursive; font-size: 1.2rem; }
+.btn-confirmar { background: white; color: var(--color-texto-oscuro); border: 1.5px solid var(--color-borde-sutil); padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.95rem; transition: all 0.25s ease; }
+.btn-confirmar:hover { background: #FDFAF6; box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08); }
+.btn-cancelar { background: #eee; color: #777; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.95rem; }
+.btn-editar-texto { background: white; border: 1.5px solid var(--color-borde-sutil); color: var(--color-texto-oscuro); padding: 10px 25px; border-radius: 25px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.95rem; transition: all 0.25s ease; }
+.btn-editar-texto:hover { background: #FDFAF6; border-color: var(--color-borde-sutil); box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08); }
+.btn-subir-foto { background: white; border: 1.5px solid var(--color-borde-sutil); color: var(--color-texto-oscuro); margin-top: 15px; padding: 8px 20px; border-radius: 25px; cursor: pointer; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.9rem; transition: all 0.25s ease; }
+.btn-subir-foto:hover { background: #FDFAF6; box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08); }
 
 @media (max-width: 850px) {
   .quien-soy-card { flex-direction: column; text-align: center; padding: 30px; }

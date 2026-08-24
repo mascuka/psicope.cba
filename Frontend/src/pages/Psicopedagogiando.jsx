@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaExternalLinkAlt, FaAngleDoubleLeft, FaAngleDoubleRight, FaSave } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaExternalLinkAlt, FaSave, FaPlay, FaInstagram, FaRegImage, FaNewspaper } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import logoImage from "../assets/logo.png";
+import Loader from "../components/Loader";
+import AsistenteIA from "../components/AsistenteIA";
 import "./psicopedagogiando.css";
 
 export default function Psicopedagogiando() {
@@ -10,9 +13,9 @@ export default function Psicopedagogiando() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const postsPerPage = 4;
+  const [postAbierto, setPostAbierto] = useState(null);
+  const [arrastrandoId, setArrastrandoId] = useState(null);
 
   const [editHeader, setEditHeader] = useState(false);
   const [headerData, setHeaderData] = useState({
@@ -67,13 +70,15 @@ export default function Psicopedagogiando() {
     init();
   }, []);
 
+
   const fetchHeader = async () => {
     const { data } = await supabase.from("configuraciones").select("*").eq("clave", "psico_header").single();
     if (data) setHeaderData(data.valor);
   };
 
   const saveHeader = async () => {
-    await supabase.from("configuraciones").upsert({ clave: "psico_header", valor: headerData });
+    const { error } = await supabase.from("configuraciones").upsert({ clave: "psico_header", valor: headerData });
+    if (error) return Swal.fire("Error", "No se pudo guardar el encabezado.", "error");
     setEditHeader(false);
     Swal.fire({ icon: 'success', title: '¡Guardado!', showConfirmButton: false, timer: 1500 });
   };
@@ -83,17 +88,68 @@ export default function Psicopedagogiando() {
     const { data, error } = await supabase
       .from("psicopedagogiando")
       .select("*")
+      .order("orden", { ascending: true })
       .order("created_at", { ascending: false });
-    
-    if (!error) {
-      setPosts(data);
-      const totalP = Math.ceil(data.length / postsPerPage);
-      if (currentPage > 1 && currentPage > totalP) {
-        setCurrentPage(totalP || 1);
-      }
-    }
+
+    if (!error) setPosts(data);
     setLoading(false);
   };
+
+  // Un post nuevo entra siempre "primero" (número de orden más chico que
+  // el mínimo actual), como hacía antes con created_at desc -- pero queda
+  // libre para que el admin lo reordene a mano después.
+  const obtenerOrdenNuevo = async () => {
+    const { data } = await supabase.from("psicopedagogiando").select("orden").order("orden", { ascending: true }).limit(1);
+    return data?.length ? data[0].orden - 1 : 0;
+  };
+
+  // Arrastrar y soltar para reordenar (solo admin, y solo sin búsqueda
+  // activa -- con un filtro puesto, la grilla no muestra todos los posts
+  // en su posición real, así que reordenar ahí sería engañoso). Reordena
+  // primero en memoria (se ve al toque) y recién después guarda el nuevo
+  // `orden` de cada post afectado en la base.
+  const arrastreHabilitado = isAdmin && !searchTerm.trim();
+
+  const handleDragStart = (e, postId) => {
+    if (!arrastreHabilitado) return;
+    setArrastrandoId(postId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e, postId) => {
+    if (!arrastreHabilitado || arrastrandoId === null || arrastrandoId === postId) return;
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e, destinoId) => {
+    if (!arrastreHabilitado || arrastrandoId === null || arrastrandoId === destinoId) return;
+    e.preventDefault();
+    const origenIdx = posts.findIndex((p) => p.id === arrastrandoId);
+    const destinoIdx = posts.findIndex((p) => p.id === destinoId);
+    if (origenIdx === -1 || destinoIdx === -1) return;
+
+    const reordenados = [...posts];
+    const [movido] = reordenados.splice(origenIdx, 1);
+    reordenados.splice(destinoIdx, 0, movido);
+    setPosts(reordenados);
+    setArrastrandoId(null);
+
+    try {
+      await Promise.all(reordenados.map((p, i) => supabase.from("psicopedagogiando").update({ orden: i }).eq("id", p.id)));
+    } catch {
+      Swal.fire("Error", "No se pudo guardar el nuevo orden.", "error");
+      fetchPosts();
+    }
+  };
+
+  const handleDragEnd = () => setArrastrandoId(null);
+
+  // Supabase Storage rechaza keys con espacios, tildes u otros caracteres
+  // fuera de un set chico (letras/números/._-) -- "Invalid key" pasaba con
+  // nombres de archivo típicos de Windows como "Sin título.png".
+  const sanitizarNombreArchivo = (nombre) => nombre
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
 
   const getFilePathFromUrl = (url) => {
     if (!url) return null;
@@ -107,18 +163,19 @@ export default function Psicopedagogiando() {
       text: "Se borrará el post y el archivo si corresponde.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#e5b3a8',
+      confirmButtonColor: '#D48CA6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, borrar todo'
     });
 
     if (res.isConfirmed) {
       try {
-        if (post.tipo === 'imagen' && post.url_media) {
+        if ((post.tipo === 'imagen' || post.tipo === 'imagen_ia') && post.url_media) {
           const path = getFilePathFromUrl(post.url_media);
           if (path) await supabase.storage.from('imagenes-web').remove([path]);
         }
-        await supabase.from("psicopedagogiando").delete().eq("id", post.id);
+        const { error } = await supabase.from("psicopedagogiando").delete().eq("id", post.id);
+        if (error) throw error;
         Swal.fire('Eliminado', 'Contenido borrado con éxito.', 'success');
         fetchPosts();
       } catch (error) {
@@ -132,7 +189,7 @@ export default function Psicopedagogiando() {
       title: "Atención", 
       text: "El título es obligatorio", 
       icon: "warning",
-      confirmButtonColor: '#e5b3a8'
+      confirmButtonColor: '#D48CA6'
     });
     
     let finalMediaUrl = formData.url_media;
@@ -144,7 +201,7 @@ export default function Psicopedagogiando() {
           title: "Error", 
           text: "El ID o URL de YouTube no es válido. Debe tener 11 caracteres.", 
           icon: "error",
-          confirmButtonColor: '#e5b3a8'
+          confirmButtonColor: '#D48CA6'
         });
       }
       finalMediaUrl = videoId;
@@ -160,22 +217,26 @@ export default function Psicopedagogiando() {
           const oldPath = getFilePathFromUrl(formData.url_media);
           if (oldPath) await supabase.storage.from('imagenes-web').remove([oldPath]);
         }
-        const fileName = `${Date.now()}_${file.name}`;
+        const fileName = `${Date.now()}_${sanitizarNombreArchivo(file.name)}`;
         const { error: upErr } = await supabase.storage.from('imagenes-web').upload(`psico/${fileName}`, file);
         if (upErr) throw upErr;
         const { data } = supabase.storage.from('imagenes-web').getPublicUrl(`psico/${fileName}`);
         finalUrl = data.publicUrl;
       }
 
-      const payload = { 
-        tipo: formData.tipo, 
-        titulo: formData.titulo, 
-        contenido: formData.contenido, 
-        url_media: finalUrl, 
-        link_externo: formData.link_externo || '' 
+      const payload = {
+        tipo: formData.tipo,
+        titulo: formData.titulo,
+        contenido: formData.contenido,
+        url_media: finalUrl,
+        link_externo: formData.link_externo || '',
+        // Sin editId (post nuevo): entra primero, como antes. Editando, se
+        // omite -- undefined no viaja en el JSON, así que no toca el
+        // orden que ya tenía.
+        orden: editId ? undefined : await obtenerOrdenNuevo(),
       };
 
-      const { error } = editId 
+      const { error } = editId
         ? await supabase.from("psicopedagogiando").update(payload).eq("id", editId)
         : await supabase.from("psicopedagogiando").insert([payload]);
 
@@ -189,7 +250,7 @@ export default function Psicopedagogiando() {
         title: "¡Éxito!", 
         text: "Publicación guardada correctamente", 
         icon: "success",
-        confirmButtonColor: '#e5b3a8'
+        confirmButtonColor: '#D48CA6'
       });
     } catch (e) {
       console.error(e);
@@ -197,45 +258,79 @@ export default function Psicopedagogiando() {
         title: "Error", 
         text: "No se pudo guardar. " + (e.message || ""), 
         icon: "error",
-        confirmButtonColor: '#e5b3a8'
+        confirmButtonColor: '#D48CA6'
       });
     } finally {
       setSubiendo(false);
     }
   };
 
-  const abrirLeerMas = (titulo, contenido) => {
-    Swal.fire({
-      title: `<span style="font-family: 'Pompiere', cursive; font-size: 2.5rem; color: #e5b3a8;">${titulo}</span>`,
-      html: `<div style="font-family: 'Montserrat', sans-serif; text-align: left; line-height: 1.6; color: #555;">${contenido}</div>`,
-      confirmButtonText: 'Cerrar',
-      confirmButtonColor: '#e5b3a8',
-    });
+  const publicarDesdeIA = async (post) => {
+    try {
+      // La imagen compuesta (con el texto ya superpuesto) viene como data
+      // URL -- hay que subirla a Storage antes, no guardar ese base64
+      // gigante directo en la tabla.
+      let urlMedia = post.imagen_url || '';
+      if (post.imagen_compuesta) {
+        const blob = await (await fetch(post.imagen_compuesta)).blob();
+        const fileName = `${Date.now()}_ia.png`;
+        const { error: upErr } = await supabase.storage.from('imagenes-web').upload(`psico/${fileName}`, blob, { contentType: 'image/png' });
+        if (upErr) throw upErr;
+        urlMedia = supabase.storage.from('imagenes-web').getPublicUrl(`psico/${fileName}`).data.publicUrl;
+      }
+
+      const { error } = await supabase.from("psicopedagogiando").insert([{
+        // "imagen_ia": el texto ya está dibujado sobre la imagen (título y
+        // texto corto), así que en la grilla/detalle no hace falta el velo
+        // oscuro + título superpuesto que usan los posts tipo "imagen"
+        // comunes (esos sí dependen de esa superposición para tener texto).
+        tipo: 'imagen_ia',
+        titulo: post.titulo,
+        contenido: post.contenido,
+        // El texto que el asistente dibujó arriba de la imagen (visible a
+        // simple vista, pero no necesariamente igual a título/contenido) --
+        // se guarda aparte para que el buscador de arriba lo encuentre.
+        texto_imagen_principal: post.texto_imagen_principal || null,
+        texto_imagen_secundario: post.texto_imagen_secundario || null,
+        url_media: urlMedia,
+        link_externo: '',
+        orden: await obtenerOrdenNuevo(),
+      }]);
+      if (error) throw error;
+      fetchPosts();
+      Swal.fire({
+        title: "¡Publicado!",
+        text: "El posteo ya está visible en esta página.",
+        icon: "success",
+        confirmButtonColor: '#D48CA6'
+      });
+    } catch (e) {
+      Swal.fire("Error", "No se pudo publicar. " + (e.message || ""), "error");
+    }
   };
 
-  const abrirImagenGrande = (url, titulo) => {
-    if (!url) return;
-    Swal.fire({
-      imageUrl: url,
-      imageAlt: titulo || 'Imagen',
-      title: titulo ? `<span style="font-family: 'Pompiere', cursive; font-size: 1.8rem; color: #e5b3a8;">${titulo}</span>` : undefined,
-      showConfirmButton: false,
-      showCloseButton: true,
-      background: '#fff',
-      width: 'min(90vw, 800px)',
-    });
+  const iconoTipo = (tipo) => {
+    if (tipo === 'video') return <FaPlay />;
+    if (tipo === 'noticia') return <FaNewspaper />;
+    if (tipo === 'instagram') return <FaInstagram />;
+    return <FaRegImage />;
   };
 
-  const postsFiltrados = posts.filter(p => p.titulo?.toLowerCase().includes(searchTerm.toLowerCase()));
-  const currentPosts = postsFiltrados.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
-  const totalPages = Math.ceil(postsFiltrados.length / postsPerPage);
+  // Antes solo miraba "titulo" -- ni "contenido" ni el texto que el
+  // asistente de IA dibuja sobre la imagen (visible a simple vista) entraban
+  // en la búsqueda, así que buscar una palabra que solo aparecía en la
+  // imagen no encontraba nada.
+  const postsFiltrados = posts.filter((p) => {
+    const termino = searchTerm.trim().toLowerCase();
+    if (!termino) return true;
+    return [p.titulo, p.contenido, p.texto_imagen_principal, p.texto_imagen_secundario]
+      .some((campo) => campo?.toLowerCase().includes(termino));
+  });
 
     if (loading) {
       return (
         <div className="materiales-page">
-          <div className="loading-container">
-            <p>Cargando...</p>
-          </div>
+          <Loader />
         </div>
       );
     }
@@ -282,135 +377,146 @@ export default function Psicopedagogiando() {
         <div className="psico-toolbar">
           <div className="psico-search">
             <FaSearch className="search-icon" />
-            <input type="text" placeholder="Buscar por título..." onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}} />
+            <input type="text" placeholder="Buscar por título..." onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           {isAdmin && (
-            <button className="btn-new-psico" onClick={() => { 
-                setEditId(null); 
-                setFormData({tipo:'imagen', titulo:'', contenido:'', url_media:'', link_externo:''}); 
-                setFile(null);
-                setShowModal(true); 
-            }}>
-                <FaPlus /> Nuevo Post
-            </button>
+            <>
+              <button className="btn-new-psico" onClick={() => {
+                  setEditId(null);
+                  setFormData({tipo:'imagen', titulo:'', contenido:'', url_media:'', link_externo:''});
+                  setFile(null);
+                  setShowModal(true);
+              }}>
+                  <FaPlus /> Nuevo Post
+              </button>
+              <AsistenteIA onPublicar={publicarDesdeIA} />
+            </>
           )}
         </div>
       </header>
 
-      <div className="psico-list">
-        {currentPosts.map((post, index) => {
-          const videoId = post.tipo === 'video' ? extraerYouTubeID(post.url_media) : null;
-          
-          return (
-            <article key={post.id} className={`psico-item ${index % 2 !== 0 ? 'rev' : ''}`}>
-              <div className="psico-visual">
-                {post.tipo === 'imagen' && (
+      {postsFiltrados.length === 0 ? (
+        <p className="psico-sin-resultados">No hay publicaciones para mostrar todavía.</p>
+      ) : (
+        <div className="psico-grid">
+          {postsFiltrados.map((post) => {
+            const videoId = post.tipo === 'video' ? extraerYouTubeID(post.url_media) : null;
+            const imagenMiniatura = post.tipo === 'video'
+              ? (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null)
+              : post.url_media;
+
+            return (
+              <article
+                key={post.id}
+                className={`psico-thumb${arrastreHabilitado ? " psico-thumb-arrastrable" : ""}${arrastrandoId === post.id ? " psico-thumb-arrastrando" : ""}`}
+                draggable={arrastreHabilitado}
+                onDragStart={(e) => handleDragStart(e, post.id)}
+                onDragOver={(e) => handleDragOver(e, post.id)}
+                onDrop={(e) => handleDrop(e, post.id)}
+                onDragEnd={handleDragEnd}
+                onClick={() => { if (arrastrandoId === null) setPostAbierto(post); }}
+              >
+                {imagenMiniatura ? (
+                  <img src={imagenMiniatura} alt="" />
+                ) : (
+                  <div className="psico-card-media-error"><p>Sin imagen</p></div>
+                )}
+
+                {/* Los posts "imagen_ia" ya traen el título dibujado arriba
+                    de la imagen, y los "imagen" comunes son una foto que
+                    subió el admin tal cual -- en ninguno de los dos casos
+                    hace falta el velo oscuro + título de acá abajo (eso
+                    sigue existiendo para video/noticia/instagram, que no
+                    tienen forma propia de mostrar de qué tratan). */}
+                {post.tipo !== 'imagen_ia' && post.tipo !== 'imagen' && (
+                  <>
+                    <div className="psico-thumb-veil" />
+                    <h4 className="psico-thumb-titulo">{post.titulo}</h4>
+                  </>
+                )}
+
+                {post.tipo !== 'imagen_ia' && post.tipo !== 'imagen' && <span className="psico-thumb-type">{iconoTipo(post.tipo)}</span>}
+                {post.tipo === 'instagram' && <span className="psico-card-ig-badge psico-thumb-ig"><FaInstagram /></span>}
+                {post.tipo === 'video' && <span className="psico-thumb-play"><FaPlay /></span>}
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {postAbierto && (() => {
+        const post = postAbierto;
+        const videoId = post.tipo === 'video' ? extraerYouTubeID(post.url_media) : null;
+        const esVisual = post.tipo === 'imagen' || post.tipo === 'imagen_ia' || post.tipo === 'noticia' || post.tipo === 'instagram';
+
+        return (
+          <div className="psico-detalle-overlay" onClick={() => setPostAbierto(null)}>
+            <div className="psico-detalle-box" onClick={(e) => e.stopPropagation()}>
+              <button className="close-x psico-detalle-close" onClick={() => setPostAbierto(null)}><FaTimes /></button>
+
+              <div className="psico-item-media">
+                {esVisual && (
                   <img
-                    src={post.url_media}
+                    src={post.url_media || 'https://via.placeholder.com/500x500?text=Sin+imagen'}
                     alt=""
-                    className="media-full media-clickable"
-                    onClick={() => abrirImagenGrande(post.url_media, post.titulo)}
                   />
                 )}
                 {post.tipo === 'video' && videoId && (
-                  <div className="video-full-wrapper">
-                    <iframe 
-                      src={`https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&fs=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1`} 
+                  <div className="psico-video-embed">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0`}
                       title={post.titulo}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
-                      allowFullScreen 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
                     />
                   </div>
                 )}
                 {post.tipo === 'video' && !videoId && (
-                  <div className="video-full-wrapper" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9dfdf', color: '#8a5e5e'}}>
-                    <p>ID de video no válido</p>
-                  </div>
+                  <div className="psico-card-media-error"><p>ID de video no válido</p></div>
                 )}
-                {post.tipo === 'noticia' && (
-                  <img
-                    src={post.url_media || 'https://via.placeholder.com/500x300?text=Noticia'}
-                    alt=""
-                    className="media-full media-clickable"
-                    onClick={() => abrirImagenGrande(post.url_media, post.titulo)}
-                  />
+                {post.tipo === 'instagram' && (
+                  <div className="psico-card-ig-badge"><FaInstagram /></div>
                 )}
               </div>
-              
-              <div className="psico-content">
-                <div className="text-wrapper">
-                  <h2>{post.titulo}</h2>
-                  <p className="descripcion-corta">
-                    {post.contenido?.length > 280 ? `${post.contenido.substring(0, 280)}...` : post.contenido}
-                  </p>
+
+              <div className="psico-item-body">
+                <div className="psico-card-header">
+                  <img src={logoImage} alt="" className="psico-card-avatar" />
+                  <span className="psico-card-handle">Psicope.cba</span>
+                  {post.tipo !== 'imagen' && post.tipo !== 'imagen_ia' && (
+                    <span className="psico-card-type-icon">{iconoTipo(post.tipo)}</span>
+                  )}
                 </div>
 
-                <div className="psico-footer-card">
+                <h3>{post.titulo}</h3>
+                <p className="psico-item-desc-full">{post.contenido}</p>
+
+                <div className="psico-card-footer">
                   <div className="footer-btns-group">
-                      {post.contenido?.length > 280 && (
-                          <button className="btn-noticia-rosa btn-small" onClick={() => abrirLeerMas(post.titulo, post.contenido)}>Leer más</button>
-                      )}
-                      {post.tipo === 'noticia' && post.link_externo && (
-                          <a href={post.link_externo} target="_blank" rel="noreferrer" className="btn-noticia-rosa btn-small">
-                              Ir a la noticia <FaExternalLinkAlt />
-                          </a>
-                      )}
+                    {post.tipo === 'noticia' && post.link_externo && (
+                      <a href={post.link_externo} target="_blank" rel="noreferrer" className="btn-noticia-rosa btn-small">
+                        Ir a la noticia <FaExternalLinkAlt />
+                      </a>
+                    )}
+                    {post.tipo === 'instagram' && post.link_externo && (
+                      <a href={post.link_externo} target="_blank" rel="noreferrer" className="btn-noticia-rosa btn-small">
+                        Ver en Instagram <FaInstagram />
+                      </a>
+                    )}
                   </div>
 
                   {isAdmin && (
                     <div className="admin-btns-bottom">
-                      <button className="btn-edit-ps" onClick={() => {setEditId(post.id); setFormData(post); setShowModal(true);}}><FaEdit /></button>
-                      <button className="btn-del-ps" onClick={() => handleBorrar(post)}><FaTrash /></button>
+                      <button className="btn-edit-ps" onClick={() => {setEditId(post.id); setFormData(post); setShowModal(true); setPostAbierto(null);}}><FaEdit /></button>
+                      <button className="btn-del-ps" onClick={() => {handleBorrar(post); setPostAbierto(null);}}><FaTrash /></button>
                     </div>
                   )}
                 </div>
               </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}><FaAngleDoubleLeft /></button>
-          <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>‹</button>
-          
-          {totalPages <= 7 ? (
-            [...Array(totalPages)].map((_, i) => (
-              <button key={i+1} onClick={() => setCurrentPage(i+1)} className={currentPage === i+1 ? 'active' : ''}>{i+1}</button>
-            ))
-          ) : (
-            <>
-              <button onClick={() => setCurrentPage(1)} className={currentPage === 1 ? 'active' : ''}>1</button>
-              
-              {currentPage > 3 && <span style={{padding: '0 10px', color: '#e5b3a8'}}>...</span>}
-              
-              {currentPage > 2 && currentPage < totalPages - 1 && (
-                <>
-                  <button onClick={() => setCurrentPage(currentPage - 1)}>{currentPage - 1}</button>
-                  <button className="active">{currentPage}</button>
-                  <button onClick={() => setCurrentPage(currentPage + 1)}>{currentPage + 1}</button>
-                </>
-              )}
-              
-              {currentPage === 2 && (
-                <button className="active">{currentPage}</button>
-              )}
-              
-              {currentPage === totalPages - 1 && (
-                <button className="active">{currentPage}</button>
-              )}
-              
-              {currentPage < totalPages - 2 && <span style={{padding: '0 10px', color: '#e5b3a8'}}>...</span>}
-              
-              <button onClick={() => setCurrentPage(totalPages)} className={currentPage === totalPages ? 'active' : ''}>{totalPages}</button>
-            </>
-          )}
-          
-          <button onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>›</button>
-          <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}><FaAngleDoubleRight /></button>
-        </div>
-      )}
+            </div>
+          </div>
+        );
+      })()}
 
       {showModal && (
         <div className="modal-psico-overlay">

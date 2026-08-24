@@ -3,9 +3,9 @@
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 75px);
-  background: linear-gradient(135deg, #fdfaf9 0%, #fef5f4 100%);
+  background: var(--color-crema);
   padding: 130px 20px 40px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
 }
 
 .registro-card {
@@ -13,9 +13,9 @@
   width: 100%;
   max-width: 480px;
   padding: 35px 30px;
-  border-radius: 28px;
-  border: 2px solid #f9dfdf;
-  box-shadow: 0 15px 40px rgba(229, 179, 168, 0.14);
+  border-radius: 26px;
+  border: 1.5px solid var(--color-borde-sutil);
+  box-shadow: 0 15px 40px rgba(43, 37, 48, 0.08);
   animation: fadeInUp 0.5s ease-out;
 }
 
@@ -31,13 +31,13 @@
 }
 
 .registro-title {
-  font-family: 'Pompiere', cursive;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   text-align: center;
-  font-size: 2.8rem;
-  color: #e5b3a8;
+  font-size: 2rem;
+  color: var(--color-texto-oscuro);
   margin-bottom: 25px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .form-group {
@@ -48,21 +48,23 @@
 }
 
 .form-group label {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.3rem;
-  color: #e5b3a8;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  color: #8a8a8a;
   margin-left: 5px;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.form-group input, 
+.form-group input,
 .form-group select {
   padding: 11px 14px;
   border-radius: 14px;
-  border: 2px solid #f9dfdf;
-  font-family: 'Montserrat', sans-serif;
+  border: 2px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-texto);
   outline: none;
   transition: all 0.3s ease;
   background: #fafafa;
@@ -70,9 +72,9 @@
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #e5b3a8;
+  border-color: var(--color-acento);
   background: white;
-  box-shadow: 0 0 0 3px rgba(229, 179, 168, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 140, 166, 0.1);
 }
 
 .form-group input::placeholder {
@@ -90,13 +92,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
   color: #777;
   justify-content: center;
   margin: 20px 0;
   padding: 12px;
-  background: #fef5f4;
+  background: #FAF6F0;
   border-radius: 12px;
 }
 
@@ -104,7 +106,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #e5b3a8;
+  accent-color: var(--color-acento);
 }
 
 .terms-container label,
@@ -114,7 +116,7 @@
 }
 
 .terms-link {
-  color: #e5b3a8;
+  color: var(--color-texto-oscuro);
   cursor: pointer;
   text-decoration: underline;
   font-weight: 700;
@@ -122,7 +124,7 @@
 }
 
 .terms-link:hover {
-  color: #d4a297;
+  color: var(--color-texto-oscuro);
 }
 
 .registro-actions {
@@ -134,24 +136,24 @@
 }
 
 .btn-primary-reg {
-  background: #e5b3a8;
-  color: white;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 14px 40px;
   border-radius: 50px;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.6rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
   width: 100%;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35);
 }
 
 .btn-primary-reg:hover:not(:disabled) {
-  background: #d4a297;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.1);
 }
 
 .btn-primary-reg:disabled {
@@ -166,7 +168,7 @@
   border: none;
   color: #aaa;
   text-decoration: underline;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
   padding: 6px;
@@ -188,7 +190,7 @@
   }
 
   .registro-title {
-    font-size: 2.5rem;
+    font-size: 1.7rem;
   }
 
   .form-grid-custom {
@@ -197,11 +199,11 @@
   }
 
   .form-group label {
-    font-size: 1.3rem;
+    font-size: 0.8rem;
   }
 
   .btn-primary-reg {
-    font-size: 1.5rem;
+    font-size: 0.95rem;
     padding: 13px 35px;
   }
 }

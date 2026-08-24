@@ -1,12 +1,31 @@
-
-
 :root {
-  --bg-page: #FCF8F8;
-  --bg-navbar: #F9DFDF;
-  --text-color: #333;
+  /* ---- Paleta general del sitio: Rosa Malva (elegido por el cliente
+     entre 6 opciones) + fondo blanco. */
+  --color-crema: #FFFFFF;        /* fondo blanco */
+  --color-crema-suave: #FDF7F9;
+  --color-acento: #D48CA6;       /* Rosa Malva (Opción 3) - relleno de botones */
+  --color-acento-hover: #C97B98; /* Rosa Empolvado (Opción 1) - hover de botones y color de títulos */
+  --color-acento-medio: #E7C0CE; /* rosa suave, para bordes/hovers secundarios */
+  --color-acento-oscuro: #772C48; /* rosa bien oscuro - texto/íconos sobre fondos claros, insignias */
+  --color-acento-suave: #F2DDE4; /* fondos suaves, bordes finos */
+  --color-acento-claro: #FAF1F4; /* fondos grandes (círculos de íconos, imágenes) */
+  --color-texto: #4A4350;        /* texto de cuerpo */
+  --color-texto-oscuro: #2B2530; /* títulos */
+  --color-borde: #F2DDE4;
 
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* alias legacy para compatibilidad con estilos existentes */
+  --bg-page: var(--color-crema);
+  --bg-navbar: #FDFBF9;
+  --color-borde-sutil: #EFE3D8; /* línea sutil del navbar -- para usar en vez de rosa donde no hace falta color */
+  --text-color: var(--color-texto);
+
+  font-family: 'Manrope', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
+}
+
+h1, h2, h3, h4,
+.font-titulo {
+  font-family: 'Plus Jakarta Sans', "Segoe UI", sans-serif;
 }
 
 /* Reset */
@@ -25,16 +44,24 @@ body {
 }
 
 
+/* Los modales propios del sitio (Asistente IA, Nuevo Post, etc.) usan
+   z-index altos (5000-6000) para tapar el resto de la página -- por
+   default SweetAlert2 usa un z-index mucho más bajo (1060), así que si
+   una alerta se dispara mientras uno de esos modales sigue abierto,
+   queda tapada detrás y hay que cerrar el modal para poder leerla. Con
+   esto, cualquier alerta de SweetAlert2 siempre se ve por encima de
+   todo lo demás del sitio. */
+.swal2-container {
+  z-index: 20000 !important;
+}
+
 /* -------------------------
    LINKS
 -------------------------- */
 
 a {
-  color: #646cff;
+  color: inherit;
   text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
 }
 
 
@@ -75,11 +102,8 @@ a:hover {
   font-weight: 600;
 }
 
-CSS
-
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
 }
-

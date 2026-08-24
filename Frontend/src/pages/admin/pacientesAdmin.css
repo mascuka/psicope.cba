@@ -1,0 +1,358 @@
+.pac-container {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+}
+
+.pac-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pac-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 50px;
+  padding: 8px 16px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.pac-search input {
+  border: none;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
+  width: 100%;
+  background: transparent;
+}
+
+.pac-toolbar select,
+.pac-fecha-label input {
+  padding: 9px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--color-borde-sutil);
+  background: white;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+}
+
+.pac-fecha-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.pac-btn-principal,
+.pac-btn-secundario {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.pac-btn-principal {
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
+}
+
+.pac-btn-principal:hover {
+  background: #FDFAF6;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.pac-btn-secundario {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+}
+
+.pac-btn-secundario:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+}
+
+.pac-btn-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pac-card {
+  background: white;
+  border-radius: 20px;
+  padding: 22px;
+  border: 1px solid var(--color-borde-sutil);
+  box-shadow: 0 4px 20px rgba(43, 37, 48, 0.05);
+  margin-bottom: 20px;
+}
+
+.pac-nota {
+  color: #999;
+  font-size: 0.95rem;
+}
+
+/* Obras sociales */
+.pac-obras-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.pac-obra-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FAF6F0;
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+
+.pac-obra-item span {
+  display: block;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* Lista de pacientes */
+.pac-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.pac-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  border: 2px solid transparent;
+}
+
+.pac-item.seleccionado {
+  border-color: var(--color-texto-oscuro);
+}
+
+.pac-item span {
+  display: block;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.pac-btn-eliminar-item {
+  background: none;
+  border: none;
+  color: #d97a7a;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Detalle / ficha */
+.pac-sub-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pac-sub-tabs button {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 6px 4px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #999;
+}
+
+.pac-sub-tabs button.activa {
+  color: var(--color-texto-oscuro);
+  border-bottom-color: var(--color-texto-oscuro);
+}
+
+.pac-ficha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pac-ficha p {
+  margin: 6px 0;
+}
+
+.pac-form-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pac-detalle input,
+.pac-detalle select,
+.pac-detalle textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde-sutil);
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.pac-detalle input:focus,
+.pac-detalle select:focus,
+.pac-detalle textarea:focus {
+  outline: none;
+  border-color: var(--color-acento);
+  background: white;
+}
+
+.pac-form-acciones {
+  display: flex;
+  gap: 10px;
+}
+
+/* Notas y archivos */
+.pac-notas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.pac-nota-form {
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pac-input-archivo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FAF6F0;
+  border: 1px dashed var(--color-borde-sutil);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.pac-notas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pac-nota-item {
+  background: #FAF6F0;
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.pac-nota-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pac-nota-item-header button {
+  background: none;
+  border: none;
+  color: #d97a7a;
+  cursor: pointer;
+}
+
+.pac-archivos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.pac-archivos-lista a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--color-texto-oscuro);
+}
+
+.pac-archivo-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.pac-archivo-item button {
+  background: none;
+  border: none;
+  color: #d97a7a;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.pac-archivo-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fbeeee;
+  color: #b95c5c;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.pac-archivo-error button {
+  background: none;
+  border: none;
+  color: #b95c5c;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.pac-turno-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.pac-turno-acciones button {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}

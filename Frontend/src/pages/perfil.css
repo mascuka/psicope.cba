@@ -1,12 +1,12 @@
-/* perfil.css MEJORADO - CONSISTENTE CON REGISTRO */
+/* perfil.css - CONSISTENTE CON REGISTRO */
 .perfil-wrapper {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdfaf9 0%, #fef5f4 100%);
+  background: var(--color-crema);
   padding: 130px 20px 60px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
 }
 
 .perfil-card {
@@ -14,9 +14,9 @@
   width: 100%;
   max-width: 480px;
   padding: 35px 30px;
-  border-radius: 28px;
-  border: 2px solid #f9dfdf;
-  box-shadow: 0 15px 40px rgba(229, 179, 168, 0.14);
+  border-radius: 26px;
+  border: 1.5px solid var(--color-borde-sutil);
+  box-shadow: 0 15px 40px rgba(43, 37, 48, 0.08);
   animation: fadeInUp 0.5s ease-out;
   position: relative;
 }
@@ -32,28 +32,28 @@
   }
 }
 
+/* De flujo normal (no absolute): así nunca se puede llegar a superponer con
+   el título, sin importar qué tan largo sea. */
 .btn-volver {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: #f9dfdf;
-  color: #8a5e5e;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 8px 16px;
   border-radius: 15px;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.2rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-bottom: 18px;
   transition: all 0.3s;
 }
 
 .btn-volver:hover {
-  background: #e5b3a8;
-  color: white;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
   transform: translateX(-3px);
 }
 
@@ -65,9 +65,9 @@
 }
 
 .perfil-title {
-  font-family: 'Pompiere', cursive;
-  font-size: 2.8rem;
-  color: #e5b3a8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  color: var(--color-texto-oscuro);
   margin: 0;
   display: flex;
   align-items: center;
@@ -84,7 +84,7 @@
   gap: 14px;
 }
 
-/* INFO-ROW REDISEÑADO - COMO FORM-GROUP DE REGISTRO */
+/* INFO-ROW - COMO FORM-GROUP DE REGISTRO */
 .info-row {
   display: flex;
   flex-direction: column;
@@ -92,11 +92,13 @@
 }
 
 .info-row label {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.3rem;
-  color: #e5b3a8;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  color: #8a8a8a;
   margin-left: 5px;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -105,10 +107,10 @@
 .info-row p {
   padding: 8px 14px;
   border-radius: 14px;
-  border: 2px solid #f9dfdf;
-  font-family: 'Montserrat', sans-serif;
+  border: 2px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-texto);
   background: #fafafa;
   margin: 0;
   min-height: 38px;
@@ -118,7 +120,7 @@
 }
 
 .info-row p:hover {
-  border-color: #e5b3a8;
+  border-color: var(--color-borde-sutil);
   background: white;
 }
 
@@ -126,10 +128,10 @@
 .perfil-input {
   padding: 8px 14px;
   border-radius: 14px;
-  border: 2px solid #f9dfdf;
-  font-family: 'Montserrat', sans-serif;
+  border: 2px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-texto);
   outline: none;
   transition: all 0.3s ease;
   background: #fafafa;
@@ -138,9 +140,9 @@
 }
 
 .perfil-input:focus {
-  border-color: #e5b3a8;
+  border-color: var(--color-acento);
   background: white;
-  box-shadow: 0 0 0 3px rgba(229, 179, 168, 0.1);
+  box-shadow: 0 0 0 3px rgba(212, 140, 166, 0.1);
 }
 
 /* ACCIONES - CONSISTENTE CON REGISTRO */
@@ -154,25 +156,25 @@
 
 .btn-edit,
 .btn-save {
-  background: #e5b3a8;
-  color: white;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 14px 40px;
   border-radius: 50px;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.6rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
   width: 100%;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35);
 }
 
 .btn-edit:hover,
 .btn-save:hover {
-  background: #d4a297;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.1);
 }
 
 .btn-cancel {
@@ -180,7 +182,7 @@
   border: none;
   color: #aaa;
   text-decoration: underline;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
   padding: 6px;
@@ -191,12 +193,26 @@
   color: #888;
 }
 
-.loader-perfil {
-  text-align: center;
-  margin-top: 100px;
-  font-family: 'Pompiere', cursive;
-  font-size: 2.2rem;
-  color: #e5b3a8;
+.btn-editar-cabecera {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-editar-cabecera:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 /* SECCIÓN MIS COMPRAS */
@@ -212,53 +228,59 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px;
-  border: 2px solid #f9dfdf;
+  border: 2px solid var(--color-borde-sutil);
   border-radius: 14px;
   background: #fafafa;
   transition: all 0.3s;
 }
 
 .compra-item:hover {
-  border-color: #e5b3a8;
+  border-color: var(--color-borde-sutil);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(229, 179, 168, 0.15);
+  box-shadow: 0 4px 12px rgba(43, 37, 48, 0.08);
 }
 
 .compra-item span {
   font-weight: 600;
-  color: #555;
-  font-family: 'Montserrat', sans-serif;
+  color: var(--color-texto);
+  font-family: 'Manrope', sans-serif;
   font-size: 0.9rem;
 }
 
 .btn-descarga {
-  background: #e5b3a8;
-  color: white;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 9px 16px;
   border-radius: 50px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.3rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.88rem;
   font-weight: 700;
   transition: all 0.3s;
-  box-shadow: 0 3px 10px rgba(229, 179, 168, 0.25);
 }
 
-.btn-descarga:hover {
-  background: #d4a297;
+.btn-descarga:hover:not(:disabled) {
+  background: #FDFAF6;
+  color: var(--color-texto-oscuro);
+  border-color: var(--color-borde-sutil);
   transform: translateY(-2px);
-  box-shadow: 0 5px 14px rgba(229, 179, 168, 0.35);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.btn-descarga:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .empty-state {
   text-align: center;
   padding: 30px 20px;
   color: #999;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.95rem;
 }
 
@@ -273,11 +295,11 @@
   }
 
   .perfil-title {
-    font-size: 2.5rem;
+    font-size: 1.7rem;
   }
 
   .info-row label {
-    font-size: 1.3rem;
+    font-size: 0.8rem;
   }
 
   .compra-item {
@@ -290,14 +312,19 @@
     width: 100%;
   }
 
-  .btn-descarga {
+  .compra-item-acciones {
     width: 100%;
+  }
+
+  .btn-descarga {
+    flex: 1;
     justify-content: center;
+    padding: 9px 10px;
   }
 
   .btn-edit,
   .btn-save {
-    font-size: 1.5rem;
+    font-size: 0.95rem;
     padding: 13px 35px;
   }
 }
@@ -307,16 +334,16 @@
    MODAL SWEETALERT2 PARA MIS COMPRAS
    ============================================ */
 .swal2-popup {
-  border-radius: 28px !important;
+  border-radius: 26px !important;
   padding: 35px !important;
-  border: 2px solid #f9dfdf !important;
-  font-family: 'Montserrat', sans-serif !important;
+  border: 1.5px solid var(--color-borde-sutil) !important;
+  font-family: 'Manrope', sans-serif !important;
 }
 
 .swal2-title {
-  font-family: 'Pompiere', cursive !important;
-  font-size: 2.5rem !important;
-  color: #e5b3a8 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.7rem !important;
+  color: var(--color-texto-oscuro) !important;
   font-weight: 800 !important;
   margin-bottom: 25px !important;
 }
@@ -335,21 +362,21 @@
 }
 
 .swal-label {
-  font-family: 'Pompiere', cursive;
-  font-size: 1.4rem;
-  color: #e5b3a8;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  color: #8a8a8a;
   margin-left: 5px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .swal-input-custom {
   width: 100% !important;
   padding: 12px 16px !important;
   border-radius: 14px !important;
-  border: 2px solid #f9dfdf !important;
-  font-family: 'Montserrat', sans-serif !important;
+  border: 2px solid var(--color-borde-sutil) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 0.95rem !important;
-  color: #555 !important;
+  color: var(--color-texto) !important;
   background: #fafafa !important;
   outline: none !important;
   transition: all 0.3s ease !important;
@@ -358,19 +385,19 @@
 }
 
 .swal-input-custom:focus {
-  border-color: #e5b3a8 !important;
+  border-color: var(--color-acento) !important;
   background: white !important;
-  box-shadow: 0 0 0 3px rgba(229, 179, 168, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(212, 140, 166, 0.1) !important;
 }
 
 .swal-textarea-custom {
   width: 100% !important;
   padding: 12px 16px !important;
   border-radius: 14px !important;
-  border: 2px solid #f9dfdf !important;
-  font-family: 'Montserrat', sans-serif !important;
+  border: 2px solid var(--color-borde-sutil) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 0.95rem !important;
-  color: #555 !important;
+  color: var(--color-texto) !important;
   background: #fafafa !important;
   outline: none !important;
   transition: all 0.3s ease !important;
@@ -381,28 +408,28 @@
 }
 
 .swal-textarea-custom:focus {
-  border-color: #e5b3a8 !important;
+  border-color: var(--color-acento) !important;
   background: white !important;
-  box-shadow: 0 0 0 3px rgba(229, 179, 168, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(212, 140, 166, 0.1) !important;
 }
 
 .swal2-confirm {
-  background: #e5b3a8 !important;
-  color: white !important;
-  border: none !important;
+  background: white !important;
+  color: var(--color-texto-oscuro) !important;
+  border: 1.5px solid var(--color-borde-sutil) !important;
   padding: 14px 40px !important;
   border-radius: 50px !important;
-  font-family: 'Pompiere', cursive !important;
-  font-size: 1.5rem !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
-  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35) !important;
   transition: all 0.3s ease !important;
 }
 
 .swal2-confirm:hover {
-  background: #d4a297 !important;
+  background: #FDFAF6 !important;
+  border-color: var(--color-borde-sutil) !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45) !important;
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.1) !important;
 }
 
 .swal2-cancel {
@@ -410,7 +437,7 @@
   border: none !important;
   color: #aaa !important;
   text-decoration: underline !important;
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 0.95rem !important;
   padding: 6px 20px !important;
   transition: color 0.3s !important;

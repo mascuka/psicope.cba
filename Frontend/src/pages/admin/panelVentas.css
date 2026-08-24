@@ -1,0 +1,263 @@
+.ventas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ventas-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.ventas-filtro-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #999;
+  font-weight: 700;
+}
+
+.ventas-filtro-grupo select,
+.ventas-filtro-grupo input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde-sutil);
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+}
+
+.ventas-filtro-grupo select:focus,
+.ventas-filtro-grupo input:focus {
+  outline: none;
+  background: white;
+}
+
+.ventas-buscador {
+  flex: 1;
+  min-width: 180px;
+}
+
+.ventas-btn-limpiar {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  padding: 8px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  height: 36px;
+}
+
+.ventas-cargando,
+.ventas-sin-datos {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+}
+
+.ventas-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.ventas-resumen-card {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ventas-resumen-valor {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--color-texto-oscuro);
+}
+
+.ventas-resumen-label {
+  font-size: 0.82rem;
+  color: #999;
+  font-weight: 600;
+}
+
+.ventas-grafico-card {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 20px 16px 12px;
+}
+
+.ventas-grafico {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 190px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.ventas-barra-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 28px;
+  flex: 1;
+  height: 100%;
+}
+
+.ventas-barra-valor {
+  font-size: 0.65rem;
+  color: #999;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.ventas-barra {
+  width: 100%;
+  max-width: 34px;
+  background: linear-gradient(180deg, var(--color-acento-hover), var(--color-acento));
+  border-radius: 6px 6px 2px 2px;
+  transition: height 0.3s ease;
+}
+
+.ventas-barra-etiqueta {
+  font-size: 0.72rem;
+  color: #999;
+  margin-top: 6px;
+  text-transform: capitalize;
+}
+
+.ventas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ventas-item {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ventas-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ventas-item-info strong {
+  color: var(--color-texto-oscuro);
+  font-size: 0.98rem;
+}
+
+.ventas-item-comprador {
+  font-size: 0.85rem;
+  color: var(--color-texto);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ventas-icono-cuenta { color: #4FA36A; flex-shrink: 0; }
+.ventas-icono-invitado { color: #C97B98; flex-shrink: 0; }
+
+.ventas-item-fecha {
+  font-size: 0.78rem;
+  color: #999;
+}
+
+.ventas-tag-cuenta,
+.ventas-tag-invitado {
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+}
+
+.ventas-tag-cuenta {
+  background: #E7F5EB;
+  color: #2F7A4A;
+}
+
+.ventas-tag-invitado {
+  background: var(--color-acento-suave);
+  color: var(--color-acento-oscuro);
+}
+
+.ventas-item-derecha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ventas-item-precio {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.ventas-btn-eliminar {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #c0392b;
+  flex-shrink: 0;
+}
+
+.ventas-btn-eliminar:hover:not(:disabled) {
+  background: #FDECEC;
+  border-color: #e0a0a0;
+}
+
+.ventas-btn-eliminar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .ventas-resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .ventas-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ventas-item-derecha {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

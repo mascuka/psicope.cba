@@ -37,37 +37,48 @@ export default function Success() {
       return;
     }
 
+    // Ya no hace falta estar logueado para llegar hasta acá: se puede
+    // comprar como invitado. El link de descarga se pide server-side (con
+    // el payment_id como prueba) en vez de generarlo acá mismo, porque un
+    // invitado no tiene sesión para poder pedirle el signed URL a Storage
+    // directamente.
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setProcesando(false);
-      Swal.fire({
-        icon: "warning",
-        title: "Sesión no encontrada",
-        text: "Tu pago fue exitoso. Inicia sesión y revisa 'Mis Compras' en unos instantes.",
-        confirmButtonColor: "#e5b3a8",
-      }).then(() => navigate("/login"));
-      return;
-    }
 
     // Reintentamos varias veces: el webhook puede tardar uno o dos segundos en llegar
     const MAX_INTENTOS = 10;
     const ESPERA_MS = 1500;
 
     for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
-      const { data: compra } = await supabase
-        .from("compras")
-        .select("id, nombre_material")
-        .eq("payment_id", paymentId)
-        .maybeSingle();
+      const { data } = await supabase.functions.invoke("verificar-compra", {
+        body: { payment_id: paymentId },
+      });
+      const compra = data?.compra;
 
       if (compra) {
         setProcesando(false);
+
+        // Descarga automática, además del mail que ya le mandó el webhook.
+        try {
+          const { data: descarga } = await supabase.functions.invoke("descargar-compra", {
+            body: { payment_id: paymentId },
+          });
+          // El link fuerza la descarga (Content-Disposition: attachment) --
+          // se dispara en esta misma pestaña, no en una nueva (que quedaría
+          // en blanco para siempre, ya que una descarga no "carga" nada
+          // para mostrar ahí).
+          if (descarga?.signedUrl) window.location.href = descarga.signedUrl;
+        } catch (descargaErr) {
+          console.warn("No se pudo iniciar la descarga automática:", descargaErr);
+        }
+
         Swal.fire({
           icon: "success",
           title: "¡Pago Confirmado!",
-          text: `Gracias por adquirir: ${compra.nombre_material}. Ya puedes encontrarlo en tus compras.`,
-          confirmButtonColor: "#e5b3a8",
-        }).then(() => navigate("/mis-compras"));
+          text: user
+            ? `Se envió por correo y se procedió a descargar ${compra.nombre_material}. También lo tenés disponible en "Mis Compras". ¡Esperamos que lo disfrutes!`
+            : `Se envió por correo y se procedió a descargar ${compra.nombre_material}. ¡Esperamos que lo disfrutes!`,
+          confirmButtonColor: "#D48CA6",
+        }).then(() => navigate(user ? "/mis-compras" : "/materiales"));
         return;
       }
 
@@ -83,10 +94,12 @@ export default function Success() {
     Swal.fire({
       icon: "info",
       title: "Tu pago fue aprobado",
-      text: "Puede demorar unos minutos en aparecer en tu cuenta. Si en unos minutos no lo ves, contáctanos con tu ID de pago.",
+      text: user
+        ? "Puede demorar unos minutos en aparecer en tu cuenta. Si en unos minutos no lo ves, contáctanos con tu ID de pago."
+        : "Puede demorar unos minutos en llegarte por mail. Si en unos minutos no te llegó, contáctanos con tu ID de pago.",
       footer: `ID de Pago: ${paymentId}`,
-      confirmButtonColor: "#e5b3a8",
-    }).then(() => navigate("/mis-compras"));
+      confirmButtonColor: "#D48CA6",
+    }).then(() => navigate(user ? "/mis-compras" : "/materiales"));
   };
 
   return (
@@ -105,7 +118,7 @@ export default function Success() {
             width: '50px',
             height: '50px',
             border: '5px solid #f3f3f3',
-            borderTop: '5px solid #e5b3a8',
+            borderTop: '5px solid #2B2530',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             marginBottom: '20px'

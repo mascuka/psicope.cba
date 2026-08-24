@@ -1,0 +1,45 @@
+/* position: fixed + centrado en todo el viewport a propósito: así el
+   "Cargando..." queda siempre a la misma altura en cualquier página, sin
+   importar cuánto padding/alto tenga el contenedor de esa página en
+   particular (eso era lo que lo hacía aparecer más arriba o más abajo
+   según la página). */
+.loader-pagina {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: var(--color-crema);
+  z-index: 10;
+}
+
+.loader-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #FFADAD, #FFD6A5, #FDFFB6, #CAFFBF, #9BF6FF, #A0C4FF, #BDB2FF, #FFC6FF, #FFADAD);
+  animation: loader-girar 1.1s linear infinite;
+  position: relative;
+}
+
+.loader-spinner::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--color-crema);
+}
+
+.loader-texto {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+}
+
+@keyframes loader-girar {
+  to { transform: rotate(360deg); }
+}

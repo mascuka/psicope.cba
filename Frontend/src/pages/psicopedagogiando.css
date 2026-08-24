@@ -1,13 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Pompiere&display=swap');
-
 /* ===============================
    BASE Y ESTRUCTURA
 ================================ */
 .psico-page {
-  padding-top: 130px; 
-  background: #fdfaf9;
+  padding-top: 130px;
+  background: var(--color-crema);
   min-height: 100vh;
-  font-family: 'Pompiere', cursive;
+  font-family: 'Manrope', sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -21,15 +19,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #e5b3a8;
-  font-size: 2rem;
+  color: var(--color-texto-oscuro);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
 }
 
 .psico-spinner {
   width: 45px;
   height: 45px;
-  border: 4px solid #f9dfdf;
-  border-top: 4px solid #e5b3a8;
+  border: 4px solid var(--color-borde-sutil);
+  border-top: 4px solid var(--color-texto-oscuro);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 15px;
@@ -51,20 +51,21 @@
   align-items: center;
   justify-content: center;
   gap: 15px;
-  margin-top: -15px; 
 }
 
 .psico-main-title {
-  font-size: 4rem;
-  color: #e5b3a8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .btn-edit-header-small {
-  background: #fef5f4;
-  color: #e5b3a8;
-  border: 1px solid #f9dfdf;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -76,17 +77,17 @@
   font-size: 0.9rem;
 }
 
-.btn-edit-header-small:hover { 
-  background: #e5b3a8; 
-  color: white; 
+.btn-edit-header-small:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 .psico-sub-phrase {
-  font-family: 'Montserrat', sans-serif;
-  color: #8a5e5e;
-  font-size: 1.15rem;
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+  font-size: 1.1rem;
   margin: 8px 0 25px 0;
-  font-style: italic;
 }
 
 /* ===============================
@@ -94,23 +95,24 @@
 ================================ */
 .header-edit-box {
   background: white;
-  border: 2px solid #f9dfdf;
-  border-radius: 25px;
+  border: 1.5px solid var(--color-borde-sutil);
+  border-radius: 24px;
   padding: 30px;
   max-width: 600px;
   margin: 0 auto 25px;
-  box-shadow: 0 8px 25px rgba(229, 179, 168, 0.15);
+  box-shadow: 0 8px 25px rgba(43, 37, 48, 0.1);
 }
 
 .input-header-title,
 .input-header-phrase {
   width: 100%;
   padding: 15px 20px;
-  border: 2px solid #f9dfdf;
+  border: 2px solid var(--color-borde-sutil);
   border-radius: 15px;
-  font-family: 'Pompiere', cursive;
-  font-size: 1.8rem;
-  color: #6d5b57;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--color-texto-oscuro);
   margin-bottom: 15px;
   box-sizing: border-box;
   transition: border-color 0.3s;
@@ -119,13 +121,13 @@
 .input-header-title:focus,
 .input-header-phrase:focus {
   outline: none;
-  border-color: #e5b3a8;
+  border-color: var(--color-acento);
 }
 
 .input-header-phrase {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 400;
   font-size: 1rem;
-  font-style: italic;
 }
 
 .header-edit-buttons {
@@ -139,8 +141,8 @@
 .btn-cancel-header {
   padding: 12px 30px;
   border-radius: 20px;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
   border: none;
@@ -151,23 +153,26 @@
 }
 
 .btn-save-header {
-  background: #e5b3a8;
-  color: white;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
 }
 
 .btn-save-header:hover {
-  background: #d19a8e;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(229, 179, 168, 0.3);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 .btn-cancel-header {
-  background: #f9dfdf;
-  color: #8a5e5e;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
 }
 
 .btn-cancel-header:hover {
-  background: #f0cdc7;
+  background: #FDFAF6;
 }
 
 /* ===============================
@@ -182,31 +187,33 @@
 
 .psico-search {
   background: white;
-  border: 2px solid #f9dfdf;
+  border: 2px solid var(--color-borde-sutil);
   padding: 10px 25px;
   border-radius: 35px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 4px 15px rgba(229, 179, 168, 0.1);
+  box-shadow: 0 4px 15px rgba(43, 37, 48, 0.06);
 }
 
 .psico-search input {
   border: none;
   outline: none;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   width: 250px;
   font-size: 0.95rem;
 }
 
 .btn-new-psico {
-  background: #e5b3a8;
-  color: white;
-  border: none;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   padding: 10px 25px;
   border-radius: 30px;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
   transition: 0.3s;
   display: flex;
   align-items: center;
@@ -214,109 +221,331 @@
 }
 
 .btn-new-psico:hover {
-  background: #d19a8e;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
   transform: translateY(-2px);
 }
 
 /* ===============================
-   LISTA DE POSTS
+   LISTA DE POSTS (card larga, imagen a la izquierda)
 ================================ */
-.psico-list {
-  max-width: 1000px;
+.psico-sin-resultados {
+  text-align: center;
+  color: var(--color-texto);
+  font-family: 'Manrope', sans-serif;
+  padding: 40px 20px 60px;
+}
+
+/* ===============================
+   GRILLA ESTILO SHORTS/HISTORIAS
+   Miniaturas verticales con el título superpuesto sobre la imagen, como
+   una historia o un Short. Clic en una abre el detalle completo.
+================================ */
+.psico-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 26px;
+  max-width: 1500px;
   margin: 0 auto 60px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
   padding: 0 20px;
   flex: 1;
 }
 
-/* ===============================
-   CARDS DE POST
-================================ */
-.psico-item {
-  display: flex;
-  background: white;
-  border-radius: 35px;
+.psico-thumb {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid #f2e1de;
-  box-shadow: 0 12px 30px rgba(229, 179, 168, 0.08);
-  height: 400px;
+  background: #FAF6F0;
+  cursor: pointer;
+  border: 3px solid var(--color-borde-sutil);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.1);
+  transition: transform 0.2s ease;
 }
 
-.psico-item.rev { 
-  flex-direction: row-reverse; 
+.psico-thumb:hover {
+  transform: translateY(-3px);
 }
 
-/* Parte visual (imagen/video) */
-.psico-visual {
-  flex: 1;
-  min-width: 45%;
-  background: #fef5f4;
-  overflow: hidden;
-  display: flex;
+/* Solo admin, y solo cuando no hay una búsqueda activa (ver
+   arrastreHabilitado en Psicopedagogiando.jsx) -- cursor de "agarrar"
+   apenas pasa el mouse, para que quede claro que la tarjeta se puede
+   mover, sin agregar ningún ícono extra que compita con la miniatura. */
+.psico-thumb-arrastrable:hover {
+  cursor: grab;
+  outline: 2px dashed var(--color-acento);
+  outline-offset: 3px;
 }
 
-.media-full {
+.psico-thumb-arrastrable:active {
+  cursor: grabbing;
+}
+
+.psico-thumb-arrastrando {
+  opacity: 0.45;
+  transform: scale(0.97);
+}
+
+.psico-thumb img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* "contain", no "cover": la tarjeta es siempre 9:16, pero una foto que
+     el admin sube a mano puede tener cualquier proporción -- con "cover"
+     se recortaba agresivo (perdía texto/contenido en los bordes). Con
+     "contain" se ve completa, con el fondo crema de la tarjeta rellenando
+     lo que sobra. Las imágenes que ya arma el asistente son 9:16 exacto,
+     así que a esas no les cambia nada. */
+  object-fit: contain;
   display: block;
 }
 
-.media-clickable {
-  cursor: zoom-in;
-  transition: filter 0.2s ease, transform 0.2s ease;
+.psico-thumb-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0) 55%);
 }
 
-.media-clickable:hover {
-  filter: brightness(0.92);
-}
-
-.video-full-wrapper { 
-  width: 100%; 
-  height: 100%; 
-}
-
-.video-full-wrapper iframe { 
-  width: 100%; 
-  height: 100%; 
-  border: none; 
-}
-
-/* Parte de texto */
-.psico-content {
-  flex: 1.2;
-  padding: 35px 45px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.psico-thumb-titulo {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.25;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.text-wrapper h2 {
-  font-size: 2.3rem;
-  color: #6d5b57;
-  margin-bottom: 12px;
-  line-height: 1;
+.psico-thumb-type {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: white;
+  font-size: 0.85rem;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
 }
 
-.descripcion-corta {
-  font-family: 'Montserrat', sans-serif;
-  color: #555;
+.psico-thumb-ig {
+  top: 14px;
+  right: 14px;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+}
+
+.psico-thumb-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.2rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* ===============================
+   MODAL DE DETALLE (imagen a la izquierda, texto completo a la derecha)
+================================ */
+.psico-detalle-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5500;
+  padding: 20px;
+}
+
+.psico-detalle-box {
+  display: flex;
+  background: white;
+  border-radius: 22px;
+  overflow: hidden;
+  max-width: 880px;
+  width: 100%;
+  height: 82vh;
+  max-height: 82vh;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.psico-detalle-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Este botón siempre tiene las dos clases juntas en el JSX -- ".close-x"
+   (compartida con otros modales) también trae su propio top/right, y como
+   se define después en la hoja le termina ganando a los de acá arriba,
+   corriendo la cruz de lugar. El selector compuesto pesa más que
+   cualquiera de las dos clases sueltas, así que gana siempre. */
+.close-x.psico-detalle-close {
+  top: 10px;
+  right: 10px;
+}
+
+.psico-item-desc-full {
+  font-family: 'Manrope', sans-serif;
   font-size: 0.95rem;
+  color: var(--color-texto);
   line-height: 1.6;
+  margin: 0 0 16px;
   word-break: break-word;
+  overflow-y: auto;
+}
+
+/* Proporción de historia/short (9:16) -- el ancho se deriva del alto
+   real del modal en vez de un porcentaje fijo, para que la imagen quede
+   angosta y alta como corresponde, no un recorte casi cuadrado. */
+.psico-item-media {
+  position: relative;
+  flex: 0 0 auto;
+  height: 100%;
+  aspect-ratio: 9 / 16;
+  background: #FAF6F0;
+  overflow: hidden;
+}
+
+.psico-item-media img,
+.psico-item-media > div {
+  width: 100%;
+  height: 100%;
+}
+
+.psico-item-media img {
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* El embed de video tiene su propio aspect-ratio; que no lo pise la regla
+   general de arriba que estira los divs hijos a 100% de alto. */
+.psico-item-media .psico-video-embed {
+  height: auto;
+}
+
+.psico-card-media-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FAF6F0;
+  color: var(--color-texto-oscuro);
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.psico-card-play-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.psico-card-play-badge svg {
+  font-size: 2.8rem;
+  color: white;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.psico-card-ig-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.psico-item-body {
+  flex: 1;
+  max-width: 420px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.psico-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.psico-card-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-borde-sutil);
+  background: #FAF6F0;
+}
+
+.psico-card-handle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: var(--color-texto-oscuro);
+}
+
+.psico-card-type-icon {
+  margin-left: auto;
+  color: var(--color-texto-oscuro);
+  font-size: 0.9rem;
+}
+
+.psico-item-body h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+  margin: 0 0 10px;
+  line-height: 1.25;
 }
 
 /* ===============================
    FOOTER DEL CARD
 ================================ */
-.psico-footer-card {
+.psico-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 25px;
+  margin-top: auto;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -327,41 +556,62 @@
   flex-wrap: wrap;
 }
 
+/* ===============================
+   VIDEO EN LIGHTBOX (SweetAlert2)
+================================ */
+.psico-video-embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.psico-video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .btn-noticia-rosa {
-  background: #e5b3a8;
-  color: white;
+  background: white;
+  color: var(--color-texto-oscuro);
   padding: 8px 18px;
   border-radius: 20px;
   text-decoration: none;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
   gap: 6px;
-  border: none;
+  border: 1.5px solid var(--color-borde-sutil);
   cursor: pointer;
   transition: 0.3s;
 }
 
 .btn-noticia-rosa:hover {
-  background: #d19a8e;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
   transform: translateY(-2px);
 }
 
 /* Botones de admin */
-.admin-btns-bottom { 
-  display: flex; 
+.admin-btns-bottom {
+  display: flex;
   gap: 10px;
-  margin-right: 15px; 
+  margin-right: 15px;
   margin-bottom: 10px;
 }
 
-.btn-edit-ps, 
+.btn-edit-ps,
 .btn-del-ps {
-  background: #fef5f4;
-  color: #e5b3a8;
-  border: 1px solid #f9dfdf;
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -369,15 +619,16 @@
   transition: 0.3s;
 }
 
-.btn-edit-ps:hover { 
-  background: #e5b3a8; 
-  color: white; 
+.btn-edit-ps:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
-.btn-del-ps:hover { 
-  background: #c0392b; 
-  color: white; 
-  border-color: #c0392b; 
+.btn-del-ps:hover {
+  background: #c0392b;
+  color: white;
+  border-color: #c0392b;
 }
 
 /* ===============================
@@ -397,7 +648,7 @@
 .modal-psico-box {
   background: white;
   padding: 35px;
-  border-radius: 35px;
+  border-radius: 28px;
   width: 95%;
   max-width: 500px;
   position: relative;
@@ -406,29 +657,31 @@
 }
 
 .modal-title {
-  font-size: 2.5rem;
-  color: #e5b3a8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: var(--color-texto-oscuro);
   margin-bottom: 25px;
   text-align: center;
 }
 
 .modal-label {
   display: block;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 0.8rem;
-  color: #8a5e5e;
+  color: var(--color-texto);
   margin-bottom: 5px;
   margin-left: 5px;
 }
 
-.ps-input, 
+.ps-input,
 .ps-area {
   width: 100%;
   margin-bottom: 15px;
   padding: 12px;
-  border: 2px solid #f9dfdf;
+  border: 2px solid var(--color-borde-sutil);
   border-radius: 12px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Manrope', sans-serif;
   box-sizing: border-box;
   transition: border-color 0.3s;
 }
@@ -436,24 +689,27 @@
 .ps-input:focus,
 .ps-area:focus {
   outline: none;
-  border-color: #e5b3a8;
+  border-color: var(--color-acento);
 }
 
 .ps-btn-main {
   width: 100%;
-  background: #e5b3a8;
-  color: white;
+  background: white;
+  color: var(--color-texto-oscuro);
   padding: 15px;
   border-radius: 15px;
-  font-size: 1.5rem;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
   cursor: pointer;
-  font-family: 'Pompiere', cursive;
-  border: none;
+  border: 1.5px solid var(--color-borde-sutil);
   transition: 0.3s;
 }
 
 .ps-btn-main:hover {
-  background: #d19a8e;
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
   transform: translateY(-2px);
 }
 
@@ -464,53 +720,14 @@
   background: none;
   border: none;
   font-size: 1.4rem;
-  color: #e5b3a8;
+  color: var(--color-texto-oscuro);
   cursor: pointer;
   transition: 0.3s;
 }
 
 .close-x:hover {
-  color: #d19a8e;
+  color: var(--color-texto-oscuro);
   transform: rotate(90deg);
-}
-
-/* ===============================
-   PAGINACIÓN
-================================ */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 0 25px 0;
-  margin-top: auto;
-}
-
-.pagination button {
-  background: white;
-  border: 1px solid #f9dfdf;
-  padding: 8px 18px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 1.3rem;
-  color: #6d5b57;
-  font-family: 'Pompiere', cursive;
-  transition: 0.3s;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #f9dfdf;
-  transform: translateY(-2px);
-}
-
-.pagination button.active { 
-  background: #e5b3a8; 
-  color: white; 
-  border-color: #e5b3a8; 
-}
-
-.pagination button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }
 
 /* ===============================
@@ -518,7 +735,7 @@
 ================================ */
 @media (max-width: 800px) {
   .psico-main-title {
-    font-size: 2.8rem;
+    font-size: 2rem;
   }
 
   .psico-sub-phrase {
@@ -540,7 +757,7 @@
   }
 
   .btn-new-psico {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 10px 20px;
   }
 
@@ -549,7 +766,7 @@
   }
 
   .input-header-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   .header-edit-buttons {
@@ -562,41 +779,37 @@
     justify-content: center;
   }
 
-  .psico-list {
+  .psico-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 12px;
     margin-bottom: 40px;
   }
 
-  .psico-item { 
-    flex-direction: column !important; 
-    height: auto !important;
-  }
-  
-  .psico-visual { 
-    width: 100% !important;
-    aspect-ratio: 16 / 9; 
-    height: auto !important;
-    min-width: 100% !important;
-    flex: none;
+  .psico-thumb-titulo {
+    font-size: 0.85rem;
   }
 
-  .psico-content {
-    padding: 25px !important;
-    min-height: 250px; 
-  }
-
-  .text-wrapper h2 { 
-    font-size: 1.8rem; 
-  }
-  
-  .psico-footer-card {
+  .psico-detalle-box {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    height: auto;
+    max-height: 92vh;
+    overflow-y: auto;
   }
-  
-  .admin-btns-bottom {
+
+  .psico-item-media {
+    flex-basis: auto;
+    height: auto;
+    aspect-ratio: 4 / 3;
     width: 100%;
-    justify-content: flex-start;
-    margin: 0;
+  }
+
+  .psico-item-body {
+    padding: 20px;
+    overflow-y: visible;
+  }
+
+  .psico-item-body h3 {
+    font-size: 1.15rem;
   }
 }

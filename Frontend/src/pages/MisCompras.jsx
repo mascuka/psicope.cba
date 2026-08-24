@@ -2,15 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2'; 
-import { FaDownload, FaCalendarAlt, FaEdit, FaArrowLeft, FaShoppingBag } from 'react-icons/fa';
-import * as Icons from 'react-icons/fa'; 
-import "./perfil.css"; 
+import { FaDownload, FaCalendarAlt, FaEdit, FaArrowLeft, FaShoppingBag, FaEnvelope } from 'react-icons/fa';
+import * as Icons from 'react-icons/fa';
+import Loader from "../components/Loader";
+import "./perfil.css";
 
 export default function MisCompras() {
   const navigate = useNavigate();
   const [compras, setCompras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [enviandoId, setEnviandoId] = useState(null);
+  const [usuario, setUsuario] = useState(null);
 
   // Estados para textos dinámicos desde contenido_mis_compras
   const [titulo, setTitulo] = useState("Mis Compras");
@@ -26,18 +29,22 @@ export default function MisCompras() {
     try {
       // 1. Obtener usuario y verificar si es Admin por ROL en la BD
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         // Verificar el rol en la tabla usuarios
         const { data: userData } = await supabase
           .from("usuarios")
-          .select("rol")
+          .select("rol, nombre, email")
           .eq("id", user.id)
           .single();
-        
+
         if (userData?.rol === "admin") {
           setIsAdmin(true);
         }
+        // El email de la sesión (auth) es siempre el real y actual; el de la
+        // tabla "usuarios" es una copia que puede haber quedado desactualizada
+        // -- por eso el de auth tiene prioridad, no al revés.
+        setUsuario({ email: user.email || userData?.email, nombre: userData?.nombre });
       }
 
       // 2. Cargar Textos de la tabla contenido_mis_compras
@@ -54,8 +61,9 @@ export default function MisCompras() {
       if (user) {
         const { data, error } = await supabase
           .from("compras")
-          .select(`id, fecha, nombre_material, precio_pagado, materiales ( archivo_url )`)
+          .select(`id, fecha, nombre_material, precio_pagado, materiales ( archivo_url, nombre_descarga )`)
           .eq("usuario_id", user.id)
+          .eq("status", "approved")
           .order('fecha', { ascending: false });
         
         if (error) throw error;
@@ -69,18 +77,23 @@ export default function MisCompras() {
   };
 
   const editarCabecera = () => {
+    // Escapado básico -- un título/subtítulo con comillas o < > rompía el
+    // HTML armado a mano (la comilla cerraba el atributo antes de tiempo,
+    // < > adentro del textarea se interpretaba como etiquetas).
+    const escaparHtml = (texto) => (texto || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     Swal.fire({
       title: 'Editar Cabecera',
       html: `
         <div class="swal-edit-container">
           <div class="swal-form-group">
             <label class="swal-label">Título</label>
-            <input id="swal-titulo" class="swal-input-custom" placeholder="Título" value="${titulo}">
+            <input id="swal-titulo" class="swal-input-custom" placeholder="Título" value="${escaparHtml(titulo)}">
           </div>
-          
+
           <div class="swal-form-group">
             <label class="swal-label">Subtítulo</label>
-            <textarea id="swal-subtitulo" class="swal-textarea-custom" placeholder="Subtítulo">${subtitulo}</textarea>
+            <textarea id="swal-subtitulo" class="swal-textarea-custom" placeholder="Subtítulo">${escaparHtml(subtitulo)}</textarea>
           </div>
         </div>
       `,
@@ -95,8 +108,10 @@ export default function MisCompras() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await supabase.from("contenido_mis_compras").update({ contenido: result.value.titulo }).eq("id", 'mc_titulo');
-          await supabase.from("contenido_mis_compras").update({ contenido: result.value.subtitulo }).eq("id", 'mc_subtitulo');
+          const { error: err1 } = await supabase.from("contenido_mis_compras").update({ contenido: result.value.titulo }).eq("id", 'mc_titulo');
+          if (err1) throw err1;
+          const { error: err2 } = await supabase.from("contenido_mis_compras").update({ contenido: result.value.subtitulo }).eq("id", 'mc_subtitulo');
+          if (err2) throw err2;
           await fetchData();
           Swal.fire({
             icon: 'success',
@@ -140,13 +155,41 @@ export default function MisCompras() {
     }
   };
 
+  const reenviarPorCorreo = async (compra) => {
+    if (!usuario?.email) return;
+    setEnviandoId(compra.id);
+    try {
+      const { error } = await supabase.functions.invoke("notificar-compra-material", {
+        body: {
+          email: usuario.email,
+          nombre: usuario.nombre,
+          nombre_material: compra.nombre_material,
+          archivo_url: compra.materiales?.archivo_url,
+          nombre_descarga: compra.materiales?.nombre_descarga,
+        },
+      });
+      if (error) throw error;
+      Swal.fire({
+        icon: 'success',
+        title: '¡Enviado con éxito!',
+        text: 'Puede tardar unos minutos en llegarte por correo.',
+        confirmButtonColor: '#D48CA6',
+      });
+    } catch (error) {
+      console.error("Error reenviando material por correo:", error);
+      Swal.fire("Error", "No se pudo enviar el correo. Probá de nuevo en unos minutos.", "error");
+    } finally {
+      setEnviandoId(null);
+    }
+  };
+
   const eliminarCompra = async (compraId) => {
     const res = await Swal.fire({
       title: '¿Quitar esta compra de prueba?',
       text: "Vas a poder volver a comprarlo (o acreditártelo) para seguir probando.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#e5b3a8',
+      confirmButtonColor: '#D48CA6',
       confirmButtonText: 'Sí, quitar'
     });
     if (!res.isConfirmed) return;
@@ -164,7 +207,7 @@ export default function MisCompras() {
 
   const DynamicIcon = Icons[iconName] || FaShoppingBag;
 
-  if (loading) return <div className="perfil-wrapper"><div className="loader-perfil">Cargando...</div></div>;
+  if (loading) return <div className="perfil-wrapper"><Loader /></div>;
 
   return (
     <div className="perfil-wrapper">
@@ -173,7 +216,7 @@ export default function MisCompras() {
           <FaArrowLeft /> Volver
         </button>
 
-        <div className="perfil-header-simple" style={{ marginTop: '20px' }}>
+        <div className="perfil-header-simple">
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -187,25 +230,7 @@ export default function MisCompras() {
             
             {/* BOTÓN EDITAR - Visible solo para admin */}
             {isAdmin && (
-              <button 
-                onClick={editarCabecera} 
-                style={{ 
-                  background: '#e5b3a8', 
-                  border: 'none', 
-                  color: 'white',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.85rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.target.style.background = '#d49b8f'}
-                onMouseLeave={(e) => e.target.style.background = '#e5b3a8'}
-              >
+              <button onClick={editarCabecera} className="btn-editar-cabecera">
                 <FaEdit size={14} /> Editar
               </button>
             )}
@@ -236,18 +261,27 @@ export default function MisCompras() {
                     <span style={{ fontSize: '0.75rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <FaCalendarAlt size={10} /> {new Date(compra.fecha).toLocaleDateString()}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#e5b3a8', fontWeight: 'bold' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-texto-oscuro)', fontWeight: 'bold' }}>
                       Importe abonado: ${compra.precio_pagado || "0"}
                     </span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <button 
+                <div className="compra-item-acciones" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button
                     onClick={() => descargarArchivo(compra.materiales?.archivo_url, compra.nombre_material)}
                     className="btn-descarga"
+                    title="Descargar"
                   >
                     <FaDownload />
+                  </button>
+                  <button
+                    onClick={() => reenviarPorCorreo(compra)}
+                    className="btn-descarga"
+                    title="Enviar por correo"
+                    disabled={enviandoId === compra.id}
+                  >
+                    <FaEnvelope />
                   </button>
                   {isAdmin && (
                     <button

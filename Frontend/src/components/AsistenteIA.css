@@ -1,0 +1,554 @@
+.btn-asistente-ia {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  padding: 10px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.btn-asistente-ia:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.ia-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+  padding: 20px;
+}
+
+.ia-modal {
+  background: white;
+  border-radius: 26px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ia-modal-ancho {
+  max-width: 1300px;
+}
+
+/* Encabezado fijo (título + cruz de cerrar) -- no se va con el scroll de
+   abajo, así la cruz siempre está a mano sin importar cuánto bajaste. */
+.ia-modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px 32px 0;
+}
+
+.ia-modal-header .ia-title {
+  margin: 0;
+}
+
+.ia-modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 32px 32px;
+}
+
+.ia-cargando {
+  text-align: center;
+  color: var(--color-texto);
+  font-family: 'Manrope', sans-serif;
+  padding: 30px 0;
+}
+
+.ia-tema-box {
+  max-width: 420px;
+  margin: 0 auto 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ia-tema-input {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 30px;
+  border: 1.5px solid var(--color-borde-sutil);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  background: #fafafa;
+  box-sizing: border-box;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.ia-tema-input:focus {
+  outline: none;
+  background: white;
+}
+
+.ia-tema-nota {
+  margin: 0;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  color: #8a8a8a;
+}
+
+.ia-btn-generar-todos {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+/* El asistente genera un solo borrador por vez (antes eran 2 en simultáneo)
+   -- ya no hace falta una grilla de varias columnas, un único slot centrado
+   se ve mejor y deja más lugar para que la imagen no quede chica. */
+.ia-slots {
+  display: flex;
+  justify-content: center;
+}
+
+.ia-close {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.ia-close:hover {
+  color: var(--color-texto-oscuro);
+  transform: rotate(90deg);
+}
+
+.ia-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--color-texto-oscuro);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+}
+
+.ia-referencias {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  color: #8a8a8a;
+  line-height: 1.4;
+}
+
+.ia-referencias svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ia-referencias a {
+  color: var(--color-texto-oscuro);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.ia-btn-generar {
+  background: white;
+  color: var(--color-texto-oscuro);
+  border: 1.5px solid var(--color-borde-sutil);
+  padding: 13px;
+  border-radius: 30px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 0.98rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.ia-btn-generar:hover:not(:disabled) {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+  transform: translateY(-2px);
+}
+
+.ia-btn-generar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ia-spin {
+  animation: ia-girar 0.9s linear infinite;
+}
+
+@keyframes ia-girar {
+  to { transform: rotate(360deg); }
+}
+
+.ia-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* La tarjeta llena va en fila: la imagen a un costado, el panel de
+   opciones + texto al otro -- no apiladas como antes. En pantallas
+   angostas (ver media query abajo) vuelve a apilarse. */
+.ia-slot-lleno {
+  background: var(--color-crema);
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 18px;
+  padding: 16px;
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.ia-slot-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* El texto del posteo (título + contenido + fuentes) tiene su propia
+   altura tope con scroll, así un contenido largo no estira la tarjeta
+   entera -- se mueve con la barra en vez de empujar todo el layout. */
+.ia-slot-texto {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ia-slot-vacio {
+  background: white;
+  border: 2px dashed var(--color-borde-sutil);
+  border-radius: 18px;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-texto-oscuro);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.ia-slot-vacio:hover:not(:disabled) {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+}
+
+.ia-slot-vacio:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ia-slot-vacio svg {
+  font-size: 1.6rem;
+}
+
+.ia-imagen-wrap {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  background: #FAF6F0;
+  flex: 0 0 440px;
+  width: 440px;
+}
+
+.ia-imagen-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 16px;
+}
+
+.ia-credito {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-family: 'Manrope', sans-serif;
+}
+
+.ia-credito a {
+  color: white;
+  text-decoration: underline;
+}
+
+.ia-imagen-faltante {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  aspect-ratio: 9 / 16;
+  border-radius: 16px;
+  background: #fbeeee;
+  border: 1.5px dashed #e5b3b3;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  flex: 0 0 440px;
+  width: 440px;
+}
+
+.ia-imagen-faltante svg {
+  color: #b23b3b;
+  font-size: 1.4rem;
+}
+
+.ia-imagen-faltante p {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.82rem;
+  color: #8a4a4a;
+  line-height: 1.4;
+}
+
+.ia-nota-imagen {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem;
+  color: #8a8a8a;
+  line-height: 1.4;
+}
+
+.ia-post-titulo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+}
+
+.ia-post-contenido {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* Grilla fija de 2 columnas -- el panel de opciones ahora va angosto, al
+   costado de la imagen, así que 2 columnas entran mejor que 3 (con los 6
+   botones de acción quedan 3 filas de 2, todos del mismo tamaño). */
+.ia-acciones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.ia-btn-accion {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  padding: 9px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.ia-btn-accion:hover:not(:disabled) {
+  background: #FDFAF6;
+  color: var(--color-texto-oscuro);
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.ia-btn-accion:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Los botones de acción son <button> (soportan :disabled) menos "Cargar mi
+   imagen", que es un <label> envolviendo un <input type=file> -- un label
+   no tiene estado disabled propio, así que esta clase le da el mismo look
+   apagado a mano cuando esa tarjeta está ocupada. */
+.ia-btn-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ia-btn-no-gusta:hover:not(:disabled) {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Pantallas angostas: la fila imagen+panel no entra cómoda, vuelve a
+   apilarse (imagen arriba, panel abajo) como el layout viejo. */
+@media (max-width: 940px) {
+  .ia-slot-lleno {
+    flex-direction: column;
+  }
+
+  .ia-imagen-wrap,
+  .ia-imagen-faltante {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .ia-modal-header {
+    padding: 20px 20px 0;
+  }
+
+  .ia-modal-body {
+    padding: 12px 20px 24px;
+  }
+
+  .ia-acciones {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Selector de color del texto, dentro del cartel "Editar texto de la
+   imagen" -- la "bolita" es el <input type="color"> nativo del navegador,
+   ya se ve como una pastilla de color clickeable por defecto. */
+.ia-color-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ia-color-input {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--color-borde-sutil);
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+}
+
+.ia-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.ia-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.ia-color-valor {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+  text-transform: uppercase;
+}
+
+/* Arrastrar el bloque de texto: cada texto (principal/secundario) tiene su
+   propio recuadro invisible, puesto justo donde ese texto quedó dibujado --
+   pasar el mouse por ENCIMA del texto (no un botoncito aparte) lo enmarca y
+   muestra la manito para moverlo. Ya no hay que adivinar tocando cualquier
+   parte de la imagen (que además era ambiguo: ¿cuál de los dos textos
+   agarré?). */
+.ia-imagen-wrap.ia-imagen-arrastrando {
+  outline: 3px solid rgba(212, 140, 166, 0.5);
+  outline-offset: -3px;
+}
+
+.ia-frame-texto {
+  position: absolute;
+  border-radius: 12px;
+  border: 2px dashed transparent;
+  cursor: grab;
+  touch-action: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ia-frame-texto:hover {
+  border-color: rgba(212, 140, 166, 0.75);
+  background: rgba(212, 140, 166, 0.08);
+}
+
+.ia-imagen-wrap.ia-imagen-arrastrando .ia-frame-texto:hover {
+  cursor: grabbing;
+}
+
+/* El ícono de girar cuelga siempre del mismo lugar del recuadro (abajo a
+   la derecha) -- solo se hace notar cuando el mouse está encima del
+   recuadro de ESE texto, para no ensuciar la imagen con dos íconos fijos
+   todo el tiempo. */
+.ia-handle-rotar {
+  position: absolute;
+  right: -14px;
+  bottom: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid rgba(212, 140, 166, 0.8);
+  color: #D48CA6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  touch-action: none;
+}
+
+.ia-frame-texto:hover .ia-handle-rotar,
+.ia-imagen-wrap.ia-imagen-arrastrando .ia-handle-rotar {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ia-handle-rotar:hover {
+  background: white;
+}
+
+.ia-handle-rotar:active {
+  background: #D48CA6;
+  color: white;
+}

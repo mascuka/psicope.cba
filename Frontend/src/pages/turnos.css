@@ -1,0 +1,400 @@
+.turnos-container,
+.turnos-container button,
+.turnos-container input,
+.turnos-container textarea,
+.turnos-container a {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+}
+
+.turnos-container h1,
+.turnos-container h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.turnos-container {
+  background: var(--color-crema);
+  padding: 130px 24px 80px;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.turnos-header,
+.turnos-sedes-tabs,
+.turnos-whatsapp-alt {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.turnos-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Datos a la izquierda (más ancha), mapa a la derecha (solo si hay dirección
+   cargada). El grid mide primero el alto natural de cada columna (el
+   formulario, con más campos, es casi siempre el más alto) y esa altura de
+   fila queda fija; align-items: stretch hace que la columna del mapa (el
+   grid item en sí) crezca para igualar esa altura exacta -- sin JS, sin
+   depender de que las fuentes ya hayan cargado, recalculado por el navegador
+   en cada layout. Los "height: 100%" de más abajo son los que dejan que ese
+   alto se propague hacia adentro, hasta el contenedor real del mapa. */
+.turnos-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.turnos-col-form,
+.turnos-col-mapa {
+  min-height: 0;
+}
+
+.turnos-col-form .turnos-form-card,
+.turnos-col-form .turnos-exito-card {
+  height: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+}
+
+.turnos-col-mapa .turnos-sede-info-standalone {
+  height: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.turnos-sede-direccion-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.turnos-link-gmaps {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  white-space: nowrap;
+}
+
+.turnos-link-gmaps svg {
+  font-size: 0.75rem;
+}
+
+.turnos-mapa-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* ---------- Mapa propio (Leaflet + OpenStreetMap) ---------- */
+.turnos-mapa-leaflet-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.turnos-mapa-leaflet {
+  width: 100%;
+  height: 100%;
+}
+
+.turnos-mapa-cargando,
+.turnos-mapa-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  background: #FAF6F0;
+  color: var(--color-texto);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.turnos-header h1 {
+  color: var(--color-texto-oscuro);
+  font-weight: 800;
+  font-size: 2.1rem;
+  margin-bottom: 8px;
+}
+
+.turnos-header p {
+  font-size: 1.05rem;
+}
+
+/* ---------- Tabs de sede ---------- */
+.turnos-sedes-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.turnos-tab-sede {
+  padding: 10px 26px;
+  border-radius: 50px;
+  border: 1.5px solid var(--color-borde-sutil);
+  background: white;
+  color: var(--color-texto-oscuro);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Mismo look "pintado" que el botón de WhatsApp (relleno tenue + borde
+   marcado, sin negro) para diferenciar la sede seleccionada -- acá el
+   color todavía cumple una función (indicar selección), no es decoración. */
+.turnos-tab-sede.activa {
+  background: #FAF6F0;
+  border: 2px solid #DCC9B4;
+  padding: 9px 25px;
+  color: var(--color-texto-oscuro) !important;
+}
+
+.turnos-tab-sede:not(.activa):hover {
+  background: #FDFAF6;
+}
+
+.turnos-btn-icono {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-borde-sutil);
+  background: white;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.turnos-btn-icono:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.turnos-btn-eliminar {
+  border-color: #f0c4c4;
+  color: #d97a7a;
+}
+
+.turnos-btn-eliminar:hover {
+  background: #d97a7a;
+  border-color: #d97a7a;
+  color: white;
+}
+
+/* ---------- Info de sede / mapa ---------- */
+.turnos-sede-info {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid var(--color-borde-sutil);
+  box-shadow: 0 4px 20px rgba(43, 37, 48, 0.05);
+}
+
+.turnos-sede-info-standalone {
+  margin-bottom: 24px;
+}
+
+.turnos-sede-direccion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* ---------- Formularios (sede + solicitud) ---------- */
+.turnos-form-card {
+  background: white;
+  border-radius: 20px;
+  padding: 26px;
+  max-width: 640px;
+  margin: 0 auto 24px;
+  border: 1px solid var(--color-borde-sutil);
+  box-shadow: 0 4px 20px rgba(43, 37, 48, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.turnos-form-reserva {
+  margin-top: 0;
+}
+
+.turnos-form-card h3 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--color-texto-oscuro);
+}
+
+.turnos-form-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .turnos-form-fila { grid-template-columns: 1fr; }
+}
+
+/* Debajo de este ancho ya no entran cómodas las dos columnas: se apila,
+   primero el formulario y después el mapa. */
+@media (max-width: 900px) {
+  .turnos-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.turnos-input,
+.turnos-textarea {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--color-borde-sutil);
+  font-size: 0.95rem;
+  background: #fafafa;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.turnos-input:focus,
+.turnos-textarea:focus {
+  outline: none;
+  background: white;
+}
+
+.turnos-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.turnos-form-acciones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.turnos-btn-confirmar {
+  background: white;
+  color: var(--color-texto-oscuro) !important;
+  border: 1.5px solid var(--color-borde-sutil);
+  padding: 14px 0;
+  border-radius: 50px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex: 1;
+}
+
+.turnos-btn-confirmar:hover:not(:disabled) {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.turnos-btn-confirmar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.turnos-btn-secundario {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro) !important;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.turnos-btn-secundario:hover {
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  color: var(--color-texto-oscuro) !important;
+}
+
+.turnos-form-nota {
+  font-size: 0.95rem;
+  color: #999;
+  text-align: center;
+  margin: 0;
+}
+
+/* ---------- Éxito ---------- */
+.turnos-exito-card {
+  background: #FAF6F0;
+  border: 1.5px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 640px;
+  text-align: center;
+  font-size: 1.1rem;
+  margin: 0 auto 24px;
+}
+
+/* ---------- WhatsApp alternativo (paleta del sitio, no verde) ---------- */
+.turnos-whatsapp-alt {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.turnos-whatsapp-alt p {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+}
+
+.turnos-btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FAF6F0;
+  color: var(--color-texto-oscuro) !important;
+  border: 2px solid #DCC9B4;
+  padding: 12px 28px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.25s ease;
+}
+
+.turnos-btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.1);
+}

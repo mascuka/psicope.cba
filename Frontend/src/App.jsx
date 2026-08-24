@@ -1,8 +1,6 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; 
-import { testConnection } from "./supabase/testConnection";
+import Footer from "./components/Footer";
 
 // Importación de Páginas
 import Home from "./pages/Home";
@@ -14,13 +12,11 @@ import Perfil from "./pages/Perfil";
 import MisCompras from "./pages/MisCompras";
 import RegistroForm from "./pages/registroUsuario/RegistroForm";
 import Success from "./pages/Success"; // <--- Nueva Importación
+import Turnos from "./pages/Turnos";
+import PanelAdmin from "./pages/admin/PanelAdmin";
 
 export default function App() {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    testConnection();
-  }, []);
 
   const handleCancelRegistration = () => {
     navigate("/");
@@ -42,6 +38,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/mis-compras" element={<MisCompras />} />
+          <Route path="/turnos" element={<Turnos />} />
+          <Route path="/admin" element={<PanelAdmin />} />
           
           {/* --- Nueva Ruta para Mercado Pago --- */}
           <Route path="/success" element={<Success />} />

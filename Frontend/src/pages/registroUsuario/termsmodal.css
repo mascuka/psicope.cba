@@ -15,25 +15,27 @@
 /* Diálogo/Card del Modal */
 .modal-dialog {
   background: white;
-  border-radius: 12px;
+  border-radius: 22px;
   width: 90%;
   max-width: 600px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  overflow: hidden; 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 90vh; 
+  max-height: 90vh;
 }
 
 .modal-header {
   padding: 15px 25px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-borde-sutil, #EFE3D8);
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 1.5rem;
-  color: #333;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--color-texto-oscuro, #333);
 }
 
 /* Contenido Principal (donde se hace scroll) */
@@ -60,13 +62,14 @@
 }
 
 .btn-close-modal {
-  padding: 12px 25px;
+  padding: 13px 25px;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 50px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
   cursor: pointer;
   width: 100%;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
 .btn-close-modal:disabled {
@@ -75,13 +78,17 @@
   cursor: not-allowed;
 }
 
+/* Sólido oscuro (no rosa) cuando se habilita: la diferencia de color con
+   el estado gris/deshabilitado de arriba sigue siendo la señal de "ya
+   podés continuar", que acá cumple una función, no es solo decoración. */
 .btn-close-modal:not(:disabled) {
-  background: #007bff;
+  background: var(--color-texto-oscuro, #2B2530);
   color: white;
 }
 
 .btn-close-modal:not(:disabled):hover {
-  background: #005fcc;
+  background: #4A4350;
+  transform: translateY(-2px);
 }
 
 .scroll-warning {

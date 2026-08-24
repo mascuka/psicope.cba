@@ -38,7 +38,7 @@ export default function Login() {
           title: "¡Bienvenido!",
           text: "Sesión iniciada correctamente",
           icon: "success",
-          confirmButtonColor: "#e5b3a8",
+          confirmButtonColor: "#D48CA6",
           timer: 1500,
           showConfirmButton: false
         });
@@ -52,7 +52,7 @@ export default function Login() {
           ? "Credenciales incorrectas" 
           : "Hubo un problema al iniciar sesión",
         icon: "error",
-        confirmButtonColor: "#e5b3a8"
+        confirmButtonColor: "#D48CA6"
       });
     } finally {
       setLoading(false);

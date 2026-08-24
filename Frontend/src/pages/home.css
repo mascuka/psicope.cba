@@ -1,67 +1,74 @@
-:root {
-  --rosa: #e5b3a8;
-  --rosa-hover: #d4a297;
-  --rosa-soft: #f9dfdf;
-  --rosa-light: #fef5f4;
-  --texto: #444;
-  --texto-oscuro: #2c2c2c;
-}
+/* Paleta compartida en index.css (--color-acento, --color-texto, etc.)
+   Antes esta hoja redeclaraba su propio :root con --rosa, y como otra
+   página (materiales.css) también define --rosa en :root con un tono
+   salmón distinto, el que carga después en el bundle final ganaba la
+   cascada y el Home terminaba mostrando ese rosa aunque el código de
+   esta hoja "pidiera" el violeta. Usar las variables únicas de
+   index.css evita que vuelva a pasar. */
 
-/* FUENTE POMPIERE PARA TODO */
+/* TIPOGRAFÍA: Plus Jakarta Sans para títulos, Manrope para el resto */
 .home-container, 
 .home-container button, 
 .home-container input, 
 .home-container textarea, 
 .home-container select,
 .home-container a {
-  font-family: 'Pompiere', sans-serif !important;
-  color: var(--texto);
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+}
+
+.home-container h1,
+.home-container h2,
+.home-container h3,
+.home-container h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .home-container {
-  background: #fdfaf9;
+  background: var(--color-crema);
   padding-bottom: 0;
-  /* CAMBIA ESTO: 75px del Navbar + 55px de espacio = 130px */
-  padding-top: 130px; 
+  padding-top: 78px; /* alto exacto del navbar fijo, sin espacio extra */
   min-height: 100vh;
 }
 
 /* ============================================
-   HERO SECTION - SIN ESPACIO ARRIBA
+   HERO SECTION - TEXTO SOBRE LA IMAGEN
    ============================================ */
 .home-hero {
-  height: 85vh;
+  height: 88vh;
+  min-height: 560px;
   background-size: cover;
   background-position: center;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-start;
   position: relative;
   overflow: hidden;
-  margin-top: 0;
 }
 
+/* Degradé cálido para que el texto blanco se lea sobre cualquier foto */
 .home-hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(32, 38, 43, 0.05) 0%,
+    rgba(32, 38, 43, 0.15) 40%,
+    rgba(32, 38, 43, 0.78) 100%
+  );
   z-index: 1;
 }
 
 .hero-content {
-  background: rgba(255, 255, 255, 0.97);
-  padding: 50px 45px;
-  border-radius: 35px;
-  width: 90%;
-  max-width: 800px;
-  text-align: center;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
-  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 640px;
+  text-align: left;
+  padding: 0 60px 80px;
+  box-sizing: border-box;
   animation: fadeInUp 0.7s ease-out;
-  border: 2px solid rgba(229, 179, 168, 0.25);
 }
 
 @keyframes fadeInUp {
@@ -75,74 +82,123 @@
   }
 }
 
-.hero-content h1 { 
-  font-size: 3.5rem; 
-  margin-bottom: 20px; 
-  color: var(--texto-oscuro);
+.hero-titulo-doble {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.hero-nombre {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2.6rem;
+  color: #ffffff;
   line-height: 1.15;
   font-weight: 800;
+  letter-spacing: -0.4px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-cargo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.35rem;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
 }
 
 .hero-content p { 
-  font-size: 1.6rem; 
-  color: #666; 
-  margin-bottom: 38px;
-  line-height: 1.45;
+  font-size: 1.05rem; 
+  color: rgba(255, 255, 255, 0.9); 
+  margin-bottom: 28px;
+  line-height: 1.5;
+  max-width: 480px;
+  font-weight: 400;
 }
 
 .btn-cta-principal {
-  background: var(--rosa);
+  background: var(--color-acento);
   color: white !important;
-  padding: 16px 48px;
-  border-radius: 50px;
-  font-weight: 800;
+  padding: 13px 36px;
+  border-radius: 10px;
+  font-weight: 700;
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
   display: inline-block;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(229, 179, 168, 0.35);
+  box-shadow: 0 8px 20px rgba(212, 140, 166, 0.18);
 }
 
 .btn-cta-principal:hover {
-  background: var(--rosa-hover);
+  background: var(--color-acento-hover);
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(229, 179, 168, 0.45);
+  box-shadow: 0 12px 26px rgba(212, 140, 166, 0.24);
 }
+
+/* Cuando la admin está editando, el bloque vuelve a ser una tarjeta
+   centrada y legible en vez de texto sobre la imagen */
+.home-hero:has(.admin-edit-card) {
+  align-items: center;
+  justify-content: center;
+}
+
+.home-hero:has(.admin-edit-card) .hero-content {
+  max-width: 720px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.home-hero .admin-edit-card {
+  background: rgba(255, 255, 255, 0.98);
+  text-align: left;
+}
+
+.home-hero .admin-edit-card h3 {
+  color: var(--color-texto-oscuro);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+
 
 /* ============================================
    BENEFICIOS - BALANCEADOS
    ============================================ */
 .home-beneficios {
-  padding: 80px 20px;
-  background: white;
-  position: relative;
+  padding: 60px 20px;
+  background: var(--color-crema);
 }
 
 .beneficios-container {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
 .beneficios-titulo {
   text-align: center;
-  font-size: 3rem;
-  color: var(--rosa);
-  margin-bottom: 60px;
-  font-weight: 800;
+  font-size: 2.1rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 40px;
+  font-weight: 700;
 }
 
 .beneficios-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 35px;
-  margin-bottom: 50px;
+  /* Ancho de card fijo (tope 340px, nunca "gordas"); el espacio extra del
+     contenedor se reparte como separación real entre ellas, no como ancho.
+     La cantidad de columnas se fija por JS según cuántos beneficios haya
+     (ver Home.jsx), para que 3 o 4 cards siempre queden bien acomodadas. */
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
 }
 
 .beneficio-item {
   text-align: center;
-  padding: 35px 28px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--rosa-light) 100%);
+  padding: 28px 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #FAF6F0 100%);
   transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 2px solid transparent;
   position: relative;
@@ -156,7 +212,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(to right, var(--rosa), var(--rosa-hover));
+  background: #DCC9B4;
   transform: scaleX(0);
   transition: transform 0.35s ease;
 }
@@ -167,94 +223,113 @@
 
 .beneficio-item:hover {
   transform: translateY(-10px) scale(1.01);
-  border-color: var(--rosa);
-  box-shadow: 0 18px 45px rgba(229, 179, 168, 0.25);
+  border-color: var(--color-borde-sutil);
+  box-shadow: 0 18px 45px rgba(43, 37, 48, 0.12);
   background: white;
 }
 
 .beneficio-icono {
-  font-size: 3.5rem;
-  color: var(--rosa);
-  margin-bottom: 22px;
+  width: 62px;
+  height: 62px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  /* Relleno beige cálido de siempre (antes sólo aparecía en hover); al
+     pasar el mouse se invierte a blanco con anillo y ícono de ese mismo
+     beige, en vez de un color sólido oscuro. */
+  background: #DCC9B4;
+  border: 2px solid transparent;
+  color: #FFFBF6;
+  font-size: 1.6rem;
   transition: all 0.35s ease;
 }
 
+/* El arcoíris es especial: trae sus propios colores (no usa currentColor)
+   y va sin el círculo de fondo, más grande, para que se luzca a color. */
+.beneficio-icono-arcoiris {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  height: 62px;
+}
+
+.beneficio-icono-arcoiris svg {
+  width: 84px;
+  height: auto;
+}
+
 .beneficio-item:hover .beneficio-icono {
-  transform: scale(1.12) rotateY(360deg);
+  transform: scale(1.08);
+  background: white;
+  border-color: #DCC9B4;
+  color: #DCC9B4;
+}
+
+.beneficio-item:hover .beneficio-icono-arcoiris {
+  transform: scale(1.08);
 }
 
 .beneficio-item h4 {
-  font-size: 1.9rem;
-  color: var(--texto-oscuro);
-  margin-bottom: 12px;
-  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .beneficio-item p {
-  font-size: 1.3rem;
+  font-size: 0.98rem;
   color: #666;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 /* ============================================
    INFO CARD - PROPORCIONADA
    ============================================ */
-.home-info { 
-  padding: 80px 20px; 
-  display: flex; 
-  justify-content: center; 
-  background: linear-gradient(to bottom, #fdfaf9 0%, white 100%);
+.home-info {
+  padding: 55px 20px;
+  display: flex;
+  justify-content: center;
+  background: var(--color-crema);
 }
 
 .info-card {
   background: white;
-  padding: 60px 45px;
-  border-radius: 35px;
-  max-width: 950px;
+  padding: 42px 40px;
+  border-radius: 18px;
+  max-width: 900px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(229, 179, 168, 0.16);
-  border: 2px solid var(--rosa-soft);
+  box-shadow: 0 20px 50px rgba(43, 37, 48, 0.08);
+  border: 1px solid var(--color-borde-sutil);
   position: relative;
-  margin-top: 60px; 
-  padding-top: 50px; 
 }
 
 .info-card::before {
   content: '';
   position: absolute;
-  top: -55px;
+  top: -3px;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
-  height: 60px; 
-  background: radial-gradient(
-    circle at bottom,
-    transparent 15%,
-    #ffadad 16%, #ffadad 28%,
-    #ffd6a5 29%, #ffd6a5 41%,
-    #fdffb6 42%, #fdffb6 54%,
-    #9bf6ff 55%, #9bf6ff 67%,
-    #a0c4ff 68%, #a0c4ff 80%,
-    #bdb2ff 81%, #bdb2ff 92%,
-    transparent 93%
-  );
-  border-radius: 120px 120px 0 0;
-  background-color: white; 
-  padding: 6px;
-  filter: drop-shadow(0 -3px 6px rgba(0,0,0,0.1));
+  width: 70px;
+  height: 4px;
+  background: #DCC9B4;
+  border-radius: 4px;
   z-index: 10;
 }
 
-.info-card h2 { 
-  font-size: 3.2rem; 
-  color: var(--rosa); 
-  margin-bottom: 22px;
-  font-weight: 800;
+.info-card h2 {
+  font-size: 2.1rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 16px;
+  font-weight: 700;
 }
 
 .info-card p { 
-  font-size: 1.6rem; 
+  font-size: 1.1rem; 
   line-height: 1.55;
   color: #555;
 }
@@ -263,26 +338,26 @@
    DESTACADOS - CON PRECIOS Y OFERTAS
    ============================================ */
 .home-destacados {
-  max-width: 1300px;
+  max-width: 1250px;
   margin: 0 auto;
-  padding: 80px 20px;
-  background: white;
+  padding: 55px 20px;
+  background: var(--color-crema);
 }
 
 .destacados-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
 }
 
-.destacados-header h3 { 
-  font-size: 3.2rem; 
-  color: var(--rosa); 
-  margin-bottom: 12px;
-  font-weight: 800;
+.destacados-header h3 {
+  font-size: 2.1rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .destacados-subtitulo {
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   color: #666;
   margin: 0;
   line-height: 1.4;
@@ -290,179 +365,233 @@
 
 .destacados-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 38px;
-  margin-bottom: 30px;
+  /* Mismo criterio que Beneficios: ancho de card fijo, el espacio de más
+     se convierte en separación entre cards, no en cards más anchas. */
+  grid-template-columns: repeat(3, minmax(0, 340px));
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 20px;
 }
 
 .home-destacados .material-card {
   background: white;
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(32, 38, 43, 0.06);
   position: relative;
   display: flex;
   flex-direction: column;
-  transition: all 0.35s ease;
-  border: 2px solid #f5f5f5;
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-borde-sutil);
 }
 
 .home-destacados .material-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 38px rgba(229, 179, 168, 0.22);
-  border-color: var(--rosa-soft);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(32, 38, 43, 0.14);
+  border-color: var(--color-borde-sutil);
 }
 
 .home-destacados .card-image-container {
-  background: #fafafa;
+  background: #FAF6F0;
   width: 100%;
-  height: 250px;
+  aspect-ratio: 4 / 3;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
+  padding: 16px;
   box-sizing: border-box;
   position: relative;
-  border-bottom: 3px solid var(--rosa-soft);
   overflow: hidden;
 }
 
-.home-destacados .card-image-container img { 
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.4s ease;
+/* object-fit: contain (no "cover") porque las portadas suelen ser verticales
+   (páginas de PDF); recortarlas en un marco horizontal les cortaba contenido
+   y se veían mal encuadradas. Así entra la portada completa, con sombra
+   propia, como una hoja apoyada sobre el fondo suave. */
+.home-destacados .card-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(43, 37, 48, 0.14);
+  transition: transform 0.5s ease;
 }
 
-/* BADGE DE OFERTA EN HOME */
+.home-destacados .material-card:hover .card-image-container img {
+  transform: scale(1.06);
+}
+
+/* LISTÓN DE OFERTA EN HOME - cinta diagonal cruzando la esquina, en vez de
+   una píldora chica que pasaba desapercibida. */
+/* Mismos colores que las bandas de Materiales, para que sea consistente
+   entre las dos páginas: oferta en rojo, gratis en verde, pack en índigo. */
 .oferta-badge-home {
   position: absolute;
-  top: 15px;
-  left: -5px;
-  background: #ff4757;
+  top: 18px;
+  left: -42px;
+  width: 165px;
+  background: #E5484D;
   color: white;
-  padding: 5px 15px;
-  font-weight: 900;
-  font-size: 1.1rem;
-  border-radius: 0 50px 50px 0;
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+  padding: 6px 0;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.4px;
+  text-align: center;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 10px rgba(229, 72, 77, 0.4);
   z-index: 10;
 }
 
-/* CONTENEDOR DE PRECIOS EN HOME */
+.oferta-badge-home.ribbon-gratis {
+  background: #2FB767;
+  box-shadow: 0 3px 10px rgba(47, 183, 103, 0.4);
+}
+
+.oferta-badge-home.ribbon-pack {
+  background: #5B5FC7;
+  box-shadow: 0 3px 10px rgba(91, 95, 199, 0.4);
+}
+
+/* CONTENEDOR DE PRECIOS EN HOME - el tachado va arriba, chico, y el precio
+   final abajo, más grande (estilo Mercado Pago) en vez de lado a lado. */
 .price-container-home {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin: 10px 0;
-  padding: 8px;
-  background: var(--rosa-light);
-  border-radius: 12px;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 0;
 }
 
 .price-current-home {
   font-weight: 800;
-  font-size: 1.5rem;
-  color: var(--texto-oscuro);
+  font-size: 1.35rem;
+  color: var(--color-texto-oscuro);
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .price-old-home {
   text-decoration: line-through;
-  color: var(--rosa);
-  font-size: 1.1rem;
-  opacity: 0.6;
+  color: #b399a8;
+  font-size: 0.76rem;
+  font-weight: 500;
 }
 
-.home-destacados .card-body { 
-  padding: 26px 24px 28px; 
-  text-align: center; 
+/* Sin oferta: se reserva el mismo alto (visibility, no display) para que
+   "Muestra"/"Comprar" queden a la misma altura en todas las cards. */
+.price-old-home--oculto {
+  visibility: hidden;
+}
+
+.home-destacados .card-body {
+  padding: 16px 18px 18px;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   flex-grow: 1;
   background: white;
 }
 
-.home-destacados .card-body h4 { 
-  font-size: 2rem !important;
+/* Va sobre la imagen (abajo a la derecha), no en el cuerpo de la card;
+   el descuento ocupa la esquina opuesta (arriba a la izquierda). */
+.tag-edad-home {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(43, 37, 48, 0.15);
+  z-index: 5;
+}
+
+.home-destacados .card-body h4 {
+  font-size: 1.02rem !important;
   margin: 0 !important;
-  line-height: 1.25 !important;
-  font-weight: 800 !important;
-  color: var(--texto-oscuro) !important;
-  letter-spacing: -0.3px;
-  min-height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+  color: var(--color-texto-oscuro) !important;
+  letter-spacing: -0.1px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
 }
 
 .home-destacados .card-body p { 
-  font-size: 1.25rem !important; 
-  color: #777 !important;
-  margin: 0 !important;
-  line-height: 1.5 !important;
-  flex-grow: 1;
+  font-size: 0.9rem !important;
+  color: #82717a !important;
+  margin: 0 0 4px !important;
+  line-height: 1.45 !important;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Bajado a 2 líneas para dar espacio al precio */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 40px;
+  min-height: 2.6em;
 }
 
 .home-card-actions {
-  margin-top: 15px;
+  margin-top: 14px;
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  gap: 8px;
+  align-items: stretch;
 }
 
 .btn-home-muestra {
-  flex: 1;
-  padding: 12px 10px;
-  border-radius: 16px;
-  border: 2.5px solid var(--rosa);
+  flex: 0 0 auto;
+  width: 46px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-borde-sutil);
   background: white;
-  color: var(--rosa);
+  color: var(--color-texto);
   cursor: pointer;
-  font-size: 1.2rem;
-  font-weight: 800;
-  transition: all 0.3s ease;
+  font-size: 1.05rem;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
 }
 
 .btn-home-muestra:hover {
-  background: var(--rosa);
-  color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(229, 179, 168, 0.3);
+  border-color: var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  background: #FDFAF6;
 }
 
+/* Blanco con borde rosa claro en reposo, se "pinta" de rosa recién al pasar
+   el mouse -- para bajarle carga visual a tanto rosa sólido en la card. */
 .btn-home-comprar {
-  flex: 1.5;
+  flex: 1;
   padding: 12px 10px;
-  border-radius: 16px;
-  background: var(--rosa);
-  color: white !important;
+  border-radius: 10px;
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro) !important;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  font-size: 0.92rem;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  box-shadow: 0 6px 22px rgba(229, 179, 168, 0.32);
+  gap: 7px;
 }
 
 .btn-home-comprar:hover {
-  background: var(--rosa-hover);
-  transform: translateY(-4px);
-  box-shadow: 0 10px 32px rgba(229, 179, 168, 0.45);
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
+  color: var(--color-texto-oscuro) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
 }
 
 /* ============================================
@@ -470,19 +599,20 @@
    ============================================ */
 .ver-todo-seccion {
   text-align: center;
-  margin-top: 70px;
-  padding: 50px 20px;
-  background: linear-gradient(135deg, var(--rosa-light) 0%, #ffffff 100%);
-  border-radius: 35px;
-  max-width: 850px;
-  margin: 70px auto 0;
+  margin-top: 45px;
+  padding: 38px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #FAF6F0 100%);
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 18px;
+  max-width: 800px;
+  margin: 45px auto 0;
 }
 
 .frase-motivadora {
-  font-size: 1.9rem;
-  color: var(--texto-oscuro);
-  margin-bottom: 32px;
-  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 22px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -490,22 +620,22 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: var(--rosa);
-  color: white !important;
-  border: none;
-  padding: 16px 48px;
+  background: white;
+  color: var(--color-texto-oscuro) !important;
+  border: 1.5px solid var(--color-borde-sutil);
+  padding: 15px 42px;
   border-radius: 50px;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 26px rgba(229, 179, 168, 0.35);
 }
 
 .btn-ver-todo:hover {
-  background: var(--rosa-hover);
+  background: #FDFAF6;
+  border-color: var(--color-borde-sutil);
   transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(229, 179, 168, 0.45);
+  box-shadow: 0 8px 20px rgba(43, 37, 48, 0.08);
 }
 
 /* ============================================
@@ -516,7 +646,7 @@
   padding: 28px;
   border-radius: 22px;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
-  border: 1px solid var(--rosa-soft);
+  border: 1px solid var(--color-borde-sutil);
   max-width: 100%;
   width: 90%;
   margin: 18px auto;
@@ -540,8 +670,8 @@
 .admin-file-input {
   padding: 10px;
   border-radius: 11px;
-  border: 2px dashed var(--rosa);
-  background: var(--rosa-light);
+  border: 2px dashed var(--color-borde-sutil);
+  background: #FAF6F0;
   cursor: pointer;
 }
 
@@ -581,18 +711,18 @@
   background: white;
   border-radius: 50%;
   padding: 10px;
-  border: 2px solid var(--rosa-soft);
+  border: 2px solid var(--color-borde-sutil);
   cursor: pointer;
-  color: var(--rosa);
+  color: var(--color-texto-oscuro);
   transition: all 0.3s ease;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.09);
 }
 
 .btn-edit-float:hover {
-  background: var(--rosa);
-  color: white;
+  background: #FDFAF6;
+  color: var(--color-texto-oscuro);
   transform: scale(1.12);
-  box-shadow: 0 5px 18px rgba(229, 179, 168, 0.28);
+  box-shadow: 0 5px 18px rgba(43, 37, 48, 0.14);
 }
 
 /* ============================================
@@ -628,28 +758,46 @@
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 768px) {
+/* El navbar pasa a 65px de alto en 968px (ver Navbar.css) */
+@media (max-width: 968px) {
   .home-container {
-    padding-top: 70px;
+    padding-top: 65px;
   }
-  
-  .hero-content h1 { font-size: 2.2rem; }
-  .hero-content p { font-size: 1.3rem; }
-  .btn-cta-principal { padding: 14px 36px; font-size: 1.35rem; }
-  
-  .beneficios-titulo,
-  .destacados-header h3,
-  .info-card h2 { font-size: 2.3rem; }
-  
-  .home-destacados .card-body h4 { font-size: 1.8rem !important; }
-  
-  .destacados-grid,
-  .beneficios-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .frase-motivadora { font-size: 1.6rem; }
-
-  .price-current-home { font-size: 1.3rem; }
 }
 
+@media (max-width: 768px) {
+  .home-hero {
+    height: 78vh;
+    align-items: flex-end;
+  }
+
+  .hero-content {
+    max-width: 100%;
+    padding: 0 22px 40px;
+    text-align: left;
+  }
+
+  .home-hero:has(.admin-edit-card) .hero-content {
+    padding: 0 16px;
+  }
+
+  .hero-nombre { font-size: 1.9rem; }
+  .hero-cargo { font-size: 1.05rem; }
+  .hero-content p { font-size: 0.95rem; margin-bottom: 20px; }
+  .btn-cta-principal { padding: 12px 28px; font-size: 0.92rem; width: 100%; text-align: center; }
+
+  .beneficios-titulo,
+  .destacados-header h3,
+  .info-card h2 { font-size: 1.7rem; }
+
+  .home-destacados .card-body h4 { font-size: 1.2rem !important; }
+
+  .destacados-grid,
+  .beneficios-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .frase-motivadora { font-size: 1.15rem; }
+
+  .price-current-home { font-size: 1.1rem; }
+}

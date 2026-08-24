@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2';
+import Loader from "../components/Loader";
 import "./quienSoy.css";
 
 export default function QuienSoy() {
@@ -123,9 +124,7 @@ export default function QuienSoy() {
   if (loading) {
     return (
       <div className="quien-soy-container">
-        <div className="loading-container">
-          <p>Cargando...</p>
-        </div>
+        <Loader />
       </div>
     );
   }

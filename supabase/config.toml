@@ -115,7 +115,7 @@ port = 54324
 [storage]
 enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "50MiB"
+file_size_limit = "250MiB"
 
 # Uncomment to configure local storage buckets
 # [storage.buckets.images]
@@ -434,3 +434,42 @@ entrypoint = "./functions/mp-webhook/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/mp-webhook/*.html" ]
+[functions.notificar-solicitud-turno]
+enabled = true
+verify_jwt = false
+import_map = "./functions/notificar-solicitud-turno/deno.json"
+
+[functions.notificar-compra-material]
+enabled = true
+verify_jwt = false
+import_map = "./functions/notificar-compra-material/deno.json"
+
+[functions.descargar-compra]
+enabled = true
+verify_jwt = false
+import_map = "./functions/descargar-compra/deno.json"
+
+[functions.reservar-qr-cobro]
+enabled = true
+verify_jwt = false
+import_map = "./functions/reservar-qr-cobro/deno.json"
+
+[functions.generar-post-ia]
+enabled = true
+verify_jwt = false
+import_map = "./functions/generar-post-ia/deno.json"
+
+[functions.buscar-foto-fondo]
+enabled = true
+verify_jwt = false
+import_map = "./functions/buscar-foto-fondo/deno.json"
+
+[functions.verificar-compra]
+enabled = true
+verify_jwt = false
+import_map = "./functions/verificar-compra/deno.json"
+
+[functions.adquirir-material-gratis]
+enabled = true
+verify_jwt = false
+import_map = "./functions/adquirir-material-gratis/deno.json"

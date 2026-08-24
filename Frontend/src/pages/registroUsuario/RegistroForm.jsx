@@ -45,7 +45,7 @@ export default function RegistroForm() {
         title: "Error",
         text: "Las contraseñas no coinciden",
         icon: "error",
-        confirmButtonColor: "#e5b3a8"
+        confirmButtonColor: "#D48CA6"
       });
       return;
     }
@@ -56,7 +56,7 @@ export default function RegistroForm() {
         title: "Campos incompletos",
         text: "Por favor completa todos los campos obligatorios",
         icon: "warning",
-        confirmButtonColor: "#e5b3a8"
+        confirmButtonColor: "#D48CA6"
       });
       return;
     }
@@ -64,14 +64,6 @@ export default function RegistroForm() {
     setLoading(true);
     
     try {
-      console.log("📝 Intentando registrar usuario con datos:", {
-        nombre: form.nombre,
-        email: form.email,
-        fecha_nacimiento: form.fecha_nacimiento,
-        pais: form.pais,
-        telefono: form.telefono
-      });
-
       // 1. Crear usuario en Auth con metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
@@ -90,8 +82,6 @@ export default function RegistroForm() {
         throw authError;
       }
 
-      console.log("✅ Usuario creado en Auth:", authData.user.id);
-
       // 2. Insertar datos en la tabla usuarios
       if (authData.user) {
         const userData = {
@@ -104,9 +94,7 @@ export default function RegistroForm() {
           rol: 'normal'
         };
 
-        console.log("📤 Insertando en tabla usuarios:", userData);
-
-        const { data: insertData, error: profileError } = await supabase
+        const { error: profileError } = await supabase
           .from("usuarios")
           .insert([userData])
           .select();
@@ -116,13 +104,11 @@ export default function RegistroForm() {
           throw profileError;
         }
 
-        console.log("✅ Perfil insertado exitosamente:", insertData);
-
         Swal.fire({
           title: "¡Cuenta creada!",
           text: "Confirma tu email para ingresar.",
           icon: "success",
-          confirmButtonColor: "#e5b3a8"
+          confirmButtonColor: "#D48CA6"
         });
         navigate("/login");
       }
@@ -141,7 +127,7 @@ export default function RegistroForm() {
         title: "Error",
         text: mensajeError,
         icon: "error",
-        confirmButtonColor: "#e5b3a8"
+        confirmButtonColor: "#D48CA6"
       });
     } finally {
       setLoading(false);

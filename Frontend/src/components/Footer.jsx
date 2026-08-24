@@ -1,12 +1,14 @@
 import React from "react";
 import { FaInstagram, FaWhatsapp, FaHeart } from "react-icons/fa";
 import "./footer.css";
+import logoImage from "../assets/logo.png";
 
 export default function Footer() {
   return (
     <footer className="footer-container" style={{ marginTop: 'auto', marginBottom: '0', display: 'block' }}>
       <div className="footer-content">
         <div className="footer-brand">
+          <img src={logoImage} alt="" className="footer-logo-icon" />
           <div className="footer-logo">Psicope.cba</div>
           <span className="footer-separator">|</span>
           <div className="footer-tagline">Lic. Brenda Grossi</div>

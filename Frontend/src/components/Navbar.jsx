@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaUserCircle, FaShoppingBag, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
+import { FaEdit, FaUserCircle, FaShoppingBag, FaSignOutAlt, FaBars, FaTimes, FaUserShield } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "./Navbar.css";
 import logoImage from "../assets/logo.png";
@@ -21,7 +21,8 @@ export default function Navbar() {
     link_inicio: "Inicio",
     link_quien_soy: "Quién Soy",
     link_materiales: "Materiales",
-    link_psicopedagogiando: "Psicopedagogiando"
+    link_psicopedagogiando: "Psicopedagogiando",
+    link_turnos: "Solicitar Turno"
   });
 
   useEffect(() => {
@@ -162,6 +163,7 @@ export default function Navbar() {
               <input className="link-edit-input" value={navContent.link_quien_soy} onChange={e => setNavContent({...navContent, link_quien_soy: e.target.value})} />
               <input className="link-edit-input" value={navContent.link_materiales} onChange={e => setNavContent({...navContent, link_materiales: e.target.value})} />
               <input className="link-edit-input" value={navContent.link_psicopedagogiando} onChange={e => setNavContent({...navContent, link_psicopedagogiando: e.target.value})} />
+              <input className="link-edit-input" value={navContent.link_turnos} onChange={e => setNavContent({...navContent, link_turnos: e.target.value})} />
             </>
           ) : (
             <>
@@ -169,6 +171,7 @@ export default function Navbar() {
               <Link to="/quien-soy" onClick={closeMobileMenu}>{navContent.link_quien_soy}</Link>
               <Link to="/materiales" onClick={closeMobileMenu}>{navContent.link_materiales}</Link>
               <Link to="/psicopedagogiando" onClick={closeMobileMenu}>{navContent.link_psicopedagogiando}</Link>
+              <Link to="/turnos" onClick={closeMobileMenu}>{navContent.link_turnos}</Link>
             </>
           )}
         </div>
@@ -201,6 +204,11 @@ export default function Navbar() {
                   <Link to="/mis-compras" onClick={() => {setMenuOpen(false); closeMobileMenu();}}>
                     <FaShoppingBag className="dropdown-icon" /> Mis compras
                   </Link>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => {setMenuOpen(false); closeMobileMenu();}}>
+                      <FaUserShield className="dropdown-icon" /> Panel de Administrador
+                    </Link>
+                  )}
                   <hr className="dropdown-divider" />
                   <button onClick={handleLogout} className="logout-item">
                     <FaSignOutAlt className="dropdown-icon" /> Cerrar sesión
