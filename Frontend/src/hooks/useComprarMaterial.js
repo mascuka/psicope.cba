@@ -179,6 +179,22 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     window.location.href = initPoint;
   };
 
+  // Entre elegir "Mercado Pago" y que la página termine de navegar hay un
+  // rato corto pero real (pedirle el link de pago al servidor, después el
+  // propio salto) donde no pasaba nada en pantalla -- este cartel cubre
+  // esa espera. No hace falta cerrarlo a mano: se va solo apenas la
+  // navegación arranca.
+  const mostrarRedirigiendoAMercadoPago = () => {
+    SwalCompra.fire({
+      title: "Redirigiendo a Mercado Pago...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      customClass: { popup: "mp-espera-popup" },
+      didOpen: () => Swal.showLoading(),
+    });
+  };
+
   const pagarConQR = async (material, email, nombreCompleto) => {
     const invitado = nombreCompleto
       ? { nombre: nombreCompleto.nombre, apellido: nombreCompleto.apellido, email }
@@ -369,6 +385,8 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
         return;
       }
 
+      mostrarRedirigiendoAMercadoPago();
+
       const { data, error } = await supabase.functions.invoke("crear-preferencia", {
         body: { material_id: material.id, invitado: datosInvitado },
       });
@@ -530,6 +548,8 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
         await pagarConQR(material, user.email, null);
         return;
       }
+
+      mostrarRedirigiendoAMercadoPago();
 
       const { data: { session } } = await supabase.auth.getSession();
 
