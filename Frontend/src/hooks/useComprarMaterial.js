@@ -165,29 +165,29 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     return false;
   };
 
-  const pagarYEsperarConfirmacion = async (ventanaPago, initPoint, materialId, email) => {
+  // OJO: a diferencia del QR (donde no hay a dónde volver salvo quedarse acá
+  // esperando), Mercado Pago Checkout Pro redirige la MISMA pestaña que se
+  // acaba de abrir de vuelta a /success apenas se aprueba el pago -- esa
+  // página (Success.jsx) es la que confirma, descarga el archivo y manda
+  // el mail. Antes, ADEMÁS de eso, esta pestaña de origen se quedaba
+  // sondeando/descargando/mostrando "listo" en paralelo -- terminaba
+  // pasando dos veces (una acá, otra en /success): dos pestañas con el
+  // mensaje de éxito y el archivo descargado dos veces. Ahora esta pestaña
+  // solo avisa que se abrió Mercado Pago y no hace nada más -- toda la
+  // confirmación pasa en la otra pestaña, una sola vez.
+  const pagarYEsperarConfirmacion = async (ventanaPago, initPoint) => {
     if (ventanaPago && !ventanaPago.closed) {
       ventanaPago.location.href = initPoint;
     } else {
       ventanaPago = window.open(initPoint, "_blank");
     }
 
-    const canceladoRef = { actual: false };
-    SwalCompra.fire({
-      title: "Esperando el pago",
-      html: "Se abrió Mercado Pago en otra pestaña. Cuando termines de pagar ahí, esta ventana se actualiza sola.",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      showCancelButton: true,
-      cancelButtonText: "Cancelar",
-      showConfirmButton: false,
-      customClass: { popup: "mp-espera-popup" },
-      didOpen: () => Swal.showLoading(),
-    }).then((result) => {
-      if (result.dismiss === Swal.DismissReason.cancel) canceladoRef.actual = true;
+    await SwalCompra.fire({
+      icon: "info",
+      title: "Se abrió Mercado Pago",
+      text: "Completá el pago en la otra pestaña. Ahí mismo te confirmamos todo, se descarga el material y te lo mandamos por mail.",
+      confirmButtonColor: "#D48CA6",
     });
-
-    return esperarConfirmacionYDescargar(materialId, email, ventanaPago, canceladoRef);
   };
 
   const pagarConQR = async (material, email, nombreCompleto) => {
@@ -391,7 +391,7 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
       if (data?.error) throw new Error(data.error);
 
       if (data?.init_point) {
-        await pagarYEsperarConfirmacion(ventanaPago, data.init_point, material.id, datosInvitado.email);
+        await pagarYEsperarConfirmacion(ventanaPago, data.init_point);
       } else {
         throw new Error("No se recibió el link de pago.");
       }
@@ -560,7 +560,7 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
       if (data?.error) throw new Error(data.error);
 
       if (data?.init_point) {
-        await pagarYEsperarConfirmacion(ventanaPago, data.init_point, material.id, user.email);
+        await pagarYEsperarConfirmacion(ventanaPago, data.init_point);
       } else {
         throw new Error("No se recibió el link de pago.");
       }
