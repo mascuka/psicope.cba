@@ -165,29 +165,18 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     return false;
   };
 
-  // OJO: a diferencia del QR (donde no hay a dónde volver salvo quedarse acá
-  // esperando), Mercado Pago Checkout Pro redirige la MISMA pestaña que se
-  // acaba de abrir de vuelta a /success apenas se aprueba el pago -- esa
-  // página (Success.jsx) es la que confirma, descarga el archivo y manda
-  // el mail. Antes, ADEMÁS de eso, esta pestaña de origen se quedaba
-  // sondeando/descargando/mostrando "listo" en paralelo -- terminaba
-  // pasando dos veces (una acá, otra en /success): dos pestañas con el
-  // mensaje de éxito y el archivo descargado dos veces. Ahora esta pestaña
-  // solo avisa que se abrió Mercado Pago y no hace nada más -- toda la
-  // confirmación pasa en la otra pestaña, una sola vez.
-  const pagarYEsperarConfirmacion = async (ventanaPago, initPoint) => {
-    if (ventanaPago && !ventanaPago.closed) {
-      ventanaPago.location.href = initPoint;
-    } else {
-      ventanaPago = window.open(initPoint, "_blank");
-    }
-
-    await SwalCompra.fire({
-      icon: "info",
-      title: "Se abrió Mercado Pago",
-      text: "Completá el pago en la otra pestaña. Ahí mismo te confirmamos todo, se descarga el material y te lo mandamos por mail.",
-      confirmButtonColor: "#D48CA6",
-    });
+  // Navega ESTA MISMA pestaña a Mercado Pago -- no abre una pestaña nueva.
+  // Cuando el pago se aprueba, Mercado Pago redirige de vuelta a esta
+  // misma pestaña (/success), que es la que confirma, descarga el archivo
+  // y manda el mail. Antes se abría una pestaña nueva (para esquivar el
+  // bloqueador de popups, porque el link de pago tarda en llegar del
+  // servidor) y esta pestaña de acá se quedaba esperando la confirmación
+  // EN PARALELO -- entre las dos terminaba pasando todo dos veces (dos
+  // pestañas con "listo", el archivo descargado dos veces). Navegando
+  // directo acá no hace falta ninguna pestaña nueva, así que tampoco hay
+  // nada que esquivarle a ningún bloqueador de popups.
+  const pagarConMercadoPago = (initPoint) => {
+    window.location.href = initPoint;
   };
 
   const pagarConQR = async (material, email, nombreCompleto) => {
@@ -374,14 +363,11 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     const { metodo, ...datosInvitado } = resultado;
 
     setCargandoPago(material.id);
-    let ventanaPago = null;
     try {
       if (metodo === "qr") {
         await pagarConQR(material, datosInvitado.email, { nombre: datosInvitado.nombre, apellido: datosInvitado.apellido });
         return;
       }
-
-      ventanaPago = window.open("", "_blank");
 
       const { data, error } = await supabase.functions.invoke("crear-preferencia", {
         body: { material_id: material.id, invitado: datosInvitado },
@@ -391,12 +377,11 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
       if (data?.error) throw new Error(data.error);
 
       if (data?.init_point) {
-        await pagarYEsperarConfirmacion(ventanaPago, data.init_point);
+        pagarConMercadoPago(data.init_point);
       } else {
         throw new Error("No se recibió el link de pago.");
       }
     } catch (error) {
-      try { ventanaPago?.close(); } catch { /* no-op */ }
       console.error("Error en compra como invitado:", error);
       SwalCompra.fire("Error de Conexión", `Mercado Pago dice: ${error.message}`, "error");
     } finally {
@@ -539,15 +524,12 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     if (!metodo) return;
 
     setCargandoPago(material.id);
-    let ventanaPago = null;
 
     try {
       if (metodo === "qr") {
         await pagarConQR(material, user.email, null);
         return;
       }
-
-      ventanaPago = window.open("", "_blank");
 
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -560,12 +542,11 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
       if (data?.error) throw new Error(data.error);
 
       if (data?.init_point) {
-        await pagarYEsperarConfirmacion(ventanaPago, data.init_point);
+        pagarConMercadoPago(data.init_point);
       } else {
         throw new Error("No se recibió el link de pago.");
       }
     } catch (error) {
-      try { ventanaPago?.close(); } catch { /* no-op */ }
       console.error("Error completo handleComprar:", error);
       SwalCompra.fire("Error de Conexión", `Mercado Pago dice: ${error.message}`, "error");
     } finally {
