@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart } from 'react-icons/fa';
+import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart, FaTrash, FaPlus } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
+import Carousel from "../components/Carousel";
 import { useComprarMaterial } from "../hooks/useComprarMaterial";
 import "./home.css";
 import "./materiales.css";
@@ -78,6 +79,25 @@ export default function Home() {
       setLoading(false);
     };
     inicializar();
+
+    // checkAdmin corre UNA vez al entrar a la página -- si te desloguéas
+    // sin recargar (ej. desde otra pestaña, o con el botón de salir sin
+    // que esta página se refresque), "isAdmin" se quedaba pegado en true
+    // y los controles de edición (editar, eliminar, agregar tarjeta)
+    // seguían mostrándose aunque ya no hubiera sesión. Este listener
+    // reacciona al toque cuando la sesión cambia, sin depender de un
+    // refresh manual.
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+        setIsAdmin(false);
+        setMisCompras([]);
+        setEditMode(null);
+      } else if (event === "SIGNED_IN") {
+        checkAdmin();
+      }
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   const checkAdmin = async () => {
@@ -85,7 +105,7 @@ export default function Home() {
     if (user) {
       setUser(user);
       const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-      if (data?.rol === "admin") setIsAdmin(true);
+      setIsAdmin(data?.rol === "admin");
 
       const { data: compras } = await supabase.from("compras").select("material_id").eq("usuario_id", user.id).eq("status", "approved");
       if (compras) setMisCompras(compras.map(c => c.material_id));
@@ -180,6 +200,36 @@ export default function Home() {
     }
   };
 
+  // Tarjetas de "Atención Psicopedagógica" (antes fijas en 3, solo se
+  // podía editar el texto): ahora el admin puede sumar o sacar tarjetas
+  // sueltas. No hay un máximo -- a partir de la 4ta, la sección entera se
+  // muestra como carrusel (ver Carousel más abajo) en vez de forzar una
+  // grilla cada vez más angosta.
+  const agregarBeneficio = () => {
+    const actualizado = {
+      ...content,
+      beneficios: [...content.beneficios, { icono: "FaCheckCircle", titulo: "Nueva tarjeta", texto: "Descripción breve." }],
+    };
+    setContent(actualizado);
+    handleSave(actualizado);
+    setEditMode(`beneficio_${actualizado.beneficios.length - 1}`);
+  };
+
+  const eliminarBeneficio = async (index) => {
+    const confirmacion = await Swal.fire({
+      title: '¿Eliminar esta tarjeta?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#D48CA6',
+    });
+    if (!confirmacion.isConfirmed) return;
+    const actualizado = { ...content, beneficios: content.beneficios.filter((_, i) => i !== index) };
+    setContent(actualizado);
+    handleSave(actualizado);
+  };
+
  if (loading) {
   return (
     <div className="home-container">
@@ -249,18 +299,20 @@ export default function Home() {
           ) : (
             <div style={{display:'flex', justifyContent:'center', alignItems:'center', gap:'15px', marginBottom:'70px'}}>
               <h2 className="beneficios-titulo">{content.beneficios_titulo}</h2>
-              {isAdmin && <button className="btn-edit-float" onClick={() => setEditMode('beneficios_titulo')}><FaEdit /></button>}
+              {isAdmin && (
+                <>
+                  <button className="btn-edit-float" onClick={() => setEditMode('beneficios_titulo')} title="Editar título"><FaEdit /></button>
+                  <button className="btn-edit-float" onClick={agregarBeneficio} title="Agregar tarjeta"><FaPlus /></button>
+                </>
+              )}
             </div>
           )}
 
-          <div
-            className="beneficios-grid"
-            style={{ gridTemplateColumns: `repeat(${content.beneficios.length === 4 ? 2 : 3}, minmax(0, 340px))` }}
-          >
-            {content.beneficios.map((beneficio, index) => {
+          {(() => {
+            const tarjetas = content.beneficios.map((beneficio, index) => {
               const IconComponent = iconosDisponibles[beneficio.icono] || FaCheckCircle;
               return (
-                <div key={index} className="beneficio-item">
+                <div key={index} className="beneficio-item carousel-item">
                   {editMode === `beneficio_${index}` ? (
                     <div style={{padding:'10px'}}>
                       <select className="admin-input" value={beneficio.icono} onChange={e => {
@@ -299,13 +351,43 @@ export default function Home() {
                       )}
                       <h4>{beneficio.titulo}</h4>
                       <p>{beneficio.texto}</p>
-                      {isAdmin && <button className="btn-edit-float" style={{position:'absolute', top:'10px', right:'10px'}} onClick={() => setEditMode(`beneficio_${index}`)}><FaEdit /></button>}
+                      {isAdmin && (
+                        <div className="beneficio-admin-acciones">
+                          <button className="btn-edit-float" onClick={() => setEditMode(`beneficio_${index}`)}><FaEdit /></button>
+                          <button className="btn-edit-float btn-delete-float" onClick={() => eliminarBeneficio(index)}><FaTrash /></button>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
               );
-            })}
-          </div>
+            });
+
+            // "Agregar tarjeta" vive como botón aparte, al lado del lápiz
+            // de editar el título (ver arriba) -- no es contenido real de
+            // la sección, así que no debe ocupar un lugar en la
+            // grilla/carrusel ni contar para decidir si hace falta
+            // carrusel (antes, contarla de más podía activar el carrusel
+            // con solo 3 tarjetas reales, mostrando flechas para "ver más"
+            // cuando lo único que había más era el propio botón de agregar).
+
+            // Hasta 3 tarjetas entran cómodas en una grilla fija -- de ahí
+            // en más, en vez de seguir angostando columnas, toda la
+            // sección pasa a carrusel con flechas.
+            const usarCarrusel = content.beneficios.length > 3;
+
+            if (usarCarrusel) {
+              return <Carousel ariaLabel="Atención Psicopedagógica">{tarjetas}</Carousel>;
+            }
+            return (
+              <div
+                className="beneficios-grid"
+                style={{ gridTemplateColumns: `repeat(${content.beneficios.length === 4 ? 2 : Math.max(content.beneficios.length, 1)}, minmax(0, 340px))` }}
+              >
+                {tarjetas}
+              </div>
+            );
+          })()}
         </div>
       </section>
 

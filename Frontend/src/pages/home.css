@@ -725,6 +725,31 @@
   box-shadow: 0 5px 18px rgba(43, 37, 48, 0.14);
 }
 
+.beneficio-admin-acciones {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.btn-delete-float {
+  color: #c0392b;
+}
+
+.btn-delete-float:hover {
+  background: #FDECEC;
+  border-color: #e0a0a0;
+  color: #c0392b;
+}
+
+/* Dentro del carrusel (4+ tarjetas) las cards necesitan un ancho fijo
+   propio -- en la grilla de hasta 3 lo resuelve gridTemplateColumns, acá
+   no hay grid que las acomode solo. */
+.carousel-track .beneficio-item {
+  width: 300px;
+}
+
 /* ============================================
    MODAL PDF
    ============================================ */
@@ -792,9 +817,36 @@
 
   .home-destacados .card-body h4 { font-size: 1.2rem !important; }
 
+  /* En vez de apilar las tarjetas en una sola columna larga (pesado para
+     navegar en el celular, mucho scroll vertical), se deslizan de costado
+     con el dedo -- una atrás de otra, como una tira de historias. Cada
+     tarjeta ocupa casi todo el ancho (se ve una casi entera + un pedacito
+     de la siguiente, como pista de que hay más para el costado). */
   .destacados-grid,
   .beneficios-grid {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 14px;
+    padding: 4px 20px 10px;
+    margin-left: -20px;
+    margin-right: -20px;
+    justify-content: flex-start !important;
+    scrollbar-width: none;
+  }
+
+  .destacados-grid::-webkit-scrollbar,
+  .beneficios-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .destacados-grid > *,
+  .beneficios-grid > * {
+    scroll-snap-align: start;
+    flex: 0 0 78vw;
+    max-width: 320px;
   }
 
   .frase-motivadora { font-size: 1.15rem; }

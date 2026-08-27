@@ -1,0 +1,72 @@
+.carousel-wrap {
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 6px 14px;
+  /* El scroll nativo (mouse drag/trackpad/swipe) ya alcanza -- no hace
+     falta mostrar además la barra de scroll del navegador. */
+  scrollbar-width: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-item {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+.carousel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-borde-sutil, #EFE3D8);
+  background: white;
+  color: var(--color-texto-oscuro, #2B2530);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(43, 37, 48, 0.14);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.carousel-flecha:hover {
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 18px rgba(43, 37, 48, 0.18);
+}
+
+.carousel-flecha-izq {
+  left: 8px;
+}
+
+.carousel-flecha-der {
+  right: 8px;
+}
+
+@media (max-width: 640px) {
+  .carousel-flecha {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .carousel-flecha-izq {
+    left: 4px;
+  }
+
+  .carousel-flecha-der {
+    right: 4px;
+  }
+}

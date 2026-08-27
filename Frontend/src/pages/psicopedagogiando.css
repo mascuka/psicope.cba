@@ -779,15 +779,54 @@
     justify-content: center;
   }
 
+  /* Grilla estilo Instagram en el celular: 3 columnas parejas, cuadradas,
+     bien pegadas -- antes eran 2 columnas en 9:16 con "object-fit:contain"
+     (ver .psico-thumb img más arriba), que en una foto que no viene ya en
+     ese formato dejaba franjas vacías color crema alrededor y se sentía
+     desprolijo/con huecos. Acá se recorta para llenar el cuadrado
+     siempre, como el perfil de una cuenta real. */
   .psico-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 0 12px;
+    /* width:100% explícito a propósito: .psico-grid es hijo de un flex
+       en columna (.psico-page) con margin:0 auto -- eso hace que, sin un
+       ancho explícito, el navegador intente calcular el ancho "a medida
+       del contenido" en vez de estirarlo. Con columnas 1fr sin ningún
+       piso (a diferencia de la versión de escritorio, que trae
+       minmax(290px, 1fr)), ese cálculo colapsaba a 0 y la grilla entera
+       desaparecía -- quedaba en el DOM pero con ancho cero, invisible. */
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    padding: 0 3px;
+    margin-left: 0;
+    margin-right: 0;
     margin-bottom: 40px;
+    box-sizing: border-box;
   }
 
+  .psico-thumb {
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    border-width: 0;
+    box-shadow: none;
+  }
+
+  .psico-thumb img {
+    object-fit: cover;
+  }
+
+  /* Instagram real no pone texto arriba de la miniatura en la grilla --
+     solo la foto, limpia; el título/descripción quedan para cuando se
+     toca y se abre el detalle. Con 3 columnas apretadas, 5 líneas de
+     título encima de un cuadrado chico se veía amontonado. */
+  .psico-thumb-veil,
   .psico-thumb-titulo {
-    font-size: 0.85rem;
+    display: none;
+  }
+
+  .psico-thumb-type {
+    top: 6px;
+    right: 6px;
+    font-size: 0.75rem;
   }
 
   .psico-detalle-box {
