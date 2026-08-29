@@ -819,9 +819,10 @@
 
   /* En vez de apilar las tarjetas en una sola columna larga (pesado para
      navegar en el celular, mucho scroll vertical), se deslizan de costado
-     con el dedo -- una atrás de otra, como una tira de historias. Cada
-     tarjeta ocupa casi todo el ancho (se ve una casi entera + un pedacito
-     de la siguiente, como pista de que hay más para el costado). */
+     con el dedo -- una por vez, a pantalla completa: se ve una tarjeta
+     entera, y recién al deslizar aparece la siguiente (nada de la
+     próxima asomando de entrada, que se leía como que estaban mal
+     encuadradas). */
   .destacados-grid,
   .beneficios-grid {
     display: flex !important;
@@ -829,10 +830,19 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    gap: 14px;
+    gap: 20px;
     padding: 4px 20px 10px;
     margin-left: -20px;
     margin-right: -20px;
+    /* Sin esto, el scroll-snap "mandatory" arranca ya corrido: alinea el
+       borde de la tarjeta con el borde MISMO del contenedor (ignorando
+       el padding), así que apenas carga ya está scrolleado esos 20px de
+       más -- eso es lo que hacía que la primera tarjeta apareciera pegada
+       a un costado, con todo el hueco sobrante amontonado del otro. Con
+       scroll-padding avisamos que el "borde" a efectos de encaje es el
+       de ADENTRO del padding, no el del contenedor. */
+    scroll-padding-left: 20px;
+    scroll-padding-right: 20px;
     justify-content: flex-start !important;
     scrollbar-width: none;
   }
@@ -845,8 +855,9 @@
   .destacados-grid > *,
   .beneficios-grid > * {
     scroll-snap-align: start;
-    flex: 0 0 78vw;
-    max-width: 320px;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
   }
 
   .frase-motivadora { font-size: 1.15rem; }
