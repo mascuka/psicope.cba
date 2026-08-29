@@ -5,6 +5,7 @@ import { FaChevronLeft, FaChevronRight, FaPlus, FaTrash, FaEdit } from "react-ic
 import PanelPacientes from "./PanelPacientes";
 import PanelObrasSociales from "./PanelObrasSociales";
 import PanelVentas from "./PanelVentas";
+import PanelFinanzas from "./PanelFinanzas";
 import "./panelAdmin.css";
 
 const FORM_VACIO = {
@@ -195,8 +196,11 @@ export default function PanelAdmin() {
         <button className={tab === "calendario" ? "activa" : ""} onClick={() => setTab("calendario")}>Calendario</button>
         <button className={tab === "pacientes" ? "activa" : ""} onClick={() => setTab("pacientes")}>Pacientes</button>
         <button className={tab === "obras_sociales" ? "activa" : ""} onClick={() => setTab("obras_sociales")}>Obras sociales</button>
+        <button className={tab === "finanzas" ? "activa" : ""} onClick={() => setTab("finanzas")}>Finanzas</button>
         <button className={tab === "ventas" ? "activa" : ""} onClick={() => setTab("ventas")}>Ventas</button>
       </div>
+
+      {tab === "finanzas" && <PanelFinanzas />}
 
       {tab === "ventas" && <PanelVentas />}
 

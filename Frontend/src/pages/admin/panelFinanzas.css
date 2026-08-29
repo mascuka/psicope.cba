@@ -1,0 +1,439 @@
+.fin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+}
+
+.fin-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.fin-filtro-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #999;
+  font-weight: 700;
+}
+
+.fin-filtro-grupo select,
+.fin-filtro-grupo input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde-sutil);
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+}
+
+.fin-filtro-grupo select:focus,
+.fin-filtro-grupo input:focus {
+  outline: none;
+  background: white;
+}
+
+/* ---------- KPIs ---------- */
+.fin-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.fin-resumen-card {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fin-resumen-valor {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--color-texto-oscuro);
+}
+
+.fin-resumen-valor.positivo { color: #2F7A4A; }
+.fin-resumen-valor.negativo { color: #c0392b; }
+
+.fin-resumen-label {
+  font-size: 0.82rem;
+  color: #999;
+  font-weight: 600;
+}
+
+/* ---------- Recordatorios de gastos recurrentes ---------- */
+.fin-recordatorios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fin-recordatorio-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-acento-claro);
+  border: 1px solid var(--color-acento-suave);
+  color: var(--color-acento-oscuro);
+  border-radius: 50px;
+  padding: 8px 8px 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.fin-recordatorio-chip button {
+  background: white;
+  border: none;
+  color: var(--color-acento-oscuro);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.fin-recordatorio-chip button:hover {
+  background: var(--color-acento-suave);
+}
+
+/* ---------- Gráfico ---------- */
+.fin-grafico-card {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 16px;
+  padding: 20px 16px 12px;
+}
+
+.fin-grafico-leyenda {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  color: #999;
+  font-weight: 700;
+}
+
+.fin-grafico-leyenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fin-grafico-leyenda i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.fin-leyenda-ingreso { background: linear-gradient(180deg, #6FBF87, #4FA36A); }
+.fin-leyenda-gasto { background: linear-gradient(180deg, #E39EA9, #D48CA6); }
+
+.fin-grafico {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 190px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.fin-barra-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 44px;
+  flex: 1;
+  height: 100%;
+}
+
+.fin-barras-par {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100%;
+}
+
+.fin-barra {
+  width: 16px;
+  border-radius: 6px 6px 2px 2px;
+  transition: height 0.3s ease;
+}
+
+.fin-barra.ingreso { background: linear-gradient(180deg, #6FBF87, #4FA36A); }
+.fin-barra.gasto { background: linear-gradient(180deg, #E39EA9, #D48CA6); }
+
+.fin-barra-etiqueta {
+  font-size: 0.72rem;
+  color: #999;
+  margin-top: 6px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.fin-sin-datos,
+.fin-cargando {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+}
+
+/* ---------- Dos columnas: ingresos / gastos ---------- */
+.fin-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.fin-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fin-columna-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fin-columna-header h3 {
+  font-size: 1.05rem;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+}
+
+.fin-columna-header .fin-total {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.fin-btn-agregar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+}
+
+.fin-btn-agregar:hover {
+  background: #FDFAF6;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.fin-form {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fin-form input,
+.fin-form select,
+.fin-form textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde-sutil);
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fin-form input:focus,
+.fin-form select:focus,
+.fin-form textarea:focus {
+  outline: none;
+  border-color: var(--color-acento);
+  background: white;
+}
+
+.fin-form-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.fin-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+}
+
+.fin-form-checkbox input {
+  width: auto;
+}
+
+.fin-form-acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.fin-btn-guardar {
+  background: var(--color-texto-oscuro);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.fin-btn-guardar:hover { opacity: 0.9; }
+
+.fin-btn-cancelar {
+  background: white;
+  border: 1.5px solid var(--color-borde-sutil);
+  color: var(--color-texto-oscuro);
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.fin-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fin-item {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.fin-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fin-item-info strong {
+  color: var(--color-texto-oscuro);
+  font-size: 0.95rem;
+}
+
+.fin-item-sub {
+  font-size: 0.8rem;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fin-tag-categoria {
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  background: var(--color-acento-suave);
+  color: var(--color-acento-oscuro);
+}
+
+.fin-tag-recurrente {
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  background: #E7F0F5;
+  color: #2F6A7A;
+}
+
+.fin-item-derecha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.fin-item-monto {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.fin-item-monto.ingreso { color: #2F7A4A; }
+.fin-item-monto.gasto { color: #c0392b; }
+
+.fin-item-acciones {
+  display: flex;
+  gap: 6px;
+}
+
+.fin-item-acciones button {
+  background: white;
+  border: 1px solid var(--color-borde-sutil);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.fin-item-acciones button.fin-btn-borrar {
+  color: #c0392b;
+}
+
+.fin-item-acciones button.fin-btn-borrar:hover {
+  background: #FDECEC;
+  border-color: #e0a0a0;
+}
+
+@media (max-width: 800px) {
+  .fin-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .fin-resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .fin-form-fila {
+    grid-template-columns: 1fr;
+  }
+}

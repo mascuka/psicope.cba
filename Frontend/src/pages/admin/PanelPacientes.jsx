@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../supabase/supabaseClient";
 import Swal from "sweetalert2";
-import { FaSearch, FaPlus, FaTrash, FaEdit, FaFileUpload, FaDownload, FaCog } from "react-icons/fa";
+import { FaSearch, FaPlus, FaTrash, FaEdit, FaFileUpload, FaDownload, FaCog, FaMoneyBillWave, FaUserSlash, FaUserCheck } from "react-icons/fa";
 import "./pacientesAdmin.css";
 
 const PACIENTE_VACIO = {
@@ -9,9 +9,15 @@ const PACIENTE_VACIO = {
   telefono: "", email: "", telefono_padre: "", email_padre: "",
   telefono_madre: "", email_madre: "",
   obra_social_id: "", monto_personalizado: "", dias_pago_personalizado: "",
+  activo: true,
 };
 
 const OBRA_SOCIAL_VACIA = { nombre: "", precio_hora: "", dias_pago: 30 };
+
+const hoyISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 export default function PanelPacientes() {
   const [pacientes, setPacientes] = useState([]);
@@ -20,6 +26,11 @@ export default function PanelPacientes() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroObraSocial, setFiltroObraSocial] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroActivo, setFiltroActivo] = useState("activos");
+
+  const [mostrarCobroRapido, setMostrarCobroRapido] = useState(false);
+  const [formCobroRapido, setFormCobroRapido] = useState({ monto: "", fecha: hoyISO(), concepto: "Sesión" });
+  const [guardandoCobro, setGuardandoCobro] = useState(false);
 
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
   const [subTab, setSubTab] = useState("datos");
@@ -57,7 +68,8 @@ export default function PanelPacientes() {
     const pasaBusqueda = !busqueda || texto.includes(busqueda.toLowerCase());
     const pasaObraSocial = !filtroObraSocial || p.obra_social_id === filtroObraSocial;
     const pasaFecha = !filtroFecha || (p.creado_en && p.creado_en.slice(0, 10) >= filtroFecha);
-    return pasaBusqueda && pasaObraSocial && pasaFecha;
+    const pasaActivo = filtroActivo === "todos" || (filtroActivo === "activos" ? p.activo !== false : p.activo === false);
+    return pasaBusqueda && pasaObraSocial && pasaFecha && pasaActivo;
   });
 
   // ---------- Ficha del paciente ----------
@@ -73,6 +85,7 @@ export default function PanelPacientes() {
     setMostrarNuevo(false);
     setEditandoDatos(false);
     setSubTab("datos");
+    setMostrarCobroRapido(false);
     setFormPaciente({
       nombre: p.nombre || "", apellido: p.apellido || "",
       nombre_padre: p.nombre_padre || "", nombre_madre: p.nombre_madre || "",
@@ -82,8 +95,60 @@ export default function PanelPacientes() {
       obra_social_id: p.obra_social_id || "",
       monto_personalizado: p.monto_personalizado ?? "",
       dias_pago_personalizado: p.dias_pago_personalizado ?? "",
+      activo: p.activo !== false,
     });
     cargarNotas(p.id);
+  };
+
+  const cambiarActivo = async (p) => {
+    const nuevoEstado = !p.activo;
+    const confirm = await Swal.fire({
+      title: nuevoEstado ? `¿Reactivar a ${p.nombre}?` : `¿Dar de baja a ${p.nombre}?`,
+      text: nuevoEstado
+        ? "Vuelve a aparecer en la lista de activos."
+        : "No se borra nada -- sigue todo su historial de cobros y notas, pero deja de contar como paciente activo.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#D48CA6",
+      confirmButtonText: nuevoEstado ? "Reactivar" : "Dar de baja",
+      cancelButtonText: "Cancelar",
+    });
+    if (!confirm.isConfirmed) return;
+
+    const { error } = await supabase.from("pacientes").update({ activo: nuevoEstado }).eq("id", p.id);
+    if (error) { Swal.fire("Error", "No se pudo actualizar.", "error"); return; }
+    if (pacienteSeleccionado?.id === p.id) setFormPaciente(f => ({ ...f, activo: nuevoEstado }));
+    cargarDatos();
+  };
+
+  // ---------- Cobro rápido (deja registrado un pago sin salir de la ficha) ----------
+  const sugerirMontoCobro = () => {
+    if (formPaciente.monto_personalizado) return formPaciente.monto_personalizado;
+    if (pacienteSeleccionado?.obras_sociales?.precio_hora) return pacienteSeleccionado.obras_sociales.precio_hora;
+    return "";
+  };
+
+  const abrirCobroRapido = () => {
+    setFormCobroRapido({ monto: sugerirMontoCobro(), fecha: hoyISO(), concepto: "Sesión" });
+    setMostrarCobroRapido(true);
+  };
+
+  const guardarCobroRapido = async () => {
+    if (!formCobroRapido.monto || Number(formCobroRapido.monto) <= 0) {
+      Swal.fire("Falta el monto", "Cargá cuánto pagó.", "warning");
+      return;
+    }
+    setGuardandoCobro(true);
+    const { error } = await supabase.from("cobros").insert([{
+      paciente_id: pacienteSeleccionado.id,
+      concepto: formCobroRapido.concepto || null,
+      monto: Number(formCobroRapido.monto),
+      fecha: formCobroRapido.fecha || hoyISO(),
+    }]);
+    setGuardandoCobro(false);
+    if (error) { Swal.fire("Error", "No se pudo registrar el cobro.", "error"); return; }
+    setMostrarCobroRapido(false);
+    Swal.fire({ icon: "success", title: "Cobro registrado", showConfirmButton: false, timer: 1200, heightAuto: false });
   };
 
   const esParticular = !formPaciente.obra_social_id;
@@ -330,6 +395,11 @@ export default function PanelPacientes() {
           <option value="">Todas las obras sociales</option>
           {obrasSociales.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
         </select>
+        <select value={filtroActivo} onChange={e => setFiltroActivo(e.target.value)}>
+          <option value="activos">Activos</option>
+          <option value="inactivos">Dados de baja</option>
+          <option value="todos">Todos</option>
+        </select>
         <label className="pac-fecha-label">
           Alta desde
           <input type="date" value={filtroFecha} onChange={e => setFiltroFecha(e.target.value)} />
@@ -382,10 +452,13 @@ export default function PanelPacientes() {
       <div className="pac-lista">
         {pacientesFiltrados.length === 0 && <p className="pac-nota">No hay pacientes que coincidan.</p>}
         {pacientesFiltrados.map(p => (
-          <div key={p.id} className={`pac-item ${pacienteSeleccionado?.id === p.id ? "seleccionado" : ""}`} onClick={() => seleccionarPaciente(p)}>
+          <div key={p.id} className={`pac-item ${pacienteSeleccionado?.id === p.id ? "seleccionado" : ""} ${p.activo === false ? "pac-item-inactivo" : ""}`} onClick={() => seleccionarPaciente(p)}>
             <div>
               <strong>{p.nombre} {p.apellido}</strong>
-              <span>{p.obras_sociales?.nombre || "Particular"}</span>
+              <span>
+                {p.obras_sociales?.nombre || "Particular"}
+                {p.activo === false && <span className="pac-tag-inactivo">Dado de baja</span>}
+              </span>
             </div>
             <button className="pac-btn-eliminar-item" onClick={(e) => { e.stopPropagation(); eliminarPaciente(p); }}><FaTrash /></button>
           </div>
@@ -406,9 +479,30 @@ export default function PanelPacientes() {
               {!editandoDatos && !mostrarNuevo ? (
                 <>
                   <div className="pac-ficha-header">
-                    <h3>{pacienteSeleccionado.nombre} {pacienteSeleccionado.apellido}</h3>
-                    <button className="pac-btn-secundario" onClick={() => setEditandoDatos(true)}><FaEdit /> Editar</button>
+                    <h3>{pacienteSeleccionado.nombre} {pacienteSeleccionado.apellido} {formPaciente.activo === false && <span className="pac-tag-inactivo">Dado de baja</span>}</h3>
+                    <div className="pac-ficha-header-acciones">
+                      <button className="pac-btn-principal" onClick={abrirCobroRapido}><FaMoneyBillWave /> Registrar cobro</button>
+                      <button className="pac-btn-secundario" onClick={() => cambiarActivo(pacienteSeleccionado)}>
+                        {formPaciente.activo === false ? <><FaUserCheck /> Reactivar</> : <><FaUserSlash /> Dar de baja</>}
+                      </button>
+                      <button className="pac-btn-secundario" onClick={() => setEditandoDatos(true)}><FaEdit /> Editar</button>
+                    </div>
                   </div>
+
+                  {mostrarCobroRapido && (
+                    <div className="pac-nota-form">
+                      <div className="pac-form-fila">
+                        <input type="number" placeholder="Monto cobrado" value={formCobroRapido.monto} onChange={e => setFormCobroRapido({ ...formCobroRapido, monto: e.target.value })} />
+                        <input type="date" value={formCobroRapido.fecha} onChange={e => setFormCobroRapido({ ...formCobroRapido, fecha: e.target.value })} />
+                      </div>
+                      <input placeholder="Concepto (ej: Sesión)" value={formCobroRapido.concepto} onChange={e => setFormCobroRapido({ ...formCobroRapido, concepto: e.target.value })} />
+                      <div className="pac-form-acciones">
+                        <button className="pac-btn-principal" onClick={guardarCobroRapido} disabled={guardandoCobro}>{guardandoCobro ? "Guardando..." : "Guardar cobro"}</button>
+                        <button className="pac-btn-secundario" onClick={() => setMostrarCobroRapido(false)}>Cancelar</button>
+                      </div>
+                    </div>
+                  )}
+
                   <p><strong>Obra social:</strong> {pacienteSeleccionado.obras_sociales?.nombre || "Particular"}</p>
                   <p><strong>Paciente:</strong> {formPaciente.telefono || "—"} {formPaciente.email ? `· ${formPaciente.email}` : ""}</p>
                   <p><strong>Padre:</strong> {formPaciente.nombre_padre || "—"} · {formPaciente.telefono_padre || "—"} {formPaciente.email_padre ? `· ${formPaciente.email_padre}` : ""}</p>
