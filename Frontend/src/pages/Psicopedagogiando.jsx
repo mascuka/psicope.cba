@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaExternalLinkAlt, FaSave, FaPlay, FaInstagram, FaRegImage, FaNewspaper } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaExternalLinkAlt, FaSave, FaPlay, FaInstagram, FaRegImage, FaNewspaper, FaDownload } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import logoImage from "../assets/logo.png";
 import Loader from "../components/Loader";
 import AsistenteIA from "../components/AsistenteIA";
+import useSEO from "../hooks/useSEO";
 import "./psicopedagogiando.css";
 
 export default function Psicopedagogiando() {
+  useSEO(
+    "Psicopedagogiando | Contenido y Novedades | Psicope.cba - Córdoba",
+    "Contenido psicopedagógico, novedades y recursos de Brenda Grossi, psicopedagoga en Córdoba. Tips para acompañar el aprendizaje de niños y adolescentes."
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,10 +64,14 @@ export default function Psicopedagogiando() {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-        if (data?.rol === "admin") setIsAdmin(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+          if (data?.rol === "admin") setIsAdmin(true);
+        }
+      } catch (error) {
+        console.error("Error chequeando la sesión:", error);
       }
       fetchPosts();
       fetchHeader();
@@ -155,6 +164,27 @@ export default function Psicopedagogiando() {
     if (!url) return null;
     const parts = url.split('/psico/');
     return parts.length > 1 ? `psico/${parts[1]}` : null;
+  };
+
+  // Trae la imagen como blob y la baja con un link temporal -- así
+  // funciona sin importar si el navegador respetaría o no el atributo
+  // "download" en una URL de otro origen (el bucket de Storage).
+  const descargarImagen = async (post) => {
+    try {
+      const respuesta = await fetch(post.url_media);
+      const blob = await respuesta.blob();
+      const urlBlob = URL.createObjectURL(blob);
+      const nombreArchivo = `psicope_${(post.titulo || "post").trim().replace(/[\\/:*?"<>|]/g, "").slice(0, 60) || "post"}.jpg`;
+      const link = document.createElement("a");
+      link.href = urlBlob;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(urlBlob);
+    } catch (error) {
+      Swal.fire("Error", "No se pudo descargar la imagen.", "error");
+    }
   };
 
   const handleBorrar = async (post) => {
@@ -507,6 +537,9 @@ export default function Psicopedagogiando() {
 
                   {isAdmin && (
                     <div className="admin-btns-bottom">
+                      {esVisual && post.url_media && (
+                        <button className="btn-edit-ps" onClick={() => descargarImagen(post)} title="Descargar imagen (para subir a Instagram)"><FaDownload /></button>
+                      )}
                       <button className="btn-edit-ps" onClick={() => {setEditId(post.id); setFormData(post); setShowModal(true); setPostAbierto(null);}}><FaEdit /></button>
                       <button className="btn-del-ps" onClick={() => {handleBorrar(post); setPostAbierto(null);}}><FaTrash /></button>
                     </div>

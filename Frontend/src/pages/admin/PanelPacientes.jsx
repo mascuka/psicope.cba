@@ -8,11 +8,12 @@ const PACIENTE_VACIO = {
   nombre: "", apellido: "", nombre_padre: "", nombre_madre: "",
   telefono: "", email: "", telefono_padre: "", email_padre: "",
   telefono_madre: "", email_madre: "",
-  obra_social_id: "", monto_personalizado: "", dias_pago_personalizado: "",
+  obra_social_id: "", lugar_trabajo_id: "", monto_personalizado: "", dias_pago_personalizado: "",
   activo: true,
 };
 
 const OBRA_SOCIAL_VACIA = { nombre: "", precio_hora: "", dias_pago: 30 };
+const LUGAR_TRABAJO_VACIO = { nombre: "", monto: "", dias_pago: 30 };
 
 const hoyISO = () => {
   const d = new Date();
@@ -22,14 +23,16 @@ const hoyISO = () => {
 export default function PanelPacientes() {
   const [pacientes, setPacientes] = useState([]);
   const [obrasSociales, setObrasSociales] = useState([]);
+  const [lugaresTrabajo, setLugaresTrabajo] = useState([]);
 
   const [busqueda, setBusqueda] = useState("");
   const [filtroObraSocial, setFiltroObraSocial] = useState("");
+  const [filtroLugarTrabajo, setFiltroLugarTrabajo] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
   const [filtroActivo, setFiltroActivo] = useState("activos");
 
   const [mostrarCobroRapido, setMostrarCobroRapido] = useState(false);
-  const [formCobroRapido, setFormCobroRapido] = useState({ monto: "", fecha: hoyISO(), concepto: "Sesión" });
+  const [formCobroRapido, setFormCobroRapido] = useState({ monto: "", fecha: hoyISO(), concepto: "Sesión", seCobro: true });
   const [guardandoCobro, setGuardandoCobro] = useState(false);
 
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
@@ -50,26 +53,34 @@ export default function PanelPacientes() {
   const [formObraSocial, setFormObraSocial] = useState(OBRA_SOCIAL_VACIA);
   const [editandoObraSocialId, setEditandoObraSocialId] = useState(null);
 
+  const [mostrarLugaresTrabajo, setMostrarLugaresTrabajo] = useState(false);
+  const [formLugarTrabajo, setFormLugarTrabajo] = useState(LUGAR_TRABAJO_VACIO);
+  const [editandoLugarTrabajoId, setEditandoLugarTrabajoId] = useState(null);
+
   useEffect(() => { cargarDatos(); }, []);
 
   const cargarDatos = async () => {
     const { data: pacientesData } = await supabase
       .from("pacientes")
-      .select("*, obras_sociales(nombre, precio_hora, dias_pago)")
+      .select("*, obras_sociales(nombre, precio_hora, dias_pago), lugares_trabajo(nombre, monto, dias_pago)")
       .order("nombre");
     setPacientes(pacientesData || []);
 
     const { data: obrasData } = await supabase.from("obras_sociales").select("*").order("nombre");
     setObrasSociales(obrasData || []);
+
+    const { data: lugaresData } = await supabase.from("lugares_trabajo").select("*").order("nombre");
+    setLugaresTrabajo(lugaresData || []);
   };
 
   const pacientesFiltrados = pacientes.filter(p => {
-    const texto = `${p.nombre} ${p.apellido} ${p.obras_sociales?.nombre || ""}`.toLowerCase();
+    const texto = `${p.nombre} ${p.apellido} ${p.obras_sociales?.nombre || ""} ${p.lugares_trabajo?.nombre || ""}`.toLowerCase();
     const pasaBusqueda = !busqueda || texto.includes(busqueda.toLowerCase());
     const pasaObraSocial = !filtroObraSocial || p.obra_social_id === filtroObraSocial;
+    const pasaLugarTrabajo = !filtroLugarTrabajo || p.lugar_trabajo_id === filtroLugarTrabajo;
     const pasaFecha = !filtroFecha || (p.creado_en && p.creado_en.slice(0, 10) >= filtroFecha);
     const pasaActivo = filtroActivo === "todos" || (filtroActivo === "activos" ? p.activo !== false : p.activo === false);
-    return pasaBusqueda && pasaObraSocial && pasaFecha && pasaActivo;
+    return pasaBusqueda && pasaObraSocial && pasaLugarTrabajo && pasaFecha && pasaActivo;
   });
 
   // ---------- Ficha del paciente ----------
@@ -93,11 +104,32 @@ export default function PanelPacientes() {
       telefono_padre: p.telefono_padre || "", email_padre: p.email_padre || "",
       telefono_madre: p.telefono_madre || "", email_madre: p.email_madre || "",
       obra_social_id: p.obra_social_id || "",
+      lugar_trabajo_id: p.lugar_trabajo_id || "",
       monto_personalizado: p.monto_personalizado ?? "",
       dias_pago_personalizado: p.dias_pago_personalizado ?? "",
       activo: p.activo !== false,
     });
     cargarNotas(p.id);
+  };
+
+  // El origen del paciente es UNA de tres cosas -- Particular, una obra
+  // social, o un lugar de trabajo (centro) -- nunca dos a la vez. Se
+  // maneja como un solo <select> (con un prefijo "os:"/"lt:" para saber
+  // cuál es cuál) para que elegir una automáticamente descarte la otra.
+  const origenSeleccionado = formPaciente.obra_social_id
+    ? `os:${formPaciente.obra_social_id}`
+    : formPaciente.lugar_trabajo_id
+    ? `lt:${formPaciente.lugar_trabajo_id}`
+    : "";
+
+  const cambiarOrigen = (valor) => {
+    if (valor.startsWith("os:")) {
+      setFormPaciente(f => ({ ...f, obra_social_id: valor.slice(3), lugar_trabajo_id: "" }));
+    } else if (valor.startsWith("lt:")) {
+      setFormPaciente(f => ({ ...f, obra_social_id: "", lugar_trabajo_id: valor.slice(3) }));
+    } else {
+      setFormPaciente(f => ({ ...f, obra_social_id: "", lugar_trabajo_id: "" }));
+    }
   };
 
   const cambiarActivo = async (p) => {
@@ -125,41 +157,44 @@ export default function PanelPacientes() {
   const sugerirMontoCobro = () => {
     if (formPaciente.monto_personalizado) return formPaciente.monto_personalizado;
     if (pacienteSeleccionado?.obras_sociales?.precio_hora) return pacienteSeleccionado.obras_sociales.precio_hora;
+    if (pacienteSeleccionado?.lugares_trabajo?.monto) return pacienteSeleccionado.lugares_trabajo.monto;
     return "";
   };
 
   const abrirCobroRapido = () => {
-    setFormCobroRapido({ monto: sugerirMontoCobro(), fecha: hoyISO(), concepto: "Sesión" });
+    setFormCobroRapido({ monto: sugerirMontoCobro(), fecha: hoyISO(), concepto: "Sesión", seCobro: true });
     setMostrarCobroRapido(true);
   };
 
+  // Sin validación de monto obligatorio: un particular puede venir un día
+  // y no cobrarle nada todavía (o directamente faltar), y Brenda igual
+  // quiere poder dejarlo anotado -- "seCobro" en false guarda el registro
+  // en $0, como una marca de "vino/no vino, no se cobró", sin forzar a
+  // inventar un número.
   const guardarCobroRapido = async () => {
-    if (!formCobroRapido.monto || Number(formCobroRapido.monto) <= 0) {
-      Swal.fire("Falta el monto", "Cargá cuánto pagó.", "warning");
-      return;
-    }
     setGuardandoCobro(true);
+    const montoFinal = formCobroRapido.seCobro ? Number(formCobroRapido.monto || 0) : 0;
     const { error } = await supabase.from("cobros").insert([{
       paciente_id: pacienteSeleccionado.id,
       concepto: formCobroRapido.concepto || null,
-      monto: Number(formCobroRapido.monto),
+      monto: montoFinal,
       fecha: formCobroRapido.fecha || hoyISO(),
+      notas: formCobroRapido.seCobro ? null : "No se cobró",
     }]);
     setGuardandoCobro(false);
     if (error) { Swal.fire("Error", "No se pudo registrar el cobro.", "error"); return; }
     setMostrarCobroRapido(false);
-    Swal.fire({ icon: "success", title: "Cobro registrado", showConfirmButton: false, timer: 1200, heightAuto: false });
+    Swal.fire({ icon: "success", title: "Registrado", showConfirmButton: false, timer: 1200, heightAuto: false });
   };
 
-  const esParticular = !formPaciente.obra_social_id;
+  const esParticular = !formPaciente.obra_social_id && !formPaciente.lugar_trabajo_id;
 
+  // Ningún dato de pago es obligatorio -- puede que todavía no sepa
+  // cuánto le va a cobrar a un paciente nuevo, o el precio varíe por
+  // sesión. Guarda lo que haya y completa el resto después.
   const guardarPaciente = async () => {
     if (!formPaciente.nombre || !formPaciente.apellido) {
       Swal.fire("Faltan datos", "Nombre y apellido son obligatorios.", "warning");
-      return;
-    }
-    if (esParticular && (formPaciente.monto_personalizado === "" || formPaciente.dias_pago_personalizado === "")) {
-      Swal.fire("Faltan datos", "Como no tiene obra social, completá el precio y cada cuántos días cobra.", "warning");
       return;
     }
 
@@ -175,6 +210,7 @@ export default function PanelPacientes() {
       telefono_madre: formPaciente.telefono_madre || null,
       email_madre: formPaciente.email_madre || null,
       obra_social_id: formPaciente.obra_social_id || null,
+      lugar_trabajo_id: formPaciente.lugar_trabajo_id || null,
       monto_personalizado: formPaciente.monto_personalizado === "" ? null : Number(formPaciente.monto_personalizado),
       dias_pago_personalizado: formPaciente.dias_pago_personalizado === "" ? null : Number(formPaciente.dias_pago_personalizado),
     };
@@ -384,6 +420,60 @@ export default function PanelPacientes() {
     cargarDatos();
   };
 
+  // ---------- Lugares de trabajo (centros) ----------
+  // Independiente de las "sedes" del mapa público para pedir turno: acá
+  // son instituciones donde Brenda trabaja y le pagan un monto acordado
+  // por los pacientes que ELLAS le asignan (no los suma ella misma para
+  // facturar como con obra social -- los caraga solo para organizarse).
+  const abrirNuevoLugarTrabajo = () => {
+    setFormLugarTrabajo(LUGAR_TRABAJO_VACIO);
+    setEditandoLugarTrabajoId(null);
+  };
+
+  const editarLugarTrabajo = (l) => {
+    setFormLugarTrabajo({ nombre: l.nombre, monto: l.monto ?? "", dias_pago: l.dias_pago ?? 30 });
+    setEditandoLugarTrabajoId(l.id);
+  };
+
+  const guardarLugarTrabajo = async () => {
+    if (!formLugarTrabajo.nombre.trim()) {
+      Swal.fire("Falta el nombre", "Ponele un nombre al lugar de trabajo (ej: Centro ABC).", "warning");
+      return;
+    }
+    const payload = {
+      nombre: formLugarTrabajo.nombre,
+      monto: formLugarTrabajo.monto === "" ? null : Number(formLugarTrabajo.monto),
+      dias_pago: Number(formLugarTrabajo.dias_pago) || 30,
+    };
+
+    let error;
+    if (editandoLugarTrabajoId) {
+      ({ error } = await supabase.from("lugares_trabajo").update(payload).eq("id", editandoLugarTrabajoId));
+    } else {
+      ({ error } = await supabase.from("lugares_trabajo").insert([payload]));
+    }
+    if (error) { Swal.fire("Error", "No se pudo guardar.", "error"); return; }
+
+    abrirNuevoLugarTrabajo();
+    cargarDatos();
+  };
+
+  const eliminarLugarTrabajo = async (id) => {
+    const confirm = await Swal.fire({
+      title: "¿Eliminar este lugar de trabajo?",
+      text: "Los pacientes que lo tenían quedan como Particular, sin ese centro asignado.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!confirm.isConfirmed) return;
+
+    await supabase.from("pacientes").update({ lugar_trabajo_id: null }).eq("lugar_trabajo_id", id);
+    await supabase.from("lugares_trabajo").delete().eq("id", id);
+    cargarDatos();
+  };
+
   return (
     <div className="pac-container">
       <div className="pac-toolbar">
@@ -394,6 +484,10 @@ export default function PanelPacientes() {
         <select value={filtroObraSocial} onChange={e => setFiltroObraSocial(e.target.value)}>
           <option value="">Todas las obras sociales</option>
           {obrasSociales.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+        </select>
+        <select value={filtroLugarTrabajo} onChange={e => setFiltroLugarTrabajo(e.target.value)}>
+          <option value="">Todos los centros</option>
+          {lugaresTrabajo.map(l => <option key={l.id} value={l.id}>{l.nombre}</option>)}
         </select>
         <select value={filtroActivo} onChange={e => setFiltroActivo(e.target.value)}>
           <option value="activos">Activos</option>
@@ -406,6 +500,9 @@ export default function PanelPacientes() {
         </label>
         <button className="pac-btn-secundario" onClick={() => setMostrarObrasSociales(!mostrarObrasSociales)}>
           <FaCog /> Obras sociales
+        </button>
+        <button className="pac-btn-secundario" onClick={() => setMostrarLugaresTrabajo(!mostrarLugaresTrabajo)}>
+          <FaCog /> Centros
         </button>
         <button className="pac-btn-principal" onClick={abrirNuevoPaciente}>
           <FaPlus /> Nuevo paciente
@@ -449,6 +546,43 @@ export default function PanelPacientes() {
         </div>
       )}
 
+      {mostrarLugaresTrabajo && (
+        <div className="pac-card pac-obras-sociales">
+          <h3>Centros / lugares de trabajo</h3>
+          <p className="pac-nota">
+            Esto no tiene nada que ver con las sedes del mapa para pedir turno -- son instituciones donde trabajás
+            (ej: un centro) que te asignan pacientes y te pagan un monto acordado. Cargalos acá y después elegilos
+            en la ficha del paciente, en vez de obra social.
+          </p>
+
+          <div className="pac-obras-lista">
+            {lugaresTrabajo.map(l => (
+              <div key={l.id} className="pac-obra-item">
+                <div>
+                  <strong>{l.nombre}</strong>
+                  <span>{l.monto ? `$${l.monto}` : "Sin monto definido"} · cobra a los {l.dias_pago} días</span>
+                </div>
+                <div className="pac-turno-acciones">
+                  <button onClick={() => editarLugarTrabajo(l)}><FaEdit /></button>
+                  <button onClick={() => eliminarLugarTrabajo(l.id)}><FaTrash /></button>
+                </div>
+              </div>
+            ))}
+            {lugaresTrabajo.length === 0 && <p className="pac-nota">Todavía no cargaste ninguno.</p>}
+          </div>
+
+          <div className="pac-form-fila">
+            <input placeholder="Nombre (ej: Centro ABC)" value={formLugarTrabajo.nombre} onChange={e => setFormLugarTrabajo({ ...formLugarTrabajo, nombre: e.target.value })} />
+            <input type="number" placeholder="Monto acordado" value={formLugarTrabajo.monto} onChange={e => setFormLugarTrabajo({ ...formLugarTrabajo, monto: e.target.value })} />
+            <input type="number" placeholder="Cobra a los X días (30, 60, 90...)" value={formLugarTrabajo.dias_pago} onChange={e => setFormLugarTrabajo({ ...formLugarTrabajo, dias_pago: e.target.value })} />
+          </div>
+          <div className="pac-form-acciones">
+            <button className="pac-btn-principal" onClick={guardarLugarTrabajo}>{editandoLugarTrabajoId ? "Guardar cambios" : "Agregar"}</button>
+            {editandoLugarTrabajoId && <button className="pac-btn-secundario" onClick={abrirNuevoLugarTrabajo}>Cancelar edición</button>}
+          </div>
+        </div>
+      )}
+
       <div className="pac-lista">
         {pacientesFiltrados.length === 0 && <p className="pac-nota">No hay pacientes que coincidan.</p>}
         {pacientesFiltrados.map(p => (
@@ -456,7 +590,7 @@ export default function PanelPacientes() {
             <div>
               <strong>{p.nombre} {p.apellido}</strong>
               <span>
-                {p.obras_sociales?.nombre || "Particular"}
+                {p.obras_sociales?.nombre || (p.lugares_trabajo?.nombre ? `Centro: ${p.lugares_trabajo.nombre}` : "Particular")}
                 {p.activo === false && <span className="pac-tag-inactivo">Dado de baja</span>}
               </span>
             </div>
@@ -491,24 +625,55 @@ export default function PanelPacientes() {
 
                   {mostrarCobroRapido && (
                     <div className="pac-nota-form">
+                      <label className="pac-checkbox-linea">
+                        <input type="checkbox" checked={formCobroRapido.seCobro} onChange={e => setFormCobroRapido({ ...formCobroRapido, seCobro: e.target.checked })} />
+                        Se cobró
+                      </label>
                       <div className="pac-form-fila">
-                        <input type="number" placeholder="Monto cobrado" value={formCobroRapido.monto} onChange={e => setFormCobroRapido({ ...formCobroRapido, monto: e.target.value })} />
+                        <input
+                          type="number"
+                          placeholder="Monto cobrado"
+                          value={formCobroRapido.monto}
+                          disabled={!formCobroRapido.seCobro}
+                          onChange={e => setFormCobroRapido({ ...formCobroRapido, monto: e.target.value })}
+                        />
                         <input type="date" value={formCobroRapido.fecha} onChange={e => setFormCobroRapido({ ...formCobroRapido, fecha: e.target.value })} />
                       </div>
-                      <input placeholder="Concepto (ej: Sesión)" value={formCobroRapido.concepto} onChange={e => setFormCobroRapido({ ...formCobroRapido, concepto: e.target.value })} />
+                      <input placeholder="Concepto (ej: Sesión) -- opcional" value={formCobroRapido.concepto} onChange={e => setFormCobroRapido({ ...formCobroRapido, concepto: e.target.value })} />
                       <div className="pac-form-acciones">
-                        <button className="pac-btn-principal" onClick={guardarCobroRapido} disabled={guardandoCobro}>{guardandoCobro ? "Guardando..." : "Guardar cobro"}</button>
+                        <button className="pac-btn-principal" onClick={guardarCobroRapido} disabled={guardandoCobro}>{guardandoCobro ? "Guardando..." : "Guardar"}</button>
                         <button className="pac-btn-secundario" onClick={() => setMostrarCobroRapido(false)}>Cancelar</button>
                       </div>
                     </div>
                   )}
 
-                  <p><strong>Obra social:</strong> {pacienteSeleccionado.obras_sociales?.nombre || "Particular"}</p>
+                  <p><strong>Origen:</strong> {
+                    pacienteSeleccionado.obras_sociales?.nombre
+                      ? pacienteSeleccionado.obras_sociales.nombre
+                      : pacienteSeleccionado.lugares_trabajo?.nombre
+                      ? `Centro: ${pacienteSeleccionado.lugares_trabajo.nombre}`
+                      : "Particular"
+                  }</p>
                   <p><strong>Paciente:</strong> {formPaciente.telefono || "—"} {formPaciente.email ? `· ${formPaciente.email}` : ""}</p>
                   <p><strong>Padre:</strong> {formPaciente.nombre_padre || "—"} · {formPaciente.telefono_padre || "—"} {formPaciente.email_padre ? `· ${formPaciente.email_padre}` : ""}</p>
                   <p><strong>Madre:</strong> {formPaciente.nombre_madre || "—"} · {formPaciente.telefono_madre || "—"} {formPaciente.email_madre ? `· ${formPaciente.email_madre}` : ""}</p>
-                  <p><strong>Precio:</strong> {formPaciente.monto_personalizado ? `$${formPaciente.monto_personalizado} (particular)` : `usa el de ${pacienteSeleccionado.obras_sociales?.nombre || "la obra social"}`}</p>
-                  <p><strong>Cobra a los:</strong> {formPaciente.dias_pago_personalizado ? `${formPaciente.dias_pago_personalizado} días (particular)` : `${pacienteSeleccionado.obras_sociales?.dias_pago || 30} días (de la obra social)`}</p>
+                  <p><strong>Precio:</strong> {
+                    formPaciente.monto_personalizado ? `$${formPaciente.monto_personalizado} (particular)`
+                    : pacienteSeleccionado.obras_sociales?.precio_hora ? `$${pacienteSeleccionado.obras_sociales.precio_hora} (de ${pacienteSeleccionado.obras_sociales.nombre})`
+                    : pacienteSeleccionado.lugares_trabajo?.monto ? `$${pacienteSeleccionado.lugares_trabajo.monto} (de ${pacienteSeleccionado.lugares_trabajo.nombre})`
+                    : "Sin definir todavía"
+                  }</p>
+                  <p><strong>Cobra a los:</strong> {
+                    formPaciente.dias_pago_personalizado ? `${formPaciente.dias_pago_personalizado} días (particular)`
+                    : pacienteSeleccionado.obras_sociales?.dias_pago ? `${pacienteSeleccionado.obras_sociales.dias_pago} días (de ${pacienteSeleccionado.obras_sociales.nombre})`
+                    : pacienteSeleccionado.lugares_trabajo?.dias_pago ? `${pacienteSeleccionado.lugares_trabajo.dias_pago} días (de ${pacienteSeleccionado.lugares_trabajo.nombre})`
+                    : esParticular ? "El mismo día"
+                    : "Sin definir todavía"
+                  }</p>
+                  <p className="pac-nota">
+                    Esto es solo el precio de referencia -- no queda como plata cobrada hasta que uses
+                    "Registrar cobro" (arriba) cada vez que efectivamente le cobrás. Eso es lo que se ve en Finanzas.
+                  </p>
                 </>
               ) : (
                 <>
@@ -532,21 +697,30 @@ export default function PanelPacientes() {
                   </div>
                   <input placeholder="Email de la madre" value={formPaciente.email_madre} onChange={e => setFormPaciente({ ...formPaciente, email_madre: e.target.value })} />
 
-                  <select value={formPaciente.obra_social_id} onChange={e => setFormPaciente({ ...formPaciente, obra_social_id: e.target.value })}>
-                    <option value="">Particular (precio propio)</option>
-                    {obrasSociales.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+                  <select value={origenSeleccionado} onChange={e => cambiarOrigen(e.target.value)}>
+                    <option value="">Particular (precio propio, o sin definir todavía)</option>
+                    {obrasSociales.length > 0 && (
+                      <optgroup label="Obra social">
+                        {obrasSociales.map(o => <option key={o.id} value={`os:${o.id}`}>{o.nombre}</option>)}
+                      </optgroup>
+                    )}
+                    {lugaresTrabajo.length > 0 && (
+                      <optgroup label="Centro / lugar de trabajo">
+                        {lugaresTrabajo.map(l => <option key={l.id} value={`lt:${l.id}`}>{l.nombre}</option>)}
+                      </optgroup>
+                    )}
                   </select>
 
                   <div className="pac-form-fila">
                     <input
                       type="number"
-                      placeholder={esParticular ? "Precio (obligatorio)" : "Precio particular (opcional, pisa el de la obra social)"}
+                      placeholder={esParticular ? "Precio (opcional -- particular se puede cobrar el mismo día)" : "Precio particular (opcional, pisa el sugerido)"}
                       value={formPaciente.monto_personalizado}
                       onChange={e => setFormPaciente({ ...formPaciente, monto_personalizado: e.target.value })}
                     />
                     <input
                       type="number"
-                      placeholder={esParticular ? "Cobra a los X días (obligatorio)" : "Cobra a los X días (opcional, pisa el de la obra social)"}
+                      placeholder={esParticular ? "Cobra a los X días (opcional -- vacío = el mismo día)" : "Cobra a los X días (opcional, pisa el sugerido)"}
                       value={formPaciente.dias_pago_personalizado}
                       onChange={e => setFormPaciente({ ...formPaciente, dias_pago_personalizado: e.target.value })}
                     />

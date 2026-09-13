@@ -45,7 +45,7 @@ export default function PanelFinanzas() {
     const [{ data: cobrosData }, { data: gastosData }, { data: pacientesData }] = await Promise.all([
       supabase.from("cobros").select("*, pacientes(nombre, apellido)").order("fecha", { ascending: false }),
       supabase.from("gastos").select("*").order("fecha", { ascending: false }),
-      supabase.from("pacientes").select("id, nombre, apellido, activo, monto_personalizado, obras_sociales(precio_hora)").order("nombre"),
+      supabase.from("pacientes").select("id, nombre, apellido, activo, monto_personalizado, obras_sociales(precio_hora), lugares_trabajo(monto)").order("nombre"),
     ]);
     setCobros(cobrosData || []);
     setGastos(gastosData || []);
@@ -133,7 +133,7 @@ export default function PanelFinanzas() {
   const sugerirMontoPaciente = (pacienteId) => {
     const p = pacientes.find((x) => x.id === pacienteId);
     if (!p) return "";
-    return p.monto_personalizado ?? p.obras_sociales?.precio_hora ?? "";
+    return p.monto_personalizado ?? p.obras_sociales?.precio_hora ?? p.lugares_trabajo?.monto ?? "";
   };
 
   const abrirNuevoCobro = () => {
@@ -158,14 +158,12 @@ export default function PanelFinanzas() {
   };
 
   const guardarCobro = async () => {
-    if (!formCobro.monto || Number(formCobro.monto) <= 0) {
-      Swal.fire("Falta el monto", "Cargá cuánto se cobró.", "warning");
-      return;
-    }
+    // Sin monto obligatorio: puede que todavía no sepa cuánto cobrar, o
+    // que ese día no se haya cobrado nada -- igual queda anotada la fecha.
     const payload = {
       paciente_id: formCobro.paciente_id || null,
       concepto: formCobro.concepto || null,
-      monto: Number(formCobro.monto),
+      monto: formCobro.monto === "" ? 0 : Number(formCobro.monto),
       fecha: formCobro.fecha || hoyISO(),
       notas: formCobro.notas || null,
     };

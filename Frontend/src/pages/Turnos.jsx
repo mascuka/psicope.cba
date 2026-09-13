@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { FaMapMarkerAlt, FaWhatsapp, FaEdit, FaPlus, FaTrash, FaExternalLinkAlt } from "react-icons/fa";
 import MapaSede from "../components/MapaSede";
 import Loader from "../components/Loader";
+import useSEO from "../hooks/useSEO";
 import "./turnos.css";
 
 const WHATSAPP_NUMERO = "5493513893506"; // sin + ni espacios, formato internacional
@@ -12,6 +13,10 @@ const SEDE_VACIA = { nombre: "", direccion: "", link_mapa: "" };
 const FORM_VACIO = { nombre: "", apellido: "", telefono: "", email: "", obra_social: "", motivo: "" };
 
 export default function Turnos() {
+  useSEO(
+    "Pedir Turno | Psicopedagoga en Córdoba - Psicope.cba",
+    "Solicitá tu turno con Brenda Grossi, psicopedagoga en Córdoba Capital. Atención particular y por obra social, en consultorio o desde donde estés."
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [usuario, setUsuario] = useState(null);
 
@@ -34,28 +39,35 @@ export default function Turnos() {
   const inicializar = async () => {
     setLoading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setUsuario(user);
-      const { data: perfil } = await supabase.from("usuarios").select("nombre, email, telefono, rol").eq("id", user.id).single();
-      if (perfil) {
-        const [nombre, ...resto] = (perfil.nombre || "").split(" ");
-        setForm(f => ({
-          ...f,
-          nombre: nombre || "",
-          apellido: resto.join(" ") || "",
-          email: perfil.email || user.email || "",
-          telefono: perfil.telefono || "",
-        }));
-        if (perfil.rol === "admin") setIsAdmin(true);
+    // Con try/finally: si algo falla al chequear la sesión (algo que solo
+    // pasa estando logueado), la página no se queda trabada en "Cargando"
+    // para siempre -- sigue de largo y al menos muestra las sedes.
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUsuario(user);
+        const { data: perfil } = await supabase.from("usuarios").select("nombre, email, telefono, rol").eq("id", user.id).single();
+        if (perfil) {
+          const [nombre, ...resto] = (perfil.nombre || "").split(" ");
+          setForm(f => ({
+            ...f,
+            nombre: nombre || "",
+            apellido: resto.join(" ") || "",
+            email: perfil.email || user.email || "",
+            telefono: perfil.telefono || "",
+          }));
+          if (perfil.rol === "admin") setIsAdmin(true);
+        }
       }
+
+      const { data: sedesData } = await supabase.from("sedes").select("*").eq("activa", true).order("nombre");
+      setSedes(sedesData || []);
+      if (sedesData && sedesData.length > 0) setSedeSeleccionada(sedesData[0]);
+    } catch (error) {
+      console.error("Error inicializando Turnos:", error);
+    } finally {
+      setLoading(false);
     }
-
-    const { data: sedesData } = await supabase.from("sedes").select("*").eq("activa", true).order("nombre");
-    setSedes(sedesData || []);
-    if (sedesData && sedesData.length > 0) setSedeSeleccionada(sedesData[0]);
-
-    setLoading(false);
   };
 
   const handleEnviar = async (e) => {

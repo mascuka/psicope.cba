@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import Carousel from "../components/Carousel";
 import { useComprarMaterial } from "../hooks/useComprarMaterial";
+import useSEO from "../hooks/useSEO";
 import "./home.css";
 import "./materiales.css";
 
@@ -21,6 +22,10 @@ const IconoArcoiris = () => (
 );
 
 export default function Home() {
+  useSEO(
+    "Psicopedagoga en Córdoba | Lic. Brenda Grossi - Psicope.cba",
+    "Psicopedagoga en Córdoba Capital. Evaluación y tratamiento psicopedagógico para niños, niñas y adolescentes con dificultades de aprendizaje. Atención particular y por obra social."
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -72,11 +77,23 @@ export default function Home() {
 
   useEffect(() => {
     const inicializar = async () => {
-      await checkAdmin();
-      await fetchHomeContent();
-      const { data } = await supabase.from("materiales").select("id, nombre");
-      setTodosLosMateriales(data || []);
-      setLoading(false);
+      // Si cualquiera de estos pasos tira una excepción real (no solo un
+      // error de Supabase, sino que se corte la promesa -- ej. un problema
+      // de red al chequear si sos admin o tus compras, algo que SOLO pasa
+      // estando logueado), antes se cortaba acá mismo y la página quedaba
+      // en "Cargando..." para siempre, porque nunca llegaba a
+      // setLoading(false). Con el try/finally, pase lo que pase, la
+      // página siempre termina de cargar.
+      try {
+        await checkAdmin();
+        await fetchHomeContent();
+        const { data } = await supabase.from("materiales").select("id, nombre");
+        setTodosLosMateriales(data || []);
+      } catch (error) {
+        console.error("Error inicializando Home:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     inicializar();
 
@@ -101,14 +118,18 @@ export default function Home() {
   }, []);
 
   const checkAdmin = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setUser(user);
-      const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-      setIsAdmin(data?.rol === "admin");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUser(user);
+        const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+        setIsAdmin(data?.rol === "admin");
 
-      const { data: compras } = await supabase.from("compras").select("material_id").eq("usuario_id", user.id).eq("status", "approved");
-      if (compras) setMisCompras(compras.map(c => c.material_id));
+        const { data: compras } = await supabase.from("compras").select("material_id").eq("usuario_id", user.id).eq("status", "approved");
+        if (compras) setMisCompras(compras.map(c => c.material_id));
+      }
+    } catch (error) {
+      console.error("Error chequeando la sesión:", error);
     }
   };
 

@@ -2,9 +2,14 @@ import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2';
 import Loader from "../components/Loader";
+import useSEO from "../hooks/useSEO";
 import "./quienSoy.css";
 
 export default function QuienSoy() {
+  useSEO(
+    "Quién Soy | Brenda Grossi, Psicopedagoga en Córdoba",
+    "Conocé a Brenda Grossi, Licenciada en Psicopedagogía en Córdoba Capital. Especializada en dislexia, discalculia, disgrafía y evaluación cognitiva WISC-V."
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -26,10 +31,14 @@ export default function QuienSoy() {
   }, []);
 
   const checkUserRole = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-      if (data?.rol === "admin") setIsAdmin(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+        if (data?.rol === "admin") setIsAdmin(true);
+      }
+    } catch (error) {
+      console.error("Error chequeando la sesión:", error);
     }
   };
 

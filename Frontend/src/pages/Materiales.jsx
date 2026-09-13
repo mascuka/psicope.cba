@@ -10,6 +10,7 @@ import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import JSZip from "jszip";
 import Loader from "../components/Loader";
 import { useComprarMaterial } from "../hooks/useComprarMaterial";
+import useSEO from "../hooks/useSEO";
 import "./materiales.css";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
@@ -18,6 +19,10 @@ const PAGINAS_MUESTRA = 4; // cantidad de hojas que se usan para el PDF de "mues
 const ANCHO_PORTADA_PX = 900; // ancho al que se renderiza la imagen de portada
 
 export default function Materiales() {
+  useSEO(
+    "Materiales Psicopedagógicos Descargables | Psicope.cba - Córdoba",
+    "Materiales didácticos y psicopedagógicos digitales para descargar, creados por una psicopedagoga en Córdoba. Recursos para trabajar el aprendizaje desde casa o la escuela."
+  );
   const [materiales, setMateriales] = useState([]);
   const [misCompras, setMisCompras] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -59,19 +64,28 @@ export default function Materiales() {
   }, []);
 
   const inicializar = async () => {
-    await checkUser();
-    await fetchMateriales();
-    setLoading(false);
+    try {
+      await checkUser();
+      await fetchMateriales();
+    } catch (error) {
+      console.error("Error inicializando Materiales:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setUser(user);
-    const { data: perfil } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
-    if (perfil?.rol === "admin") setIsAdmin(true);
-    const { data: compras } = await supabase.from("compras").select("material_id").eq("usuario_id", user.id).eq("status", "approved");
-    if (compras) setMisCompras(compras.map(c => c.material_id));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUser(user);
+      const { data: perfil } = await supabase.from("usuarios").select("rol").eq("id", user.id).single();
+      if (perfil?.rol === "admin") setIsAdmin(true);
+      const { data: compras } = await supabase.from("compras").select("material_id").eq("usuario_id", user.id).eq("status", "approved");
+      if (compras) setMisCompras(compras.map(c => c.material_id));
+    } catch (error) {
+      console.error("Error chequeando la sesión:", error);
+    }
   };
 
   // El contador de ventas que ve el admin en cada tarjeta tiene que contar

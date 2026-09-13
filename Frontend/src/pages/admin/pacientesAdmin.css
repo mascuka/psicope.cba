@@ -222,6 +222,25 @@
   opacity: 0.6;
 }
 
+.pac-checkbox-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+.pac-checkbox-linea input {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.pac-detalle input:disabled {
+  opacity: 0.5;
+  background: #f0f0f0;
+}
+
 .pac-ficha p {
   margin: 6px 0;
 }
