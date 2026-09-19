@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart, FaTrash, FaPlus, FaChevronDown } from 'react-icons/fa';
+import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart, FaTrash, FaPlus, FaChevronDown, FaGripVertical } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
@@ -35,6 +35,7 @@ export default function Home() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [misCompras, setMisCompras] = useState([]);
   const [faqAbierta, setFaqAbierta] = useState(null);
+  const [faqArrastrando, setFaqArrastrando] = useState(null);
 
   // Mismo flujo de compra real que usa Materiales.jsx (elegir método,
   // formulario de invitado, QR o Mercado Pago, espera + descarga) -- así
@@ -291,6 +292,36 @@ export default function Home() {
     setContent(actualizado);
     handleSave(actualizado);
   };
+
+  // Arrastrar y soltar para reordenar -- mismo mecanismo que ya se usa
+  // para reordenar los posts de Psicopedagogiando, pero acá es más
+  // simple: al ser un array adentro de un solo bloque JSON (no filas
+  // separadas en la base), alcanza con reordenar en memoria y guardar
+  // una vez con el mismo handleSave de siempre.
+  const iniciarArrastreFAQ = (e, index) => {
+    if (!isAdmin) return;
+    setFaqArrastrando(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const permitirSoltarFAQ = (e, index) => {
+    if (!isAdmin || faqArrastrando === null || faqArrastrando === index) return;
+    e.preventDefault();
+  };
+
+  const soltarFAQ = (e, index) => {
+    if (!isAdmin || faqArrastrando === null || faqArrastrando === index) return;
+    e.preventDefault();
+    const reordenadas = [...content.faq];
+    const [movida] = reordenadas.splice(faqArrastrando, 1);
+    reordenadas.splice(index, 0, movida);
+    setFaqArrastrando(null);
+    const actualizado = { ...content, faq: reordenadas };
+    setContent(actualizado);
+    handleSave(actualizado);
+  };
+
+  const terminarArrastreFAQ = () => setFaqArrastrando(null);
 
  if (loading) {
   return (
@@ -642,7 +673,15 @@ export default function Home() {
             {(content.faq || []).map((item, index) => {
               const abierta = faqAbierta === index;
               return (
-                <div key={index} className={`faq-item ${abierta ? 'abierta' : ''}`}>
+                <div
+                  key={index}
+                  className={`faq-item ${abierta ? 'abierta' : ''} ${faqArrastrando === index ? 'arrastrando' : ''}`}
+                  draggable={isAdmin && editMode !== `faq_${index}`}
+                  onDragStart={(e) => iniciarArrastreFAQ(e, index)}
+                  onDragOver={(e) => permitirSoltarFAQ(e, index)}
+                  onDrop={(e) => soltarFAQ(e, index)}
+                  onDragEnd={terminarArrastreFAQ}
+                >
                   {editMode === `faq_${index}` ? (
                     <div style={{padding:'10px'}}>
                       <input
@@ -675,9 +714,10 @@ export default function Home() {
                       <button
                         type="button"
                         className="faq-pregunta"
-                        onClick={() => setFaqAbierta(abierta ? null : index)}
+                        onClick={() => { if (faqArrastrando === null) setFaqAbierta(abierta ? null : index); }}
                         aria-expanded={abierta}
                       >
+                        {isAdmin && <span className="faq-agarre" title="Arrastrar para reordenar"><FaGripVertical /></span>}
                         <h3>{item.pregunta}</h3>
                         <span className="faq-flecha"><FaChevronDown /></span>
                       </button>

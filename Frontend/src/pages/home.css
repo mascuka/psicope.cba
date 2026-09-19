@@ -905,14 +905,19 @@
   box-shadow: 0 10px 30px rgba(43, 37, 48, 0.06);
 }
 
+/* Mientras se arrastra una pregunta para reordenar, se atenúa para que
+   quede claro cuál es la que se está moviendo. */
+.faq-item.arrastrando {
+  opacity: 0.4;
+}
+
 /* La pregunta entera es el botón que abre/cierra -- así hace falta un
    solo clic en cualquier parte de la fila, no justo en el texto. */
 .faq-pregunta {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -922,11 +927,19 @@
 }
 
 .faq-pregunta h3 {
+  flex: 1;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 1.1rem;
   color: var(--color-texto-oscuro);
   font-weight: 700;
   margin: 0;
+}
+
+.faq-agarre {
+  flex-shrink: 0;
+  color: #bbb;
+  cursor: grab;
+  display: flex;
 }
 
 .faq-flecha {
