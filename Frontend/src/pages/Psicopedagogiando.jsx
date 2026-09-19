@@ -365,8 +365,29 @@ export default function Psicopedagogiando() {
       );
     }
 
+  // Se arma solo a partir de "posts" -- cada post nuevo que subas entra
+  // acá automáticamente la próxima vez que alguien (o Google) cargue la
+  // página, sin que haga falta tocar nada aparte para que cuente para el
+  // buscador.
   return (
     <div className="psico-page">
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": headerData.titulo || "Psicopedagogiando",
+          "description": headerData.frase,
+          "url": "https://psicope-cba.netlify.app/psicopedagogiando",
+          "publisher": { "@type": "Person", "name": "Brenda Grossi" },
+          "blogPost": posts.slice(0, 30).map((p) => ({
+            "@type": "BlogPosting",
+            "headline": p.titulo,
+            "description": (p.contenido || "").replace(/\s+/g, " ").trim().slice(0, 200),
+            "datePublished": p.created_at,
+            ...((p.tipo === "imagen" || p.tipo === "imagen_ia") && p.url_media ? { "image": p.url_media } : {}),
+          })),
+        })}
+      </script>
       <header className="psico-header-section">
         {editHeader ? (
           <div className="header-edit-box">

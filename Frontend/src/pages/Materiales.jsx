@@ -540,8 +540,32 @@ export default function Materiales() {
   const precioBasePackForm = nuevoMaterial.materiales_incluidos.reduce((s, it) => s + (Number(it.precio_efectivo) || 0), 0);
   const precioFinalPackForm = Math.round(precioBasePackForm * (1 - (parseFloat(nuevoMaterial.descuento_pack) || 0) / 100));
 
+  // Igual que en Psicopedagogiando: se arma solo a partir de la lista de
+  // materiales que ya está cargada -- cada material nuevo que subas suma
+  // acá automáticamente, sin tener que repetir nada a mano.
   return (
     <div className="materiales-page">
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Materiales Psicopedagógicos",
+          "url": "https://psicope-cba.netlify.app/materiales",
+          "itemListElement": materiales.slice(0, 50).map((m, i) => ({
+            "@type": "Product",
+            "position": i + 1,
+            "name": m.nombre,
+            "description": (m.descripcion || "").replace(/\s+/g, " ").trim().slice(0, 200),
+            ...(m.imagen_portada ? { "image": m.imagen_portada } : {}),
+            "offers": {
+              "@type": "Offer",
+              "price": m.en_oferta ? (m.precio * (1 - m.porcentaje_descuento / 100)).toFixed(0) : m.precio,
+              "priceCurrency": "ARS",
+              "availability": "https://schema.org/InStock",
+            },
+          })),
+        })}
+      </script>
       <div className="materiales-content">
         <aside className="materiales-sidebar">
           <div className="filter-card">

@@ -138,8 +138,33 @@ export default function QuienSoy() {
     );
   }
 
+  // Igual que en Home con las Preguntas Frecuentes: este JSON-LD lee el
+  // mismo texto/foto que se edita acá arriba con "Editar Todo" -- así que
+  // cambiar la bio también actualiza automáticamente lo que le llega a
+  // Google, sin tener que tocar nada aparte.
+  const descripcionCorta = (texto || "").replace(/\s+/g, " ").trim().slice(0, 300);
+
   return (
     <div className="quien-soy-container">
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": "Brenda Grossi",
+          "jobTitle": "Licenciada en Psicopedagogía",
+          "description": descripcionCorta,
+          "image": imagen ? imagen.split("?")[0] : undefined,
+          "url": "https://psicope-cba.netlify.app/quien-soy",
+          "worksFor": { "@type": "MedicalBusiness", "name": "Psicope.cba" },
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Córdoba",
+            "addressRegion": "Córdoba",
+            "addressCountry": "AR",
+          },
+          "sameAs": ["https://www.instagram.com/psicope.cba/"],
+        })}
+      </script>
       <div className="quien-soy-card">
         <div className="quien-soy-foto-seccion">
           <div className="marco-perfil-rosa">
