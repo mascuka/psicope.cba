@@ -21,6 +21,29 @@ const IconoArcoiris = () => (
   </svg>
 );
 
+const PREGUNTAS_FRECUENTES = [
+  {
+    pregunta: "¿Qué hace una psicopedagoga?",
+    respuesta: "Una psicopedagoga evalúa y trata los procesos de aprendizaje de niños, niñas y adolescentes. Detecta fortalezas y dificultades (lectura, escritura, cálculo, atención, memoria), arma un plan de intervención personalizado y trabaja en conjunto con la familia y la escuela para acompañar el aprendizaje.",
+  },
+  {
+    pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?",
+    respuesta: "Cuando un niño, niña o adolescente muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado.",
+  },
+  {
+    pregunta: "¿Atendés solo particular o también con obra social?",
+    respuesta: "Atiendo tanto de forma particular como por obra social, en consultorio en Córdoba Capital. Podés consultar por WhatsApp para confirmar la cobertura específica de tu obra social.",
+  },
+  {
+    pregunta: "¿Qué dificultades de aprendizaje se pueden evaluar y tratar?",
+    respuesta: "Trabajo especialmente con Dificultades Específicas del Aprendizaje como dislexia, discalculia y disgrafía, además de evaluación cognitiva (WISC-V) y fortalecimiento de funciones ejecutivas (organización, memoria de trabajo, autorregulación).",
+  },
+  {
+    pregunta: "¿Cómo pido un turno?",
+    respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en 27 de Abril 424, Córdoba Capital.",
+  },
+];
+
 export default function Home() {
   useSEO(
     "Psicopedagoga en Córdoba | Lic. Brenda Grossi - Psicope.cba",
@@ -581,6 +604,39 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* ==================== PREGUNTAS FRECUENTES ====================
+          Contenido real (no oculto) que cubre de forma natural variantes
+          de búsqueda como "psicopedagoga en Córdoba", "qué hace un
+          psicopedagogo", "psicopedagoga particular u obra social", etc.
+          -- las metaetiquetas de "keywords" no las lee Google hace años,
+          pero SÍ lee y valora texto real como este. El JSON-LD FAQPage de
+          abajo, además, puede hacer que Google muestre estas preguntas
+          directo en el resultado de búsqueda. */}
+      <section className="home-faq">
+        <div className="faq-container">
+          <h2>Preguntas frecuentes</h2>
+          <div className="faq-lista">
+            {PREGUNTAS_FRECUENTES.map((item, i) => (
+              <div key={i} className="faq-item">
+                <h3>{item.pregunta}</h3>
+                <p>{item.respuesta}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": PREGUNTAS_FRECUENTES.map((item) => ({
+            "@type": "Question",
+            "name": item.pregunta,
+            "acceptedAnswer": { "@type": "Answer", "text": item.respuesta },
+          })),
+        })}
+      </script>
 
       {/* ==================== MODAL PDF ==================== */}
       {viewingPdf && (
