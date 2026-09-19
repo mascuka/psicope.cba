@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
-import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaEye, FaShoppingCart, FaArrowRight, FaDownload, FaClock, FaCheckCircle, FaHeart, FaTrash, FaPlus, FaChevronDown } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
@@ -21,29 +21,6 @@ const IconoArcoiris = () => (
   </svg>
 );
 
-const PREGUNTAS_FRECUENTES = [
-  {
-    pregunta: "¿Qué hace una psicopedagoga?",
-    respuesta: "Una psicopedagoga evalúa y trata los procesos de aprendizaje de niños, niñas y adolescentes. Detecta fortalezas y dificultades (lectura, escritura, cálculo, atención, memoria), arma un plan de intervención personalizado y trabaja en conjunto con la familia y la escuela para acompañar el aprendizaje.",
-  },
-  {
-    pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?",
-    respuesta: "Cuando un niño, niña o adolescente muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado.",
-  },
-  {
-    pregunta: "¿Atendés solo particular o también con obra social?",
-    respuesta: "Atiendo tanto de forma particular como por obra social, en consultorio en Córdoba Capital. Podés consultar por WhatsApp para confirmar la cobertura específica de tu obra social.",
-  },
-  {
-    pregunta: "¿Qué dificultades de aprendizaje se pueden evaluar y tratar?",
-    respuesta: "Trabajo especialmente con Dificultades Específicas del Aprendizaje como dislexia, discalculia y disgrafía, además de evaluación cognitiva (WISC-V) y fortalecimiento de funciones ejecutivas (organización, memoria de trabajo, autorregulación).",
-  },
-  {
-    pregunta: "¿Cómo pido un turno?",
-    respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en 27 de Abril 424, Córdoba Capital.",
-  },
-];
-
 export default function Home() {
   useSEO(
     "Psicopedagoga en Córdoba | Lic. Brenda Grossi - Psicope.cba",
@@ -57,6 +34,7 @@ export default function Home() {
   const [viewingPdf, setViewingPdf] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [misCompras, setMisCompras] = useState([]);
+  const [faqAbierta, setFaqAbierta] = useState(null);
 
   // Mismo flujo de compra real que usa Materiales.jsx (elegir método,
   // formulario de invitado, QR o Mercado Pago, espera + descarga) -- así
@@ -86,10 +64,24 @@ export default function Home() {
     destacados_subtitulo: "Recursos cuidadosamente seleccionados para cada etapa del aprendizaje",
     frase_ver_todos: "¿Listo para potenciar tu práctica educativa?",
     config_destacados: [
-      { id: null, modo: "automatico" }, 
-      { id: null, modo: "automatico" }, 
+      { id: null, modo: "automatico" },
+      { id: null, modo: "automatico" },
       { id: null, modo: "automatico" }
-    ]
+    ],
+    // Mismo mecanismo que "beneficios": vive adentro de este mismo bloque
+    // de contenido (tabla contenido_home, sin tabla nueva), así que
+    // editar o borrar una pregunta se guarda con el mismo botón "Guardar"
+    // de siempre, y al borrar desaparece del todo (no queda nada
+    // huérfano dando vueltas). El JSON-LD de más abajo lee este mismo
+    // array, así que se actualiza solo con lo que se edite acá -- nada
+    // de lo hecho para Google se pierde ni se desincroniza.
+    faq: [
+      { pregunta: "¿Qué hace una psicopedagoga?", respuesta: "Una psicopedagoga evalúa y trata los procesos de aprendizaje de niños, niñas y adolescentes. Detecta fortalezas y dificultades (lectura, escritura, cálculo, atención, memoria), arma un plan de intervención personalizado y trabaja en conjunto con la familia y la escuela para acompañar el aprendizaje." },
+      { pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?", respuesta: "Cuando un niño, niña o adolescente muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado." },
+      { pregunta: "¿Atendés solo particular o también con obra social?", respuesta: "Atiendo tanto de forma particular como por obra social, en consultorio en Córdoba Capital. Podés consultar por WhatsApp para confirmar la cobertura específica de tu obra social." },
+      { pregunta: "¿Qué dificultades de aprendizaje se pueden evaluar y tratar?", respuesta: "Trabajo especialmente con Dificultades Específicas del Aprendizaje como dislexia, discalculia y disgrafía, además de evaluación cognitiva (WISC-V) y fortalecimiento de funciones ejecutivas (organización, memoria de trabajo, autorregulación)." },
+      { pregunta: "¿Cómo pido un turno?", respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en 27 de Abril 424, Córdoba Capital." },
+    ],
   });
 
   const [destacados, setDestacados] = useState([]);
@@ -270,6 +262,32 @@ export default function Home() {
     });
     if (!confirmacion.isConfirmed) return;
     const actualizado = { ...content, beneficios: content.beneficios.filter((_, i) => i !== index) };
+    setContent(actualizado);
+    handleSave(actualizado);
+  };
+
+  // ---------- Preguntas frecuentes ----------
+  const agregarFAQ = () => {
+    const actualizado = {
+      ...content,
+      faq: [...(content.faq || []), { pregunta: "Nueva pregunta", respuesta: "Escribí acá la respuesta." }],
+    };
+    setContent(actualizado);
+    handleSave(actualizado);
+    setEditMode(`faq_${actualizado.faq.length - 1}`);
+  };
+
+  const eliminarFAQ = async (index) => {
+    const confirmacion = await Swal.fire({
+      title: '¿Eliminar esta pregunta?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#D48CA6',
+    });
+    if (!confirmacion.isConfirmed) return;
+    const actualizado = { ...content, faq: content.faq.filter((_, i) => i !== index) };
     setContent(actualizado);
     handleSave(actualizado);
   };
@@ -611,18 +629,70 @@ export default function Home() {
           psicopedagogo", "psicopedagoga particular u obra social", etc.
           -- las metaetiquetas de "keywords" no las lee Google hace años,
           pero SÍ lee y valora texto real como este. El JSON-LD FAQPage de
-          abajo, además, puede hacer que Google muestre estas preguntas
-          directo en el resultado de búsqueda. */}
+          abajo lee este mismo content.faq, así que editar o agregar una
+          pregunta desde acá actualiza también lo que ve Google -- no hay
+          nada separado que se pueda desincronizar. */}
       <section className="home-faq">
         <div className="faq-container">
-          <h2>Preguntas frecuentes</h2>
+          <div style={{display:'flex', justifyContent:'center', alignItems:'center', gap:'15px', marginBottom:'40px'}}>
+            <h2>Preguntas frecuentes</h2>
+            {isAdmin && <button className="btn-edit-float" onClick={agregarFAQ} title="Agregar pregunta"><FaPlus /></button>}
+          </div>
           <div className="faq-lista">
-            {PREGUNTAS_FRECUENTES.map((item, i) => (
-              <div key={i} className="faq-item">
-                <h3>{item.pregunta}</h3>
-                <p>{item.respuesta}</p>
-              </div>
-            ))}
+            {(content.faq || []).map((item, index) => {
+              const abierta = faqAbierta === index;
+              return (
+                <div key={index} className={`faq-item ${abierta ? 'abierta' : ''}`}>
+                  {editMode === `faq_${index}` ? (
+                    <div style={{padding:'10px'}}>
+                      <input
+                        className="admin-input"
+                        placeholder="Pregunta"
+                        value={item.pregunta}
+                        onChange={e => {
+                          const nuevasFaq = [...content.faq];
+                          nuevasFaq[index] = { ...nuevasFaq[index], pregunta: e.target.value };
+                          setContent({ ...content, faq: nuevasFaq });
+                        }}
+                      />
+                      <textarea
+                        className="admin-textarea"
+                        placeholder="Respuesta"
+                        value={item.respuesta}
+                        onChange={e => {
+                          const nuevasFaq = [...content.faq];
+                          nuevasFaq[index] = { ...nuevasFaq[index], respuesta: e.target.value };
+                          setContent({ ...content, faq: nuevasFaq });
+                        }}
+                      />
+                      <div style={{display:'flex', gap:'8px', marginTop:'10px'}}>
+                        <button onClick={() => handleSave()} className="btn-save-admin">✓</button>
+                        <button onClick={() => setEditMode(null)} className="btn-cancel-admin">✕</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="faq-pregunta"
+                        onClick={() => setFaqAbierta(abierta ? null : index)}
+                        aria-expanded={abierta}
+                      >
+                        <h3>{item.pregunta}</h3>
+                        <span className="faq-flecha"><FaChevronDown /></span>
+                      </button>
+                      {abierta && <p className="faq-respuesta">{item.respuesta}</p>}
+                      {isAdmin && (
+                        <div className="faq-admin-acciones">
+                          <button className="btn-edit-float" onClick={() => setEditMode(`faq_${index}`)}><FaEdit /></button>
+                          <button className="btn-edit-float btn-delete-float" onClick={() => eliminarFAQ(index)}><FaTrash /></button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -630,7 +700,7 @@ export default function Home() {
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          "mainEntity": PREGUNTAS_FRECUENTES.map((item) => ({
+          "mainEntity": (content.faq || []).map((item) => ({
             "@type": "Question",
             "name": item.pregunta,
             "acceptedAnswer": { "@type": "Answer", "text": item.respuesta },
