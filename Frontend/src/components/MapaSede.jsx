@@ -59,12 +59,13 @@ export default function MapaSede({ direccion, nombre }) {
 
         const mapa = L.map(contenedorRef.current, { scrollWheelZoom: true }).setView([lat, lon], 16);
 
-        // Tiles de CARTO "Voyager": colorido y limpio, mucho más parecido a
-        // Google Maps que el estilo crudo por default de OpenStreetMap.
-        // Gratis, sin API key.
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: "abcd",
+        // Tiles estándar de OpenStreetMap: gratis, sin API key y sin
+        // depender de un proveedor externo que pueda sumar requisitos
+        // (CARTO empezó a pedir API key incluso en su plan gratuito, lo que
+        // rompía el mapa mostrando tiles con el texto "API KEY REQUIRED").
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          subdomains: "abc",
           maxZoom: 19,
         }).addTo(mapa);
 
