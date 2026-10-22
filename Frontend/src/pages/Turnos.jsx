@@ -3,6 +3,7 @@ import { supabase } from "../supabase/supabaseClient";
 import Swal from "sweetalert2";
 import { FaMapMarkerAlt, FaWhatsapp, FaEdit, FaPlus, FaTrash, FaExternalLinkAlt } from "react-icons/fa";
 import MapaSede from "../components/MapaSede";
+import { coordenadasDeLinkGoogle } from "../components/coordenadasMapa";
 import Loader from "../components/Loader";
 import useSEO from "../hooks/useSEO";
 import "./turnos.css";
@@ -132,16 +133,36 @@ export default function Turnos() {
       return;
     }
 
+    // El link corto de "Compartir" (maps.app.goo.gl) no trae coordenadas:
+    // se expande al link largo para que el mapa ubique el pin exacto.
+    const sedeAGuardar ={ ...formSede, link_mapa: formSede.link_mapa.trim() };
+    if (sedeAGuardar.link_mapa && !coordenadasDeLinkGoogle(sedeAGuardar.link_mapa)) {
+      const { data, error } = await supabase.functions.invoke("resolver-link-mapa", { body: { url: sedeAGuardar.link_mapa } });
+      if (!error && coordenadasDeLinkGoogle(data?.url)) {
+        sedeAGuardar.link_mapa = data.url;
+      } else {
+        const seguir = await Swal.fire({
+          icon: "warning",
+          title: "No pude leer la ubicación del link",
+          text: "El mapa se va a ubicar con la dirección escrita. ¿Guardar igual?",
+          showCancelButton: true,
+          confirmButtonText: "Guardar igual",
+          cancelButtonText: "Volver",
+        });
+        if (!seguir.isConfirmed) return;
+      }
+    }
+
     if (creandoSede) {
-      const { data, error } = await supabase.from("sedes").insert([{ ...formSede, activa: true }]).select().single();
+      const { data, error } = await supabase.from("sedes").insert([{ ...sedeAGuardar, activa: true }]).select().single();
       if (error) { Swal.fire("Error", "No se pudo crear la sede.", "error"); return; }
       const nuevas = [...sedes, data].sort((a, b) => a.nombre.localeCompare(b.nombre));
       setSedes(nuevas);
       setSedeSeleccionada(data);
     } else {
-      const { error } = await supabase.from("sedes").update(formSede).eq("id", sedeSeleccionada.id);
+      const { error } = await supabase.from("sedes").update(sedeAGuardar).eq("id", sedeSeleccionada.id);
       if (error) { Swal.fire("Error", "No se pudo guardar la sede.", "error"); return; }
-      const actualizada = { ...sedeSeleccionada, ...formSede };
+      const actualizada = { ...sedeSeleccionada, ...sedeAGuardar };
       setSedes(sedes.map(s => s.id === actualizada.id ? actualizada : s));
       setSedeSeleccionada(actualizada);
     }
@@ -272,7 +293,7 @@ export default function Turnos() {
           />
           <input
             className="turnos-input"
-            placeholder="Link de Google Maps para el botón 'Ver en Google Maps' (opcional, se arma solo con la dirección si lo dejás vacío)"
+            placeholder="Link de Google Maps (opcional; si lo pegás, el mapa usa esa ubicación exacta)"
             value={formSede.link_mapa}
             onChange={e => setFormSede({ ...formSede, link_mapa: e.target.value })}
           />
@@ -303,7 +324,7 @@ export default function Turnos() {
                 )}
               </div>
               <div className="turnos-mapa-wrap">
-                <MapaSede direccion={sedeSeleccionada.direccion} nombre={sedeSeleccionada.nombre} />
+                <MapaSede direccion={sedeSeleccionada.direccion} linkMapa={sedeSeleccionada.link_mapa} nombre={sedeSeleccionada.nombre} />
               </div>
             </div>
           </div>
