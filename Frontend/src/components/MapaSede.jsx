@@ -18,7 +18,7 @@ export default function MapaSede({ direccion, linkMapa, nombre }) {
     <iframe
       className="turnos-mapa-iframe"
       title={`Mapa de ${nombre || direccion}`}
-      src={`https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&hl=es&output=embed`}
+      src={`https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&hl=es&output=embed`}
       loading="lazy"
       referrerPolicy="no-referrer-when-downgrade"
       allowFullScreen
