@@ -81,7 +81,7 @@ export default function Home() {
       { pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?", respuesta: "Cuando un niño, niña o adolescente muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado." },
       { pregunta: "¿Atendés solo particular o también con obra social?", respuesta: "Atiendo tanto de forma particular como por obra social, en consultorio en Córdoba Capital. Podés consultar por WhatsApp para confirmar la cobertura específica de tu obra social." },
       { pregunta: "¿Qué dificultades de aprendizaje se pueden evaluar y tratar?", respuesta: "Trabajo especialmente con Dificultades Específicas del Aprendizaje como dislexia, discalculia y disgrafía, además de evaluación cognitiva (WISC-V) y fortalecimiento de funciones ejecutivas (organización, memoria de trabajo, autorregulación)." },
-      { pregunta: "¿Cómo pido un turno?", respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en 27 de Abril 424, Córdoba Capital." },
+      { pregunta: "¿Cómo pido un turno?", respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en Santa Fe 133, Córdoba Capital." },
     ],
   });
 
