@@ -3,7 +3,7 @@ import { supabase } from "../supabase/supabaseClient";
 import Swal from "sweetalert2";
 import { FaMapMarkerAlt, FaWhatsapp, FaEdit, FaPlus, FaTrash, FaExternalLinkAlt } from "react-icons/fa";
 import MapaSede from "../components/MapaSede";
-import { coordenadasDeLinkGoogle } from "../components/coordenadasMapa";
+import { coordenadasDeLinkGoogle, consultaMapaGoogle } from "../components/coordenadasMapa";
 import Loader from "../components/Loader";
 import useSEO from "../hooks/useSEO";
 import "./turnos.css";
@@ -203,7 +203,7 @@ export default function Turnos() {
   const linkGoogleMaps = sedeSeleccionada?.link_mapa
     ? sedeSeleccionada.link_mapa
     : sedeSeleccionada?.direccion
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sedeSeleccionada.direccion)}`
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consultaMapaGoogle(null, sedeSeleccionada.direccion))}`
       : null;
 
   // Una sede puede no tener dirección cargada: en ese caso no se muestra ese
