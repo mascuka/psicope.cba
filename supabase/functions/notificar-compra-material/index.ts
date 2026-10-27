@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { enviarMailGmail } from "../_shared/gmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,13 +9,6 @@ const corsHeaders = {
 // El nombre lo escribe el comprador invitado: que no meta HTML en el mail.
 const escaparHtml = (texto: unknown) => String(texto ?? "")
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-// denomailer manda el HTML tal cual, con los saltos de línea "\n" sueltos
-// del template (sin "\r"). Gmail firma el mensaje (DKIM) y después le
-// normaliza esos saltos, así que la firma deja de coincidir y Gmail del
-// otro lado lo rechaza: "550 5.7.30 DKIM authentication didn't pass".
-// En una sola línea no queda ningún salto suelto.
-const aplanarHtml = (html: string) => html.replace(/\s*\r?\n\s*/g, " ").trim();
 
 Deno.serve(async (req) => {
   // Preflight de CORS
@@ -60,12 +53,15 @@ Deno.serve(async (req) => {
         .eq("status", "approved")
         .limit(1)
         .maybeSingle();
-      if (!compra?.materiales) return noAutorizado(403);
+      // Por la relación compras -> materiales llega un objeto, pero los tipos
+      // de supabase-js lo declaran como lista: se aceptan las dos formas.
+      const material = Array.isArray(compra?.materiales) ? compra.materiales[0] : compra?.materiales;
+      if (!material) return noAutorizado(403);
 
       const { data: perfil } = await supabaseAdmin.from("usuarios").select("nombre").eq("id", user.id).maybeSingle();
       email = user.email;
       nombre = perfil?.nombre;
-      ({ nombre: nombre_material, archivo_url, nombre_descarga } = compra.materiales);
+      ({ nombre: nombre_material, archivo_url, nombre_descarga } = material);
     }
 
     if (!email || !archivo_url) {
@@ -97,8 +93,7 @@ Deno.serve(async (req) => {
       .createSignedUrl(fileName, 60 * 60 * 24 * 7, { download: nombreArchivoFinal });
     if (signError) throw signError;
 
-    // Todo en una sola línea (ver aplanarHtml).
-    const html = aplanarHtml(`
+    const html = `
       <h2>¡Gracias por tu compra!</h2>
       <p>Hola ${escaparHtml(nombre)},</p>
       <p>Ya tenés disponible tu material: <strong>${escaparHtml(nombre_material || "tu material")}</strong></p>
@@ -110,24 +105,7 @@ Deno.serve(async (req) => {
       <p style="font-size:13px;color:#888">Te recomendamos descargar el material ahora y guardarlo en tu dispositivo: este link es temporal y más adelante podría dejar de funcionar.</p>
       <hr/>
       <p style="font-size:13px;color:#888">Este mensaje se generó automáticamente desde la web.</p>
-    `);
-
-    // Se manda con el Gmail real de Brenda (vía SMTP + contraseña de
-    // aplicación), no con Resend: Resend en modo de prueba (sin dominio
-    // propio verificado) solo deja mandar correos a la casilla dueña de la
-    // cuenta, no a clientes reales.
-    const gmailUser = Deno.env.get("GMAIL_USER")!;
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: gmailUser,
-          password: Deno.env.get("GMAIL_APP_PASSWORD")!,
-        },
-      },
-    });
+    `;
 
     // La hora al final del asunto rompe el agrupado en un solo hilo que
     // hace Gmail (y otros webmails) cuando el asunto es IDÉNTICO -- si el
@@ -144,17 +122,15 @@ Deno.serve(async (req) => {
     const horaArg = new Date(Date.now() - 3 * 60 * 60 * 1000);
     const horaCompra = `${String(horaArg.getUTCHours()).padStart(2, "0")}:${String(horaArg.getUTCMinutes()).padStart(2, "0")}`;
 
-    try {
-      await client.send({
-        from: `Psicope.cba <${gmailUser}>`,
-        to: email,
-        subject: `Tu material "${nombre_material || ""}" ya está listo (${horaCompra})`,
-        content: "Tu cliente de correo no puede mostrar el mensaje en HTML.",
-        html,
-      });
-    } finally {
-      await client.close();
-    }
+    // Se manda con el Gmail real de Brenda (vía SMTP + contraseña de
+    // aplicación), no con Resend: Resend en modo de prueba (sin dominio
+    // propio verificado) solo deja mandar correos a la casilla dueña de la
+    // cuenta, no a clientes reales.
+    await enviarMailGmail({
+      para: email,
+      asunto: `Tu material "${nombre_material || ""}" ya está listo (${horaCompra})`,
+      html,
+    });
 
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

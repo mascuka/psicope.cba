@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { enviarMailGmail } from "../_shared/gmail.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,22 +50,6 @@ Deno.serve(async (req) => {
 
       const link = data.properties?.action_link;
       if (link) {
-        const gmailUser = Deno.env.get("GMAIL_USER")!;
-        const client = new SMTPClient({
-          connection: {
-            hostname: "smtp.gmail.com",
-            port: 465,
-            tls: true,
-            auth: {
-              username: gmailUser,
-              password: Deno.env.get("GMAIL_APP_PASSWORD")!,
-            },
-          },
-        });
-
-        // Todo en una sola línea: denomailer manda los "\n" sueltos del
-        // template tal cual, eso rompe la firma DKIM y Gmail rechaza el mail
-        // (550 5.7.30). Mismo arreglo que notificar-compra-material.
         const html = `
           <h2>Recuperá tu contraseña</h2>
           <p>Recibimos un pedido para restablecer la contraseña de tu cuenta en Psicope.cba.</p>
@@ -77,7 +61,7 @@ Deno.serve(async (req) => {
           <p style="font-size:13px;color:#888">Si no pediste esto, podés ignorar este mensaje tranquilamente -- tu contraseña actual sigue funcionando igual.</p>
           <hr/>
           <p style="font-size:13px;color:#888">Este mensaje se generó automáticamente desde la web.</p>
-        `.replace(/\s*\r?\n\s*/g, " ").trim();
+        `;
 
         // La hora al final del asunto rompe el agrupado en un solo hilo
         // que hace Gmail (y otros webmails) cuando el asunto es IDÉNTICO
@@ -95,17 +79,11 @@ Deno.serve(async (req) => {
         const horaArg = new Date(Date.now() - 3 * 60 * 60 * 1000);
         const horaPedido = `${String(horaArg.getUTCHours()).padStart(2, "0")}:${String(horaArg.getUTCMinutes()).padStart(2, "0")}`;
 
-        try {
-          await client.send({
-            from: `Psicope.cba <${gmailUser}>`,
-            to: email,
-            subject: `Recuperá tu contraseña - Psicope.cba (${horaPedido})`,
-            content: "Tu cliente de correo no puede mostrar el mensaje en HTML.",
-            html,
-          });
-        } finally {
-          await client.close();
-        }
+        await enviarMailGmail({
+          para: email,
+          asunto: `Recuperá tu contraseña - Psicope.cba (${horaPedido})`,
+          html,
+        });
       }
     } catch (err) {
       // Correo no registrado u otro fallo puntual del envío -- se traga
