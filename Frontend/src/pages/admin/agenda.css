@@ -23,7 +23,7 @@
   border: 1px solid var(--cal-linea);
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(43, 37, 48, 0.05);
-  padding: 20px;
+  padding: 16px;
   min-width: 0;
 }
 
@@ -40,12 +40,13 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
 .ag-barra h2 {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   color: var(--color-texto-oscuro);
   margin: 0;
 }
@@ -77,12 +78,6 @@
   background: var(--color-acento-suave);
 }
 
-.ag-ayuda {
-  font-size: 0.84rem;
-  color: var(--cal-suave);
-  margin: 8px 0 14px;
-}
-
 .ag-scroll {
   overflow-x: auto;
   padding-bottom: 10px;
@@ -99,14 +94,14 @@
 }
 
 .ag-cab {
-  padding-bottom: 6px;
+  padding-bottom: 4px;
 }
 
 .ag-cab-dia {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 4px 10px;
   border: 0;
   border-radius: 10px;
   background: none;
@@ -221,7 +216,6 @@
 .ag-col {
   position: relative;
   border-left: 1px solid var(--cal-linea);
-  cursor: copy;
 }
 
 .ag-col:last-child {
@@ -288,11 +282,17 @@
   text-overflow: ellipsis;
 }
 
+/* Bloque bajito (ej. 45 min con la grilla compacta): nombre y horario en una línea */
 .ag-b.corto {
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  padding: 2px 8px;
+  padding: 0 8px;
+}
+
+.ag-b.corto b {
+  flex: none;
+  max-width: 60%;
 }
 
 .ag-b.apagado,
@@ -346,16 +346,6 @@
 .ag-dtabs button.on {
   background: white;
   box-shadow: 0 1px 4px rgba(43, 37, 48, 0.12);
-}
-
-.ag-dtabs button i {
-  position: absolute;
-  bottom: 3px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--color-acento-oscuro);
-  opacity: 0.45;
 }
 
 .ag-movil-todo {
@@ -462,12 +452,12 @@
 .cal-tabs-meses {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 3px;
-  margin-top: 10px;
+  gap: 2px;
+  margin-top: 6px;
 }
 
 .cal-tabs-meses button {
-  padding: 5px 0;
+  padding: 3px 0;
   border: 0;
   border-radius: 8px;
   background: none;
@@ -488,7 +478,7 @@
 }
 
 .cal-mes {
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 .cal-mes-cab b {
@@ -511,24 +501,24 @@
 }
 
 .cal-sem {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .cal-sem span {
   font-size: 0.68rem;
   font-weight: 700;
   color: var(--cal-suave);
-  padding: 3px 0;
+  padding: 2px 0;
 }
 
-/* Un día */
+/* Un día. El borde lleva los colores de los consultantes de ese día: el
+   componente pone --marco (un conic-gradient, un color por consultante) y el
+   fondo se pinta solo adentro (padding-box), así el borde queda a la vista. */
 .cal-d {
-  --C1: var(--c1); --C2: var(--c2); --C3: var(--c3);
-  --F1: var(--f1); --F2: var(--f2); --F3: var(--f3);
-  --T1: var(--t1); --T2: var(--t2); --T3: var(--t3);
+  --fondo-dia: white;
   position: relative;
-  height: 33px;
-  margin: 1px 2px;
+  height: 28px;
+  margin: 1px;
   display: grid;
   place-items: center;
   font-family: 'Manrope', sans-serif;
@@ -537,14 +527,16 @@
   color: var(--color-texto);
   font-variant-numeric: tabular-nums;
   border-radius: 9px;
-  border: 0;
-  background: none;
+  border: 2.5px solid transparent;
+  background:
+    linear-gradient(var(--fondo-dia), var(--fondo-dia)) padding-box,
+    var(--marco, linear-gradient(transparent, transparent)) border-box;
   cursor: pointer;
   padding: 0;
 }
 
 .cal-d:hover {
-  background: var(--cal-hover);
+  --fondo-dia: var(--cal-hover);
 }
 
 .cal-d.finde {
@@ -557,32 +549,23 @@
 
 /* La semana que se ve en la grilla */
 .cal-d.semana {
-  background: var(--cal-hover);
+  --fondo-dia: var(--cal-hover);
 }
 
-.cal-d.marca {
-  background: var(--f);
-  color: var(--t);
+.cal-d.con-marco {
   font-weight: 800;
-  opacity: 1;
-}
-
-/* Dos cosas el mismo día: partido en diagonal; tres: en franjas. Cada ícono
-   va en la parte de su color. */
-.cal-d.dos,
-.cal-d.tres {
-  --G1: color-mix(in srgb, var(--C1) 30%, var(--F1));
-  --G2: color-mix(in srgb, var(--C2) 30%, var(--F2));
-  --G3: color-mix(in srgb, var(--C3) 30%, var(--F3));
   color: var(--color-texto-oscuro);
 }
 
-.cal-d.dos {
-  background: linear-gradient(to bottom right, var(--G1) calc(50% - 0.8px), white calc(50% - 0.8px) calc(50% + 0.8px), var(--G2) calc(50% + 0.8px));
+/* "Otro": dorado y con la estrellita (lo de varios días, más suave) */
+.cal-d.otro {
+  --fondo-dia: #FAF0CC;
+  color: #6E5300;
+  font-weight: 800;
 }
 
-.cal-d.tres {
-  background: linear-gradient(var(--G1) calc(33.33% - 0.7px), white calc(33.33% - 0.7px) calc(33.33% + 0.7px), var(--G2) calc(33.33% + 0.7px) calc(66.67% - 0.7px), white calc(66.67% - 0.7px) calc(66.67% + 0.7px), var(--G3) calc(66.67% + 0.7px));
+.cal-d.otro.rango {
+  --fondo-dia: #FCF6E1;
 }
 
 .cal-ti {
@@ -592,32 +575,19 @@
   color: var(--c);
 }
 
-.cal-d .cal-ti {
+.cal-d-estrella {
   position: absolute;
+  top: 1px;
+  right: 2px;
   width: 8px;
   height: 8px;
+  color: #C9A227;
   pointer-events: none;
 }
 
-.cal-d.marca .ti1 { top: 3px; right: 4px; color: var(--c); }
-.cal-d.dos .ti1 { right: auto; left: 4px; color: var(--T1); }
-.cal-d.dos .ti2 { bottom: 3px; right: 4px; color: var(--T2); }
-.cal-d.tres .cal-ti { right: 3px; width: 7px; height: 7px; }
-.cal-d.tres .ti1 { top: calc(16.67% - 3.5px); color: var(--T1); }
-.cal-d.tres .ti2 { top: calc(50% - 3.5px); color: var(--T2); }
-.cal-d.tres .ti3 { top: calc(83.33% - 3.5px); color: var(--T3); }
-.cal-d .cal-ti.tn { opacity: 0.55; }
-
-/* Algo de varios días: más suave y punteado */
-.cal-d.marca.rango {
-  background: color-mix(in srgb, var(--f) 55%, white);
-  outline: 1.5px dashed color-mix(in srgb, var(--c) 70%, transparent);
-  outline-offset: -1.5px;
+.cal-d.rango .cal-d-estrella {
+  opacity: 0.6;
 }
-
-.cal-d.r1 { --G1: color-mix(in srgb, var(--F1) 50%, white); }
-.cal-d.r2 { --G2: color-mix(in srgb, var(--F2) 50%, white); }
-.cal-d.r3 { --G3: color-mix(in srgb, var(--F3) 50%, white); }
 
 /* Puntito con el color del paciente (en las listas) */
 .cal-punto {
@@ -628,41 +598,34 @@
   background: var(--c);
 }
 
-/* Puntito = ese día hay turnos fijos */
-.cal-fijos {
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  width: 4px;
-  height: 4px;
-  margin-left: -2px;
-  border-radius: 50%;
-  background: var(--color-acento-oscuro);
-  opacity: 0.45;
-}
-
+/* Hoy: el número en rosa con una rayita abajo */
 .cal-d.hoy {
-  box-shadow: inset 0 0 0 2px var(--cal-hoy);
   color: var(--color-acento-oscuro);
   font-weight: 800;
   opacity: 1;
 }
 
-.cal-d.hoy.rango {
-  outline: none;
+.cal-d.hoy::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  margin-left: -6px;
+  border-radius: 2px;
+  background: var(--cal-hoy);
 }
 
 .cal-d.sel,
 .cal-d.sel:hover {
-  background: var(--color-texto-oscuro);
+  --fondo-dia: var(--color-texto-oscuro);
   color: white;
-  box-shadow: none;
-  outline: none;
   opacity: 1;
 }
 
-.cal-d.sel .cal-ti { color: white; }
-.cal-d.sel .cal-fijos { background: white; opacity: 0.8; }
+.cal-d.sel .cal-d-estrella { color: #F4D35E; }
+.cal-d.sel::after { background: white; }
 
 /* Búsqueda: se apagan los días sin coincidencias */
 .cal-d.apagado {
@@ -670,7 +633,8 @@
 }
 
 .cal-d.coincide {
-  box-shadow: 0 0 0 2px var(--color-acento-oscuro);
+  outline: 2px solid var(--color-acento-oscuro);
+  outline-offset: 1px;
   opacity: 1;
 }
 
@@ -689,7 +653,7 @@
 }
 
 .cal-buscar {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .cal-buscar:focus-within,
@@ -726,7 +690,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--cal-suave);
-  margin: 18px 0 4px;
+  margin: 12px 0 2px;
 }
 
 .cal-vacio {
@@ -750,7 +714,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 9px 2px;
+  padding: 6px 2px;
   border: 0;
   border-bottom: 1px solid var(--cal-linea);
   background: none;
@@ -925,7 +889,7 @@
 .cal-pop {
   position: fixed;
   z-index: 1100;
-  width: 360px;
+  width: 380px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
   background: white;
@@ -976,43 +940,46 @@
   height: 30px;
 }
 
-.cal-pop-sub {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--cal-suave);
-  margin: 16px 0 6px;
+/* Las dos opciones del globo */
+.cal-opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin: 12px 0 10px;
+  background: var(--cal-hover);
+  border-radius: 50px;
 }
 
-.cal-pop-sub small {
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.cal-link {
+.cal-opciones button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
   border: 0;
+  border-radius: 50px;
   background: none;
   font-family: 'Manrope', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--color-acento-oscuro);
+  color: var(--cal-suave);
   cursor: pointer;
-  padding: 4px 0;
 }
 
-.cal-pop-fijos {
-  padding-bottom: 4px;
+.cal-opciones button .cal-ti {
+  color: #C9A227;
+}
+
+.cal-opciones button.on {
+  background: white;
+  color: var(--color-texto-oscuro);
+  box-shadow: 0 1px 4px rgba(43, 37, 48, 0.12);
+}
+
+.cal-opciones button.otro.on {
+  background: #FAF0CC;
+  color: #6E5300;
 }
 
 .cal-pop-ya {
@@ -1057,28 +1024,6 @@
 .cal-pop-ya .cal-detalle {
   white-space: pre-wrap;
   margin-top: 2px;
-}
-
-.cal-ayuda-form {
-  font-size: 0.8rem;
-  color: var(--cal-suave);
-  line-height: 1.5;
-  margin: 0 0 8px;
-}
-
-.cal-otro {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 7px;
-  border-radius: 50px;
-  background: #FAF0CC;
-  color: #6E5300;
-  font-weight: 700;
-}
-
-.cal-otro .cal-ti {
-  color: #C9A227;
 }
 
 .cal-in {
@@ -1327,8 +1272,7 @@
     display: block;
   }
 
-  .ag-scroll,
-  .ag-ayuda {
+  .ag-scroll {
     display: none;
   }
 
@@ -1353,11 +1297,135 @@
   }
 
   .cal-d {
-    height: 40px;
+    height: 38px;
     font-size: 0.92rem;
   }
 
   .cal-pop-acc .cal-btn {
     flex: 1;
   }
+}
+
+/* ===================== Turnos fijos: faltó / sacado ese día / cobro ===================== */
+/* En la semana: si faltó, el bloque va tachado y más suave */
+.ag-b.falto,
+.ag-dl-b.falto {
+  opacity: 0.6;
+}
+
+.ag-b.falto b,
+.ag-dl-b.falto b {
+  text-decoration: line-through;
+}
+
+/* En el globo: cada turno del día, con sus acciones para ese día */
+.cal-pop-ya > .cal-turno {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.cal-turno-fila {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cal-pop-ya .cal-accion {
+  width: auto;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.7);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  opacity: 1;
+}
+
+.cal-pop-ya .cal-accion:hover {
+  background: white;
+}
+
+.cal-turno.falto b {
+  text-decoration: line-through;
+}
+
+.cal-turno.cancelado {
+  opacity: 0.6;
+}
+
+.cal-turno.cancelado b {
+  text-decoration: line-through;
+}
+
+/* Estado de la sesión: Agendado (no pasó), Asistió (lo normal), Faltó */
+.cal-pop-ya .cal-estado {
+  width: auto;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: 50px;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 1;
+  border: 1px solid transparent;
+}
+
+.cal-pop-ya .cal-estado.agendado,
+.cal-pop-ya .cal-estados .agendado.on { background: #EEF1F7; color: #4A5578; border-color: #D9DEEB; }
+.cal-pop-ya .cal-estado.asistio,
+.cal-pop-ya .cal-estados .asistio.on { background: #E3F4E8; color: #2F7A4A; border-color: #C5E6CF; }
+.cal-pop-ya .cal-estado.falto,
+.cal-pop-ya .cal-estados .falto.on { background: #FBE7E4; color: #A8443A; border-color: #F2C8C2; }
+
+.cal-pop-ya .cal-estado:hover {
+  filter: brightness(0.96);
+}
+
+.cal-estados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 0 2px;
+}
+
+.cal-pop-ya .cal-estados button {
+  width: auto;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 50px;
+  background: white;
+  border: 1px solid transparent;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  opacity: 1;
+}
+
+/* Forma de cobro del turno fijo */
+div.cal-label {
+  margin-bottom: 4px;
+}
+
+.cal-opciones.cal-opciones-cobro {
+  margin: 0 0 8px;
+}
+
+.cal-hint {
+  font-size: 0.78rem;
+  color: var(--cal-suave);
+  margin: 6px 0 0;
+}
+
+.cal-btn-peligro {
+  color: #b95c5c;
+  margin-right: auto;
+}
+
+/* Con "Eliminar turno", "Cancelar" y "Guardar cambios" juntos, que entren en una línea */
+.cal-pop-acc .cal-btn {
+  padding: 0 14px;
+  white-space: nowrap;
 }

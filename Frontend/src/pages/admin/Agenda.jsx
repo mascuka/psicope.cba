@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../../supabase/supabaseClient";
 import Swal from "sweetalert2";
 import { FaChevronLeft, FaChevronRight, FaSearch, FaTimes, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { indiceExcepciones } from "./sesiones";
+import { colorPaciente } from "./colores";
 import "./agenda.css";
 
 /*
@@ -13,46 +15,27 @@ import "./agenda.css";
  *    En el celular, un día a la vez (pestañas Lun…Sáb).
  * 2. EL CALENDARIO (costado; en el celular, abajo): de a dos meses, con los
  *    doce en dos filas de seis. Tocando un día, la grilla salta a esa semana
- *    y se abre un globo para anotar cualquier cosa o configurar turnos fijos.
+ *    y se abre un globo con lo que hay ese día y dos opciones: "Turno fijo"
+ *    (un consultante, se repite cada semana) u "Otro" (cualquier otra cosa).
  *    Debajo: el buscador (apaga los días sin coincidencias) y las próximas
  *    fechas.
- * - Colores: cada paciente tiene el suyo (sus turnos fijos y lo anotado con
- *   él); lo que no es de un paciente es "Otro", dorado y con estrellita.
- * - En el calendario, el día se pinta con el color de lo anotado: con dos
- *   cosas se parte en diagonal, con tres en franjas; lo de varios días va más
- *   suave y punteado. El puntito abajo del número = ese día hay turnos fijos.
+ * - Colores: cada consultante tiene el suyo; "Otro" es dorado y es lo único
+ *   con ícono (la estrellita).
+ * - En el calendario, el borde del día lleva los colores de los consultantes
+ *   de ese día (tres consultantes, tres colores); si hay algo "Otro", el día
+ *   va dorado con la estrellita.
  */
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const DIAS_LARGO = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const DIAS_CORTO = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-/* Dos clases de cosas: las de un paciente (sus turnos fijos y lo anotado con
-   él) van con el color de ese paciente; el resto es "Otro": dorado y con
-   estrellita, y el título dice qué es. c = punto/borde, f = fondo, t = texto. */
-const OTRO = { c: "#C9A227", f: "#FAF0CC", t: "#6E5300" };
-
-// Un color por paciente, sacado de su id: siempre el mismo para el mismo
-// paciente aunque se sumen otros. Se salta la franja de los amarillos
-// (35°–70°), que queda para "Otro".
-const coloresPaciente = {};
-function colorPaciente(id) {
-  if (!id) return OTRO;
-  if (coloresPaciente[id]) return coloresPaciente[id];
-  // FNV-1a + una mezcla final: ids parecidos dan tonos bien distintos.
-  let hash = 2166136261;
-  for (const ch of String(id)) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619);
-  hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
-  hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35);
-  hash = (hash ^ (hash >>> 16)) >>> 0;
-  const base = (hash % 1000) / 1000 * 325;
-  const h = Math.round(base < 35 ? base : base + 35);
-  const s = 42 + ((hash >> 10) % 3) * 9; // tres saturaciones, para separar más los tonos vecinos
-  return (coloresPaciente[id] = { c: `hsl(${h} ${s}% 55%)`, f: `hsl(${h} ${s + 18}% 92%)`, t: `hsl(${h} ${s}% 26%)` });
-}
 const colorEvento = (ev) => colorPaciente(ev.paciente_id);
 
-const PX_HORA = 52; // alto de una hora en la grilla de la semana
+// Alto de una hora en la grilla de la semana: se ajusta al alto de la
+// pantalla para que la semana entera entre sin tener que bajar.
+const ALTO_FUERA_GRILLA = 390; // navbar, título del panel, pestañas, encabezado de la semana
+const altoHora = (horas, altoVentana) => Math.max(28, Math.min(48, Math.floor((altoVentana - ALTO_FUERA_GRILLA) / horas)));
 const DURACION_DEFECTO = 45; // minutos, para lo anotado con hora pero sin hora de fin
 
 const claveDia = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -120,7 +103,9 @@ function carriles(items) {
 }
 
 const EVENTO_VACIO = { id: null, fecha: "", titulo: "", detalle: "", hora: "", hora_fin: "", paciente_id: "", varios: false, hasta: "" };
-const FIJO_VACIO = { id: null, hora_inicio: "", hora_fin: "", sede_id: "", paciente_id: "", paciente_nuevo: "", fecha_desde: "", fecha_hasta: "", dias_pago_personalizado: "" };
+const FIJO_VACIO = { id: null, hora_inicio: "", hora_fin: "", sede_id: "", paciente_id: "", paciente_nuevo: "", fecha_desde: "", fecha_hasta: "", forma_cobro: "efectivo", monto: "", obra_social_id: "" };
+const SELECT_HORARIOS = "*, sedes(nombre), pacientes(nombre, apellido, obra_social_id, monto_personalizado, dias_pago_personalizado)";
+const formatoMoneda = (n) => `$${Number(n || 0).toLocaleString("es-AR")}`;
 
 /* Buscador de pacientes: se escribe y aparecen los que coinciden. Si se
    permite, la última opción crea un paciente nuevo con lo escrito. */
@@ -182,16 +167,24 @@ export default function Agenda() {
   const [sedes, setSedes] = useState([]);
   const [pacientes, setPacientes] = useState([]);
   const [horarios, setHorarios] = useState([]);
+  const [obrasSociales, setObrasSociales] = useState([]);
+  const [excepciones, setExcepciones] = useState([]); // días puntuales: sacado ese día / faltó
+  const [menuEstado, setMenuEstado] = useState(null); // turno con el menú de estado abierto
+  // Desde dónde se abrió el globo: "semana" (solo muestra lo del día, para
+  // marcar el estado, sacar o editar) o "calendario" (además, para agregar).
+  const [origen, setOrigen] = useState("calendario");
+  const [resaltado, setResaltado] = useState(null); // lo que se tocó en la semana
   const [eventos, setEventos] = useState([]);
   const [proximos, setProximos] = useState([]);
   const [faltaTabla, setFaltaTabla] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
   const [sel, setSel] = useState(null); // día con el globo abierto ("2026-11-03")
-  const [modo, setModo] = useState("anotar"); // anotar | fijo
+  const [modo, setModo] = useState("otro"); // fijo | otro
   const [form, setForm] = useState(EVENTO_VACIO);
   const [formFijo, setFormFijo] = useState(FIJO_VACIO);
   const popRef = useRef(null);
+  const [altoVentana, setAltoVentana] = useState(window.innerHeight);
   const tituloRef = useRef(null);
   // Al lado de qué se abre el globo: { el, y } (y = altura del clic dentro de
   // una columna de la grilla, para que apunte a la hora tocada).
@@ -205,21 +198,28 @@ export default function Agenda() {
 
   useEffect(() => {
     const cargar = async () => {
-      const [{ data: s }, { data: p }, { data: h }] = await Promise.all([
+      const [{ data: s }, { data: p }, { data: h }, { data: o }] = await Promise.all([
         supabase.from("sedes").select("*").eq("activa", true).order("nombre"),
-        supabase.from("pacientes").select("id, nombre, apellido").order("nombre"),
-        supabase.from("horarios_pacientes").select("*, sedes(nombre), pacientes(nombre, apellido)").order("hora_inicio"),
+        supabase.from("pacientes").select("id, nombre, apellido, obra_social_id, monto_personalizado").order("nombre"),
+        supabase.from("horarios_pacientes").select(SELECT_HORARIOS).order("hora_inicio"),
+        supabase.from("obras_sociales").select("*").order("nombre"),
       ]);
       setSedes(s || []);
       setPacientes(p || []);
       setHorarios(h || []);
+      setObrasSociales(o || []);
     };
     cargar();
   }, []);
 
   const cargarHorarios = async () => {
-    const { data } = await supabase.from("horarios_pacientes").select("*, sedes(nombre), pacientes(nombre, apellido)").order("hora_inicio");
+    const { data } = await supabase.from("horarios_pacientes").select(SELECT_HORARIOS).order("hora_inicio");
     setHorarios(data || []);
+  };
+
+  const cargarExcepciones = async () => {
+    const { data } = await supabase.from("horarios_excepciones").select("*").gte("fecha", rangoIni).lte("fecha", rangoFin);
+    setExcepciones(data || []);
   };
 
   const cargarEventos = async () => {
@@ -240,14 +240,14 @@ export default function Agenda() {
       .select("*, pacientes(nombre, apellido)")
       .or(`fecha.gte.${kHoy},hasta.gte.${kHoy}`)
       .order("fecha")
-      .limit(6);
+      .limit(4);
     setProximos(data || []);
   };
 
   // Se recarga solo cuando cambia el rango de fechas (las funciones de carga
   // se recrean en cada render, pero leen siempre el rango actual).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { cargarEventos(); }, [rangoIni, rangoFin]);
+  useEffect(() => { cargarEventos(); cargarExcepciones(); }, [rangoIni, rangoFin]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { cargarProximos(); }, []);
 
@@ -267,11 +267,16 @@ export default function Agenda() {
   }, [eventos, rangoIni, rangoFin]);
 
   // Un turno fijo "aplica" a una fecha si coincide el día de la semana y la
-  // fecha cae dentro del rango desde/hasta (hasta puede ser null).
-  const fijosDelDia = (k) => {
+  // fecha cae dentro del rango desde/hasta (hasta puede ser null). Cada uno
+  // lleva `ex`: lo que pasó ese día puntual (faltó / sacado ese día). Los
+  // sacados ese día no aparecen, salvo en el globo (para volver a ponerlos).
+  const idxExcepciones = useMemo(() => indiceExcepciones(excepciones), [excepciones]);
+  const fijosDelDia = (k, { conSacados = false } = {}) => {
     const dia = deClave(k).getDay();
     return horarios
       .filter((h) => h.dia_semana === dia && h.fecha_desde <= k && (!h.fecha_hasta || h.fecha_hasta >= k))
+      .map((h) => ({ ...h, ex: idxExcepciones[`${h.id}|${k}`] }))
+      .filter((h) => conSacados || h.ex?.estado !== "cancelado")
       .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
   };
 
@@ -300,16 +305,24 @@ export default function Agenda() {
     ...EVENTO_VACIO, fecha: k, hasta: masDias(k, 4), hora, hora_fin: hora ? aHora(aMin(hora) + DURACION_DEFECTO) : "",
   });
 
-  const abrirDia = (k, el, { y = null, hora = "" } = {}) => {
-    anclaRef.current = el ? { el, y } : null;
+  const fijoNuevo = (k, hora = "") => ({
+    ...FIJO_VACIO, fecha_desde: k, hora_inicio: hora, hora_fin: hora ? aHora(aMin(hora) + DURACION_DEFECTO) : "",
+  });
+
+  const abrirDia = (k, el, { desde = "calendario", resaltar = null } = {}) => {
+    anclaRef.current = el ? { el, y: null } : null;
     setSel(k);
-    setModo("anotar");
-    setForm(formNuevo(k, hora));
+    setOrigen(desde);
+    setResaltado(resaltar);
+    setModo("otro");
+    setMenuEstado(null);
+    setForm(formNuevo(k));
+    setFormFijo(fijoNuevo(k));
   };
   const cerrar = () => setSel(null);
 
   const editarEvento = (ev) => {
-    setModo("anotar");
+    setModo("otro");
     setForm({
       id: ev.id, fecha: ev.fecha, titulo: ev.titulo, detalle: ev.detalle || "",
       hora: ev.hora?.slice(0, 5) || "", hora_fin: ev.hora_fin?.slice(0, 5) || "", paciente_id: ev.paciente_id || "",
@@ -318,11 +331,9 @@ export default function Agenda() {
   };
 
   const guardarEvento = async () => {
-    const paciente = pacientes.find((p) => p.id === form.paciente_id);
-    // Sin título pero con paciente: queda el nombre del paciente.
-    const titulo = form.titulo.trim() || nombrePaciente(paciente);
+    const titulo = form.titulo.trim();
     if (!titulo) {
-      Swal.fire("Falta el qué", "Escribí qué es o elegí un paciente.", "warning");
+      Swal.fire("Falta el qué", "Escribí qué es.", "warning");
       return;
     }
     if (form.varios && form.hasta < form.fecha) {
@@ -336,12 +347,12 @@ export default function Agenda() {
     const payload = {
       fecha: form.fecha,
       hasta: form.varios && form.hasta > form.fecha ? form.hasta : null,
-      tipo: form.paciente_id ? "paciente" : "otro",
+      tipo: "otro",
       titulo,
       detalle: form.detalle.trim() || null,
       hora: form.hora || null,
       hora_fin: form.hora && form.hora_fin ? form.hora_fin : null,
-      paciente_id: form.paciente_id || null,
+      paciente_id: null,
     };
     const { error } = form.id
       ? await supabase.from("agenda_eventos").update(payload).eq("id", form.id)
@@ -367,10 +378,13 @@ export default function Agenda() {
     recargarEventos();
   };
 
-  const nuevoFijo = () => {
-    setFormFijo({ ...FIJO_VACIO, fecha_desde: sel, hora_inicio: form.hora, hora_fin: form.hora_fin });
-    setModo("fijo");
-  };
+  // La forma de cobro que se sugiere para un paciente: su obra social si
+  // tiene, si no efectivo con su precio.
+  const cobroSugerido = (p) => ({
+    forma_cobro: p?.obra_social_id ? "obra_social" : "efectivo",
+    monto: p?.monto_personalizado ?? "",
+    obra_social_id: p?.obra_social_id || "",
+  });
 
   const editarFijo = (h) => {
     setFormFijo({
@@ -382,7 +396,10 @@ export default function Agenda() {
       paciente_nuevo: "",
       fecha_desde: h.fecha_desde || "",
       fecha_hasta: h.fecha_hasta || "",
-      dias_pago_personalizado: h.dias_pago_personalizado ?? "",
+      // Un turno viejo sin forma de cobro toma la de su paciente.
+      ...(h.forma_cobro
+        ? { forma_cobro: h.forma_cobro, monto: h.monto ?? "", obra_social_id: h.obra_social_id || "" }
+        : cobroSugerido(h.pacientes)),
     });
     setModo("fijo");
   };
@@ -399,6 +416,10 @@ export default function Agenda() {
     }
     if (!f.paciente_id && !f.paciente_nuevo.trim()) {
       Swal.fire("Faltan datos", "Buscá el paciente o cargá uno nuevo.", "warning");
+      return;
+    }
+    if (f.forma_cobro === "obra_social" && !f.obra_social_id) {
+      Swal.fire("Falta la obra social", "Elegí qué obra social paga este turno.", "warning");
       return;
     }
 
@@ -420,13 +441,15 @@ export default function Agenda() {
       hora_fin: f.hora_fin,
       fecha_desde: f.fecha_desde,
       fecha_hasta: f.fecha_hasta || null,
-      dias_pago_personalizado: f.dias_pago_personalizado === "" ? null : Number(f.dias_pago_personalizado),
+      forma_cobro: f.forma_cobro,
+      monto: f.forma_cobro === "efectivo" && f.monto !== "" ? Number(f.monto) : null,
+      obra_social_id: f.forma_cobro === "obra_social" ? f.obra_social_id : null,
     };
     const { error } = f.id
       ? await supabase.from("horarios_pacientes").update(payload).eq("id", f.id)
       : await supabase.from("horarios_pacientes").insert([payload]);
     if (error) { Swal.fire("Error", "No se pudo guardar.", "error"); return; }
-    setModo("anotar");
+    setFormFijo(fijoNuevo(sel));
     cargarHorarios();
   };
 
@@ -442,8 +465,48 @@ export default function Agenda() {
     if (!r.isConfirmed) return;
     const { error } = await supabase.from("horarios_pacientes").delete().eq("id", h.id);
     if (error) { Swal.fire("Error", "No se pudo eliminar.", "error"); return; }
+    setFormFijo(fijoNuevo(sel));
     cargarHorarios();
   };
+
+  /* ---------- Un día puntual de un turno fijo (no toca las demás semanas) ---------- */
+  const guardarExcepcion = async (h, k, cambios) => {
+    const { error } = await supabase
+      .from("horarios_excepciones")
+      .upsert({ horario_id: h.id, fecha: k, cobra: false, ...cambios }, { onConflict: "horario_id,fecha" });
+    if (error) { Swal.fire("Error", "No se pudo guardar. ¿Ya se aplicó la última actualización de la base?", "error"); return; }
+    setMenuEstado(null);
+    cargarExcepciones();
+  };
+
+  const marcarFalto = (h, k, cobra) => guardarExcepcion(h, k, { estado: "falto", cobra });
+
+  const sacarDia = async (h, k) => {
+    const f = deClave(k);
+    const r = await Swal.fire({
+      title: `¿Sacar a ${nombrePaciente(h.pacientes)} solo el ${DIAS_LARGO[f.getDay()]} ${f.getDate()}?`,
+      text: "Las demás semanas sigue igual.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sacar este día",
+      cancelButtonText: "Cancelar",
+    });
+    if (r.isConfirmed) guardarExcepcion(h, k, { estado: "cancelado" });
+  };
+
+  // Vuelve el día a la normalidad (vino / se vuelve a poner).
+  const restaurarDia = async (h) => {
+    const { error } = await supabase.from("horarios_excepciones").delete().eq("id", h.ex.id);
+    if (error) { Swal.fire("Error", "No se pudo cambiar.", "error"); return; }
+    setMenuEstado(null);
+    cargarExcepciones();
+  };
+
+  useEffect(() => {
+    const medir = () => setAltoVentana(window.innerHeight);
+    window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
+  }, []);
 
   /* ---------- El globo: se ubica al lado de lo tocado (en el celular, abajo) ---------- */
   useLayoutEffect(() => {
@@ -477,7 +540,7 @@ export default function Agenda() {
   // En la compu el cursor ya queda en "qué hay"; en el celular no, para que
   // no salte el teclado tapando todo apenas se toca.
   useEffect(() => {
-    if (sel && modo === "anotar" && !window.matchMedia("(max-width: 899px)").matches) {
+    if (sel && modo === "otro" && !window.matchMedia("(max-width: 899px)").matches) {
       tituloRef.current?.focus({ preventScroll: true });
     }
   }, [sel, modo, form.id]);
@@ -487,7 +550,7 @@ export default function Agenda() {
   useEffect(() => {
     if (!sel) return;
     const tecla = (e) => { if (e.key === "Escape" && !document.querySelector(".swal2-container")) cerrar(); };
-    const clic = (e) => { if (!e.target.closest(".cal-pop, .cal-d, .cal-fila, .ag-col, .ag-cab-dia, .ag-chip, .ag-dl, .ag-agregar, .swal2-container")) cerrar(); };
+    const clic = (e) => { if (!e.target.closest(".cal-pop, .cal-d, .cal-fila, .ag-b, .ag-cab-dia, .ag-chip, .ag-dl, .ag-agregar, .swal2-container")) cerrar(); };
     document.addEventListener("keydown", tecla);
     document.addEventListener("mousedown", clic);
     return () => {
@@ -516,25 +579,23 @@ export default function Agenda() {
   const t0 = Math.min(8 * 60, ...todos.map((b) => Math.floor(b.ini / 60) * 60));
   const t1 = Math.max(20 * 60, ...todos.map((b) => Math.ceil(b.fin / 60) * 60));
   const hayTodoElDia = columnas.some((d) => d.todoElDia.length);
+  const PX_HORA = altoHora((t1 - t0) / 60, altoVentana);
 
+  // Desde la semana no se agrega nada: tocar un bloque abre lo de ese día
+  // (estado, sacar ese día, editar), con lo tocado resaltado.
   const abrirBloque = (e, k, b) => {
     e.stopPropagation();
-    abrirDia(k, e.currentTarget);
-    if (b.fijo) editarFijo(b.fijo);
-    else editarEvento(b.ev);
-  };
-
-  // Tocar un hueco de la grilla: anotar algo ese día a esa hora (redondeada a la media hora).
-  const clicHueco = (e, k) => {
-    const y = e.clientY - e.currentTarget.getBoundingClientRect().top;
-    const min = Math.min(t1 - 30, t0 + Math.floor((y / PX_HORA) * 2) * 30);
-    abrirDia(k, e.currentTarget, { y, hora: aHora(min) });
+    abrirDia(k, e.currentTarget, { desde: "semana", resaltar: b.fijo ? b.fijo.id : b.ev.id });
   };
 
   const contenidoBloque = (b) => b.fijo ? (
     <>
       <b>{nombrePaciente(b.fijo.pacientes)}</b>
-      <small>{aHora(b.ini)}–{aHora(b.fin)} · {b.fijo.sedes?.nombre}</small>
+      <small>
+        {b.fijo.ex?.estado === "falto"
+          ? `Faltó · ${b.fijo.ex.cobra ? "se cobra" : "no se cobra"}`
+          : `${aHora(b.ini)}–${aHora(b.fin)} · ${b.fijo.sedes?.nombre}`}
+      </small>
     </>
   ) : (
     <>
@@ -563,7 +624,7 @@ export default function Agenda() {
         {columnas.map(({ k }) => {
           const f = deClave(k);
           return (
-            <button key={k} className={`ag-cab-dia ${k === kHoy ? "hoy" : ""} ${k === foco ? "foco" : ""}`} onClick={(e) => { setFoco(k); abrirDia(k, e.currentTarget); }}>
+            <button key={k} className={`ag-cab-dia ${k === kHoy ? "hoy" : ""} ${k === foco ? "foco" : ""}`} onClick={(e) => { setFoco(k); abrirDia(k, e.currentTarget, { desde: "semana" }); }}>
               {DIAS_CORTO[f.getDay()]} <b>{f.getDate()}</b>
             </button>
           );
@@ -580,12 +641,12 @@ export default function Agenda() {
           {Array.from({ length: (t1 - t0) / 60 + 1 }, (_, i) => <span key={i} style={{ top: i * PX_HORA }}>{aHora(t0 + i * 60)}</span>)}
         </div>
         {columnas.map(({ k, bloques }) => (
-          <div key={k} className={`ag-col ${k === kHoy ? "hoy" : ""}`} onClick={(e) => clicHueco(e, k)}>
+          <div key={k} className={`ag-col ${k === kHoy ? "hoy" : ""}`}>
             {Array.from({ length: (t1 - t0) / 60 }, (_, i) => <i key={i} className="ag-linea" style={{ top: (i + 1) * PX_HORA }} />)}
             {carriles(bloques).map((b) => (
               <button
                 key={b.clave}
-                className={`ag-b ${b.fijo ? "fijo" : "evento"} ${b.ev?.hasta ? "rango" : ""} ${b.fin - b.ini < 40 ? "corto" : ""} ${q && !(b.fijo ? coincideFijo(b.fijo) : coincideEvento(b.ev)) ? "apagado" : ""}`}
+                className={`ag-b ${b.fijo ? "fijo" : "evento"} ${b.fijo?.ex?.estado === "falto" ? "falto" : ""} ${b.ev?.hasta ? "rango" : ""} ${((b.fin - b.ini) / 60) * PX_HORA < 38 ? "corto" : ""} ${q && !(b.fijo ? coincideFijo(b.fijo) : coincideEvento(b.ev)) ? "apagado" : ""}`}
                 style={{
                   ...colorBloque(b),
                   top: ((b.ini - t0) / 60) * PX_HORA + 1,
@@ -609,11 +670,11 @@ export default function Agenda() {
   const listaDia = (
     <div className="ag-movil">
       <div className="ag-dtabs">
-        {columnas.map(({ k, bloques, todoElDia }) => {
+        {columnas.map(({ k }) => {
           const f = deClave(k);
           return (
             <button key={k} className={`${k === datosFoco.k ? "on" : ""} ${k === kHoy ? "hoy" : ""}`} onClick={() => setFoco(k)}>
-              {DIAS_CORTO[f.getDay()]}<b>{f.getDate()}</b>{(bloques.length > 0 || todoElDia.length > 0) && <i />}
+              {DIAS_CORTO[f.getDay()]}<b>{f.getDate()}</b>
             </button>
           );
         })}
@@ -623,7 +684,7 @@ export default function Agenda() {
       {[...datosFoco.bloques].sort((a, b) => a.ini - b.ini).map((b) => (
         <button key={b.clave} className="ag-dl" onClick={(e) => abrirBloque(e, datosFoco.k, b)}>
           <span className="ag-dl-h">{aHora(b.ini)}<small>{aHora(b.fin)}</small></span>
-          <span className={`ag-dl-b ${b.ev?.hasta ? "rango" : ""}`} style={colorBloque(b)}>{contenidoBloque(b)}</span>
+          <span className={`ag-dl-b ${b.ev?.hasta ? "rango" : ""} ${b.fijo?.ex?.estado === "falto" ? "falto" : ""}`} style={colorBloque(b)}>{contenidoBloque(b)}</span>
         </button>
       ))}
       <button className="cal-btn ag-agregar" onClick={() => abrirDia(datosFoco.k, null)}><FaPlus /> Anotar algo el {DIAS_LARGO[deClave(datosFoco.k).getDay()]}</button>
@@ -631,39 +692,41 @@ export default function Agenda() {
   );
 
   /* =================== 2. EL CALENDARIO =================== */
+  // El borde del día lleva los colores de los consultantes de ese día (con
+  // tres consultantes, tres colores alrededor). Si hay algo "Otro", el día va
+  // dorado y con la estrellita.
   const renderDia = (k, d, finde) => {
     const evs = eventosPorDia[k] || [];
-    const marcas = evs.slice(0, 3);
     const fijos = fijosDelDia(k);
+    const consultantes = [...new Map(fijos.map((h) => [h.paciente_id, h])).values()];
     const coincide = q && (evs.some(coincideEvento) || fijos.some(coincideFijo));
-    const estilo = marcas.length === 1 ? varsColor(colorEvento(marcas[0])) : Object.assign({}, ...marcas.map((ev, i) => varsColor(colorEvento(ev), i + 1)));
-    const rangos = marcas.length === 1 ? (marcas[0].hasta ? "rango" : "") : marcas.map((ev, i) => (ev.hasta ? `r${i + 1}` : "")).join(" ");
+    const n = consultantes.length;
+    const marco = n && `conic-gradient(${consultantes.map((h, i) => `${colorPaciente(h.paciente_id).c} ${(i * 100) / n}% ${((i + 1) * 100) / n}%`).join(", ")})`;
+    const soloRango = evs.length > 0 && evs.every((ev) => ev.hasta);
     const clases = [
       "cal-d",
       finde && "finde",
       k < kHoy && "pasado",
       k === kHoy && "hoy",
       k >= semana && k <= masDias(semana, 6) && "semana",
-      marcas.length && "marca",
-      ["", "", "dos", "tres"][marcas.length],
-      rangos,
+      n && "con-marco",
+      evs.length && (soloRango ? "otro rango" : "otro"),
       k === sel && "sel",
       q && (coincide ? "coincide" : "apagado"),
     ].filter(Boolean).join(" ");
-    const titulo = [...evs.map((ev) => ev.titulo), fijos.length && `${fijos.length} turno${fijos.length > 1 ? "s" : ""} fijo${fijos.length > 1 ? "s" : ""}`].filter(Boolean).join(" · ");
+    const titulo = [...consultantes.map((h) => nombrePaciente(h.pacientes)), ...evs.map((ev) => `★ ${ev.titulo}`)].join(" · ");
 
     return (
       <button
         key={k}
         className={clases}
-        style={estilo}
+        style={marco ? { "--marco": marco } : undefined}
         data-dia={k}
         onClick={(e) => { if (sel === k) { cerrar(); return; } setFoco(k); abrirDia(k, e.currentTarget); }}
         title={titulo || "Anotar algo este día"}
       >
         {d}
-        {marcas.map((ev, i) => !ev.paciente_id && <Estrella key={ev.id} className={`ti${i + 1}${ev.hasta ? " tn" : ""}`} />)}
-        {fijos.length > 0 && <span className="cal-fijos" />}
+        {evs.length > 0 && <Estrella className="cal-d-estrella" />}
       </button>
     );
   };
@@ -715,7 +778,15 @@ export default function Agenda() {
   const popDia = () => {
     const f = deClave(sel);
     const evs = eventosPorDia[sel] || [];
-    const fijos = fijosDelDia(sel);
+    const fijos = fijosDelDia(sel, { conSacados: true });
+    const osElegida = obrasSociales.find((o) => o.id === formFijo.obra_social_id);
+    const desdeSemana = origen === "semana";
+    const editandoAlgo = (modo === "fijo" && formFijo.id) || (modo === "otro" && form.id);
+    // Agendado mientras no pasó; Asistió después (lo normal, se cobra); Faltó lo marca ella.
+    const yaPaso = (h) => new Date(`${sel}T${h.hora_fin?.slice(0, 5) || "23:59"}`) < new Date();
+    const estadoSesion = (h) => h.ex?.estado === "falto"
+      ? { clase: "falto", texto: "Faltó", nota: h.ex.cobra ? "se cobra igual" : "no se cobra" }
+      : yaPaso(h) ? { clase: "asistio", texto: "Asistió" } : { clase: "agendado", texto: "Agendado" };
 
     return (
       <>
@@ -726,56 +797,79 @@ export default function Agenda() {
             <button className="cal-x" onClick={cerrar} aria-label="Cerrar"><FaTimes /></button>
           </div>
 
-          {modo === "anotar" ? (
-            <>
-              {evs.length > 0 && (
-                <div className="cal-pop-ya">
-                  {evs.map((ev) => (
-                    <div key={ev.id} className={`${ev.hasta ? "rango" : ""} ${form.id === ev.id ? "editando" : ""}`} style={varsColor(colorEvento(ev))}>
-                      {ev.paciente_id ? <i className="cal-punto" /> : <Estrella />}
+          {/* Lo que ya hay ese día, para editarlo o borrarlo */}
+          {(fijos.length > 0 || evs.length > 0) && (
+            <div className="cal-pop-ya">
+              {fijos.map((h) => {
+                const sacado = h.ex?.estado === "cancelado";
+                const est = estadoSesion(h);
+                const resaltar = resaltado === h.id || (formFijo.id === h.id && modo === "fijo");
+                return (
+                  <div key={h.id} className={`cal-turno ${sacado ? "cancelado" : est.clase} ${resaltar ? "editando" : ""}`} style={varsColor(colorPaciente(h.paciente_id))}>
+                    <div className="cal-turno-fila">
+                      <i className="cal-punto" />
                       <span>
-                        <b>{ev.titulo}</b>
-                        <small>
-                          {[ev.hora && `${ev.hora.slice(0, 5)}${ev.hora_fin ? `–${ev.hora_fin.slice(0, 5)}` : ""}`, ev.pacientes && nombrePaciente(ev.pacientes), ev.hasta && rangoTxt(ev.fecha, ev.hasta)].filter(Boolean).join(" · ") || "Otro"}
-                        </small>
-                        {ev.detalle && <small className="cal-detalle">{ev.detalle}</small>}
+                        <b>{nombrePaciente(h.pacientes)}</b>
+                        <small>{sacado ? "Sacado este día" : [`${h.hora_inicio?.slice(0, 5)}–${h.hora_fin?.slice(0, 5)}`, h.sedes?.nombre, est.nota].filter(Boolean).join(" · ")}</small>
                       </span>
-                      <button onClick={() => editarEvento(ev)} aria-label="Editar"><FaEdit /></button>
-                      <button onClick={() => borrarEvento(ev)} aria-label="Borrar"><FaTrash /></button>
+                      {sacado ? (
+                        <button className="cal-accion" onClick={() => restaurarDia(h)}>Volver a poner</button>
+                      ) : (
+                        <>
+                          <button className={`cal-estado ${est.clase}`} onClick={() => setMenuEstado(menuEstado === h.id ? null : h.id)} title="Cambiar el estado de esta sesión">{est.texto}</button>
+                          <button onClick={() => sacarDia(h, sel)} aria-label="Sacar solo este día" title="Sacar solo este día"><FaTrash /></button>
+                          <button onClick={() => editarFijo(h)} aria-label="Editar turno fijo" title="Editar (todas las semanas)"><FaEdit /></button>
+                        </>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="cal-pop-fijos">
-                <div className="cal-pop-sub">
-                  <span>Turnos fijos <small>· todos los {DIAS_LARGO[f.getDay()]}</small></span>
-                  <button className="cal-link" onClick={nuevoFijo}><FaPlus /> Turno fijo</button>
-                </div>
-                {fijos.length === 0 ? (
-                  <p className="cal-vacio">Ninguno este día.</p>
-                ) : fijos.map((h) => (
-                  <div key={h.id} className="cal-fijo" style={varsColor(colorPaciente(h.paciente_id))}>
-                    <b>{h.hora_inicio?.slice(0, 5)}</b>
-                    <span>{nombrePaciente(h.pacientes)}<small>{h.sedes?.nombre}</small></span>
-                    <button onClick={() => editarFijo(h)} aria-label="Editar turno fijo"><FaEdit /></button>
-                    <button onClick={() => borrarFijo(h)} aria-label="Eliminar turno fijo"><FaTrash /></button>
+                    {menuEstado === h.id && (
+                      <div className="cal-estados">
+                        <button className={`${est.clase !== "falto" ? "on" : ""} ${yaPaso(h) ? "asistio" : "agendado"}`} onClick={() => (h.ex ? restaurarDia(h) : setMenuEstado(null))}>{yaPaso(h) ? "Asistió" : "Agendado"}</button>
+                        <button className={`falto ${h.ex?.estado === "falto" && h.ex.cobra ? "on" : ""}`} onClick={() => marcarFalto(h, sel, true)}>Faltó · se cobra</button>
+                        <button className={`falto ${h.ex?.estado === "falto" && !h.ex.cobra ? "on" : ""}`} onClick={() => marcarFalto(h, sel, false)}>Faltó · no se cobra</button>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                );
+              })}
+              {evs.map((ev) => (
+                <div key={ev.id} className={`${ev.hasta ? "rango" : ""} ${resaltado === ev.id || (form.id === ev.id && modo === "otro") ? "editando" : ""}`} style={varsColor(colorEvento(ev))}>
+                  <Estrella />
+                  <span>
+                    <b>{ev.titulo}</b>
+                    {(ev.hora || ev.hasta) && (
+                      <small>{[ev.hora && `${ev.hora.slice(0, 5)}${ev.hora_fin ? `–${ev.hora_fin.slice(0, 5)}` : ""}`, ev.hasta && rangoTxt(ev.fecha, ev.hasta)].filter(Boolean).join(" · ")}</small>
+                    )}
+                    {ev.detalle && <small className="cal-detalle">{ev.detalle}</small>}
+                  </span>
+                  <button onClick={() => editarEvento(ev)} aria-label="Editar"><FaEdit /></button>
+                  <button onClick={() => borrarEvento(ev)} aria-label="Borrar"><FaTrash /></button>
+                </div>
+              ))}
+            </div>
+          )}
 
-              <div className="cal-pop-sub"><span>{form.id ? "Editar" : "Anotar algo"}</span></div>
-              <p className="cal-ayuda-form">Con paciente, va con su color. Sin paciente queda como <span className="cal-otro"><Estrella /> Otro</span> y el título dice qué es.</p>
+          {desdeSemana && fijos.length === 0 && evs.length === 0 && <p className="cal-vacio">No hay nada este día.</p>}
+
+          {/* Las dos opciones (solo desde el calendario): un turno fijo (se repite cada semana) u otra cosa */}
+          {!desdeSemana && (
+            <div className="cal-opciones">
+              <button className={modo === "fijo" ? "on" : ""} onClick={() => setModo("fijo")}>Turno fijo</button>
+              <button className={`otro ${modo === "otro" ? "on" : ""}`} onClick={() => setModo("otro")}><Estrella /> Otro</button>
+            </div>
+          )}
+
+          {(!desdeSemana || editandoAlgo) && (modo === "otro" ? (
+            <>
               <input
                 className="cal-in"
                 value={form.titulo}
                 onChange={(e) => setForm({ ...form, titulo: e.target.value })}
                 onKeyDown={(e) => { if (e.key === "Enter") guardarEvento(); }}
-                placeholder="¿Qué es? Ej: reunión en la escuela, curso, feriado…"
+                placeholder="¿Qué es? Ej: reunión en la escuela, feriado…"
                 maxLength={80}
                 ref={tituloRef}
               />
-              <BuscarPaciente pacientes={pacientes} pacienteId={form.paciente_id} onElegir={(id) => setForm({ ...form, paciente_id: id })} />
               <div className="cal-fila-form">
                 <label>
                   Desde (opcional)
@@ -811,13 +905,14 @@ export default function Agenda() {
             </>
           ) : (
             <>
-              <div className="cal-pop-sub">
-                <span>{formFijo.id ? "Editar turno fijo" : `Nuevo turno fijo · todos los ${DIAS_LARGO[f.getDay()]}`}</span>
-              </div>
               <BuscarPaciente
                 pacientes={pacientes}
                 pacienteId={formFijo.paciente_id}
-                onElegir={(id) => setFormFijo({ ...formFijo, paciente_id: id, paciente_nuevo: "" })}
+                onElegir={(id) => setFormFijo({
+                  ...formFijo, paciente_id: id, paciente_nuevo: "",
+                  // Turno nuevo: se sugiere cómo cobra ese paciente.
+                  ...(formFijo.id || !id ? {} : cobroSugerido(pacientes.find((p) => p.id === id))),
+                })}
                 nuevo={formFijo.paciente_nuevo}
                 onNuevo={(nombre) => setFormFijo({ ...formFijo, paciente_id: "", paciente_nuevo: nombre })}
               />
@@ -829,23 +924,42 @@ export default function Agenda() {
                 Lugar
                 <select className="cal-in" value={formFijo.sede_id} onChange={(e) => setFormFijo({ ...formFijo, sede_id: e.target.value })}>
                   <option value="">Elegir…</option>
-                  {sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                  {sedes.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}
                 </select>
               </label>
               <div className="cal-fila-form">
                 <label>Empieza<input className="cal-in" type="date" value={formFijo.fecha_desde} onChange={(e) => setFormFijo({ ...formFijo, fecha_desde: e.target.value })} /></label>
                 <label>Termina (opcional)<input className="cal-in" type="date" value={formFijo.fecha_hasta} onChange={(e) => setFormFijo({ ...formFijo, fecha_hasta: e.target.value })} /></label>
               </div>
-              <label className="cal-label">
-                Cobra a los X días (opcional, pisa lo del paciente / obra social)
-                <input className="cal-in" type="number" value={formFijo.dias_pago_personalizado} onChange={(e) => setFormFijo({ ...formFijo, dias_pago_personalizado: e.target.value })} placeholder="Ej: 30, 60, 90" />
-              </label>
+              {/* Cómo se cobra: en efectivo ese mismo día, o lo paga una obra social */}
+              <div className="cal-label">Cobro</div>
+              <div className="cal-opciones cal-opciones-cobro">
+                <button className={formFijo.forma_cobro === "efectivo" ? "on" : ""} onClick={() => setFormFijo({ ...formFijo, forma_cobro: "efectivo" })}>Efectivo</button>
+                <button className={formFijo.forma_cobro === "obra_social" ? "on" : ""} onClick={() => setFormFijo({ ...formFijo, forma_cobro: "obra_social" })}>Obra social</button>
+              </div>
+              {formFijo.forma_cobro === "efectivo" ? (
+                <input className="cal-in" type="number" min="0" value={formFijo.monto} onChange={(e) => setFormFijo({ ...formFijo, monto: e.target.value })} placeholder="Valor de la consulta (se cobra ese día)" />
+              ) : (
+                <>
+                  <select className="cal-in" value={formFijo.obra_social_id} onChange={(e) => setFormFijo({ ...formFijo, obra_social_id: e.target.value })}>
+                    <option value="">Elegir obra social…</option>
+                    {obrasSociales.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+                  </select>
+                  {osElegida && (
+                    <p className="cal-hint">Abona {osElegida.precio_hora ? formatoMoneda(osElegida.precio_hora) : "(sin monto cargado)"} por sesión, a los {osElegida.dias_pago} días.</p>
+                  )}
+                  {obrasSociales.length === 0 && <p className="cal-hint">Todavía no hay obras sociales cargadas (pestaña Obras sociales).</p>}
+                </>
+              )}
               <div className="cal-pop-acc">
-                <button className="cal-btn plano" onClick={() => setModo("anotar")}>Volver</button>
-                <button className="cal-btn pri" onClick={guardarFijo}>Guardar turno fijo</button>
+                {formFijo.id && <button className="cal-btn plano cal-btn-peligro" onClick={() => borrarFijo(horarios.find((x) => x.id === formFijo.id))}>Eliminar turno</button>}
+                {formFijo.id && <button className="cal-btn plano" onClick={() => setFormFijo(fijoNuevo(sel))}>Cancelar</button>}
+                <button className="cal-btn pri" onClick={guardarFijo}>
+                  {formFijo.id ? "Guardar cambios" : `Guardar · todos los ${DIAS_LARGO[f.getDay()]}`}
+                </button>
               </div>
             </>
-          )}
+          ))}
         </div>
       </>
     );
@@ -867,7 +981,6 @@ export default function Agenda() {
           <p className="cal-aviso">No se pudo leer la agenda. Si es la primera vez, falta crear la tabla <code>agenda_eventos</code> en Supabase.</p>
         )}
 
-        <p className="ag-ayuda">Tocá un hueco para anotar algo a esa hora, o un bloque para cambiarlo. Los turnos fijos se repiten todas las semanas.</p>
         <div className="ag-scroll">{grillaSemana}</div>
         {listaDia}
 
@@ -911,12 +1024,12 @@ export default function Agenda() {
             {resultados.length === 0 ? <p className="cal-vacio">Nada en {vista.anio}.</p> : resultados.map(filaEvento)}
           </>
         ) : (
-          <>
-            <div className="cal-sub">Próximas fechas</div>
-            {proximos.length === 0
-              ? <p className="cal-vacio">Tocá un día para anotar una evaluación, un informe, una reunión o lo que quieras.</p>
-              : proximos.map(filaEvento)}
-          </>
+          proximos.length > 0 && (
+            <>
+              <div className="cal-sub">Próximas fechas</div>
+              {proximos.map(filaEvento)}
+            </>
+          )
         )}
       </aside>
 

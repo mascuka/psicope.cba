@@ -1,263 +1,345 @@
-.ventas-panel {
+/* ---------- Ventas de materiales (PanelVentas.jsx) ---------- */
+.ventas {
+  --v-linea: var(--color-borde-sutil);
+  --v-suave: #9a929f;
+  --v-azul: #3F7FB5;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.ventas-filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: flex-end;
-  background: white;
-  border: 1px solid var(--color-borde-sutil);
-  border-radius: 16px;
-  padding: 16px 18px;
-}
-
-.ventas-filtro-grupo {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-  color: #999;
-  font-weight: 700;
-}
-
-.ventas-filtro-grupo select,
-.ventas-filtro-grupo input {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--color-borde-sutil);
-  background: #fafafa;
+  gap: 16px;
   font-family: 'Manrope', sans-serif;
-  font-size: 0.9rem;
   color: var(--color-texto);
 }
 
-.ventas-filtro-grupo select:focus,
-.ventas-filtro-grupo input:focus {
-  outline: none;
-  background: white;
+.ventas-vacio {
+  font-size: 0.88rem;
+  color: var(--v-suave);
+  margin: 8px 0 0;
 }
 
-.ventas-buscador {
-  flex: 1;
-  min-width: 180px;
-}
-
-.ventas-btn-limpiar {
-  background: white;
-  border: 1.5px solid var(--color-borde-sutil);
-  color: var(--color-texto-oscuro);
-  padding: 8px 16px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  height: 36px;
-}
-
-.ventas-cargando,
-.ventas-sin-datos {
-  text-align: center;
-  color: #999;
-  padding: 30px 0;
-}
-
-.ventas-resumen {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.ventas-resumen-card {
-  background: white;
-  border: 1px solid var(--color-borde-sutil);
-  border-radius: 16px;
-  padding: 18px;
-  text-align: center;
+/* Arriba: mes, buscador y "Más opciones" */
+.ventas-top {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ventas-resumen-valor {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
-  font-size: 1.5rem;
-  color: var(--color-texto-oscuro);
-}
-
-.ventas-resumen-label {
-  font-size: 0.82rem;
-  color: #999;
-  font-weight: 600;
-}
-
-.ventas-grafico-card {
-  background: white;
-  border: 1px solid var(--color-borde-sutil);
-  border-radius: 16px;
-  padding: 20px 16px 12px;
-}
-
-.ventas-grafico {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 190px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.ventas-barra-col {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  min-width: 28px;
-  flex: 1;
-  height: 100%;
-}
-
-.ventas-barra-valor {
-  font-size: 0.65rem;
-  color: #999;
-  white-space: nowrap;
-  margin-bottom: 4px;
-}
-
-.ventas-barra {
-  width: 100%;
-  max-width: 34px;
-  background: linear-gradient(180deg, var(--color-acento-hover), var(--color-acento));
-  border-radius: 6px 6px 2px 2px;
-  transition: height 0.3s ease;
-}
-
-.ventas-barra-etiqueta {
-  font-size: 0.72rem;
-  color: #999;
-  margin-top: 6px;
-  text-transform: capitalize;
-}
-
-.ventas-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ventas-item {
-  background: white;
-  border: 1px solid var(--color-borde-sutil);
-  border-radius: 14px;
-  padding: 14px 16px;
-  display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.ventas-item-info {
+.ventas-rango {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+}
+
+.ventas-top-derecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ventas-buscar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 50px;
+  border: 1px solid var(--v-linea);
+  background: white;
+  color: var(--v-suave);
+  min-width: 240px;
+}
+
+.ventas-buscar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.92rem;
+  color: var(--color-texto);
+}
+
+.ventas-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 50px;
+  border: 1.5px solid var(--v-linea);
+  background: white;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ventas-btn.on {
+  background: var(--color-acento-claro);
+  border-color: var(--color-acento-medio);
+}
+
+.ventas-opciones {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: white;
+  border: 1px solid var(--v-linea);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.ventas-opciones label {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--v-suave);
+}
+
+.ventas-opciones input {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--v-linea);
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+}
+
+.ventas-opciones > span {
+  font-size: 0.82rem;
+  color: var(--v-suave);
+  padding-bottom: 9px;
+}
+
+/* Totales */
+.ventas-kpis {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 14px;
+}
+
+.ventas-kpi,
+.ventas-card {
+  background: white;
+  border: 1px solid var(--v-linea);
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(43, 37, 48, 0.04);
+  padding: 18px 20px;
+}
+
+.ventas-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ventas-kpi span {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--v-suave);
+}
+
+.ventas-kpi b {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+}
+
+.ventas-kpi.destacado {
+  background: #EAF3FB;
+  border-color: #CFE3F3;
+}
+
+.ventas-kpi.destacado b {
+  color: var(--v-azul);
+  font-size: 2rem;
+}
+
+/* Ranking + lista */
+.ventas-dos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.ventas-card-titulo {
+  display: block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--color-texto-oscuro);
+  margin-bottom: 10px;
+}
+
+.ventas-ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ventas-ranking li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ventas-ranking-num {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: #EAF3FB;
+  color: var(--v-azul);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.ventas-ranking-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ventas-ranking-info > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ventas-ranking-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-texto-oscuro);
+}
+
+.ventas-ranking-info b {
+  white-space: nowrap;
+}
+
+.ventas-ranking-barra {
+  height: 6px;
+  margin: 5px 0 3px;
+  border-radius: 50px;
+  background: #F1F5F9;
+  overflow: hidden;
+}
+
+.ventas-ranking-barra i {
+  display: block;
+  height: 100%;
+  border-radius: 50px;
+  background: #7FB1DD;
+}
+
+.ventas-ranking-info small {
+  font-size: 0.78rem;
+  color: var(--v-suave);
+}
+
+/* Lista por día */
+.ventas-dia + .ventas-dia {
+  margin-top: 6px;
+}
+
+.ventas-dia-cab {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--v-suave);
+  padding: 8px 0 4px;
+}
+
+.ventas-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 2px;
+  border-bottom: 1px solid #F4F1EC;
+}
+
+.ventas-item-info {
+  flex: 1;
   min-width: 0;
 }
 
 .ventas-item-info strong {
+  display: block;
   color: var(--color-texto-oscuro);
-  font-size: 0.98rem;
-}
-
-.ventas-item-comprador {
-  font-size: 0.85rem;
-  color: var(--color-texto);
-  display: flex;
-  align-items: center;
-  gap: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ventas-icono-cuenta { color: #4FA36A; flex-shrink: 0; }
-.ventas-icono-invitado { color: #C97B98; flex-shrink: 0; }
-
-.ventas-item-fecha {
-  font-size: 0.78rem;
-  color: #999;
-}
-
-.ventas-tag-cuenta,
-.ventas-tag-invitado {
-  font-weight: 700;
-  padding: 1px 8px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-}
-
-.ventas-tag-cuenta {
-  background: #E7F5EB;
-  color: #2F7A4A;
-}
-
-.ventas-tag-invitado {
-  background: var(--color-acento-suave);
-  color: var(--color-acento-oscuro);
-}
-
-.ventas-item-derecha {
+.ventas-item-info small {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--v-suave);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
+.ventas-icono-cuenta { color: #2F7A4A; flex: none; }
+.ventas-icono-invitado { color: var(--v-suave); flex: none; }
+
 .ventas-item-precio {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
-  color: var(--color-texto-oscuro);
-  font-size: 1.05rem;
   white-space: nowrap;
+  color: var(--v-azul);
 }
 
 .ventas-btn-eliminar {
-  background: white;
-  border: 1px solid var(--color-borde-sutil);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--v-suave);
   cursor: pointer;
-  color: #c0392b;
-  flex-shrink: 0;
 }
 
-.ventas-btn-eliminar:hover:not(:disabled) {
-  background: #FDECEC;
-  border-color: #e0a0a0;
+.ventas-btn-eliminar:hover {
+  background: #FBE7E4;
+  color: #B5483B;
 }
 
-.ventas-btn-eliminar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (max-width: 600px) {
-  .ventas-resumen {
+/* Celular */
+@media (max-width: 760px) {
+  .ventas-kpis,
+  .ventas-dos {
     grid-template-columns: 1fr;
   }
 
-  .ventas-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .ventas-top-derecha,
+  .ventas-buscar {
+    width: 100%;
+    min-width: 0;
   }
 
-  .ventas-item-derecha {
-    width: 100%;
-    justify-content: space-between;
+  .ventas-buscar {
+    flex: 1;
   }
 }

@@ -550,7 +550,7 @@ export default function Materiales() {
           "@context": "https://schema.org",
           "@type": "ItemList",
           "name": "Materiales Psicopedagógicos",
-          "url": "https://psicope-cba.netlify.app/materiales",
+          "url": "https://psicope-cba.com.ar/materiales",
           "itemListElement": materiales.slice(0, 50).map((m, i) => ({
             "@type": "Product",
             "position": i + 1,

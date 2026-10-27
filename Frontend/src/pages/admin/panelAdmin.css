@@ -11,7 +11,7 @@
 
 /* Agenda: la grilla de la semana + el calendario al costado */
 .panel-admin-container.panel-admin-ancho {
-  max-width: 1280px;
+  max-width: 1480px;
 }
 
 .panel-loading {
@@ -82,5 +82,25 @@
   /* El quinto queda solo: que ocupe la fila entera en vez de quedar a medias */
   .panel-tabs button:last-child:nth-child(odd) {
     grid-column: 1 / -1;
+  }
+}
+
+/* Agenda: menos aire arriba para que la semana entre en la pantalla sin bajar */
+@media (min-width: 701px) {
+  .panel-admin-container.panel-admin-ancho {
+    padding-top: 86px;
+  }
+
+  .panel-admin-ancho h1 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .panel-admin-ancho .panel-tabs {
+    margin-bottom: 14px;
+  }
+
+  .panel-admin-ancho .panel-tabs button {
+    padding: 7px 22px;
   }
 }

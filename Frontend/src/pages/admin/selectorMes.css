@@ -1,0 +1,57 @@
+/* ‹ Octubre 2026 › (SelectorMes.jsx) */
+.selector-mes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selector-mes > button:not(.selector-mes-hoy) {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #FAF6F0;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+}
+
+.selector-mes > button:not(.selector-mes-hoy):hover {
+  background: var(--color-acento-suave);
+}
+
+.selector-mes b {
+  min-width: 170px;
+  text-align: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-texto-oscuro);
+}
+
+.selector-mes b span {
+  font-weight: 600;
+  color: #9a929f;
+}
+
+.selector-mes-hoy {
+  margin-left: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-borde-sutil);
+  border-radius: 50px;
+  background: white;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .selector-mes b {
+    min-width: 0;
+    flex: 1;
+    font-size: 1.15rem;
+  }
+}

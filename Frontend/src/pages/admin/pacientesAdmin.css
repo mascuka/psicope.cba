@@ -142,8 +142,8 @@
   justify-content: space-between;
   align-items: center;
   background: white;
-  border-radius: 14px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 9px 14px;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   border: 2px solid transparent;
@@ -154,7 +154,7 @@
 }
 
 .pac-item span {
-  display: block;
+  display: inline;
   font-size: 0.85rem;
   color: #999;
 }
@@ -425,4 +425,43 @@
   .pac-form-acciones {
     flex-wrap: wrap;
   }
+}
+
+/* Lista de pacientes en una sola línea: punto de su color, nombre y obra social al costado */
+.pac-lista {
+  gap: 6px;
+}
+
+.pac-item-linea {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pac-punto {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.pac-item-linea strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pac-item-linea span {
+  white-space: nowrap;
+}
+
+/* La ficha se abre debajo del paciente tocado */
+.pac-item {
+  scroll-margin-top: 96px; /* que no quede tapado por el navbar al acomodar la pantalla */
+}
+
+.pac-lista .pac-detalle {
+  margin: 0 0 6px;
 }

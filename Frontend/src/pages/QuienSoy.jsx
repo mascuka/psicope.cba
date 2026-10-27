@@ -154,7 +154,7 @@ export default function QuienSoy() {
           "jobTitle": "Licenciada en Psicopedagogía",
           "description": descripcionCorta,
           "image": imagen ? imagen.split("?")[0] : undefined,
-          "url": "https://psicope-cba.netlify.app/quien-soy",
+          "url": "https://psicope-cba.com.ar/quien-soy",
           "worksFor": { "@type": "MedicalBusiness", "name": "Psicope.cba" },
           "address": {
             "@type": "PostalAddress",

@@ -377,7 +377,7 @@ export default function Psicopedagogiando() {
           "@type": "Blog",
           "name": headerData.titulo || "Psicopedagogiando",
           "description": headerData.frase,
-          "url": "https://psicope-cba.netlify.app/psicopedagogiando",
+          "url": "https://psicope-cba.com.ar/psicopedagogiando",
           "publisher": { "@type": "Person", "name": "Brenda Grossi" },
           "blogPost": posts.slice(0, 30).map((p) => ({
             "@type": "BlogPosting",
