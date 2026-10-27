@@ -8,7 +8,7 @@ import Loader from "../components/Loader";
 import useSEO from "../hooks/useSEO";
 import "./turnos.css";
 
-const WHATSAPP_NUMERO = "5493513893506"; // sin + ni espacios, formato internacional
+const WHATSAPP_NUMERO = "5493516575488"; // sin + ni espacios, formato internacional
 
 const SEDE_VACIA = { nombre: "", direccion: "", link_mapa: "" };
 const FORM_VACIO = { nombre: "", apellido: "", telefono: "", email: "", obra_social: "", motivo: "" };
