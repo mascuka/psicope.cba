@@ -399,3 +399,30 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
+/* Celular: los formularios de dos columnas pasan a una, y las sub-pestañas
+   de la ficha se pueden deslizar si no entran. */
+@media (max-width: 600px) {
+  .pac-form-fila {
+    grid-template-columns: 1fr;
+  }
+
+  .pac-toolbar > * {
+    flex: 1 1 100%;
+  }
+
+  .pac-sub-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .pac-item,
+  .pac-obra-item,
+  .pac-nota-item {
+    padding: 12px 14px;
+  }
+
+  .pac-form-acciones {
+    flex-wrap: wrap;
+  }
+}

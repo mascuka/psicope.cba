@@ -1,0 +1,1363 @@
+/* ---------- Agenda (Agenda.jsx) ----------
+   ag-  = la semana (grilla y lista del celular)
+   cal- = el calendario del costado y el globo del día
+   Colores: el componente pone --c/--f/--t (o --c1..3, --f1..3, --t1..3 en un
+   día partido) en el style de cada elemento. */
+
+.ag {
+  --cal-linea: var(--color-borde-sutil);
+  --cal-hover: #FAF6F0;
+  --cal-suave: #9a929f;
+  --cal-hoy: var(--color-acento-hover);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-texto);
+}
+
+.ag-zona,
+.ag-lado {
+  background: white;
+  border: 1px solid var(--cal-linea);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(43, 37, 48, 0.05);
+  padding: 20px;
+  min-width: 0;
+}
+
+.ag-lado {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 112px);
+  overflow-y: auto;
+}
+
+/* ===================== 1. La semana ===================== */
+.ag-barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ag-barra h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+}
+
+.ag-barra .cal-btn {
+  margin-left: auto;
+}
+
+.cal-flechas {
+  display: flex;
+  gap: 4px;
+}
+
+.cal-flechas button,
+.cal-x {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--cal-hover);
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+}
+
+.cal-flechas button:hover,
+.cal-x:hover {
+  background: var(--color-acento-suave);
+}
+
+.ag-ayuda {
+  font-size: 0.84rem;
+  color: var(--cal-suave);
+  margin: 8px 0 14px;
+}
+
+.ag-scroll {
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.ag-grilla {
+  --gut: 52px;
+  min-width: 560px;
+}
+
+.ag-fila {
+  display: grid;
+  grid-template-columns: var(--gut) repeat(var(--dias), minmax(0, 1fr));
+}
+
+.ag-cab {
+  padding-bottom: 6px;
+}
+
+.ag-cab-dia {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ag-cab-dia b {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.1rem;
+  color: var(--color-texto-oscuro);
+}
+
+.ag-cab-dia:hover {
+  background: var(--cal-hover);
+}
+
+.ag-cab-dia.hoy,
+.ag-cab-dia.hoy b {
+  color: var(--color-acento-hover);
+}
+
+.ag-cab-dia.foco {
+  background: var(--color-acento-claro);
+}
+
+/* Lo anotado sin hora */
+.ag-todo {
+  border-top: 1px solid var(--cal-linea);
+  padding: 5px 0;
+}
+
+.ag-todo-et {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cal-suave);
+  line-height: 1.2;
+  padding-top: 5px;
+}
+
+.ag-todo-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 3px;
+  min-width: 0;
+}
+
+.ag-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--f);
+  color: var(--t);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ag-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ag-chip.rango,
+.ag-b.rango,
+.ag-dl-b.rango {
+  background: color-mix(in srgb, var(--f) 55%, white);
+  outline: 1px dashed color-mix(in srgb, var(--c) 70%, transparent);
+  outline-offset: -1px;
+}
+
+/* La grilla con horas */
+.ag-cuerpo {
+  position: relative;
+  border-top: 1px solid var(--cal-linea);
+}
+
+.ag-horas {
+  position: relative;
+}
+
+.ag-horas span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cal-suave);
+  font-variant-numeric: tabular-nums;
+  background: white;
+  padding: 1px 0;
+}
+
+.ag-horas span:first-child {
+  transform: none;
+}
+
+.ag-col {
+  position: relative;
+  border-left: 1px solid var(--cal-linea);
+  cursor: copy;
+}
+
+.ag-col:last-child {
+  border-right: 1px solid var(--cal-linea);
+}
+
+.ag-col.hoy {
+  background: color-mix(in srgb, var(--color-acento-claro) 60%, white);
+}
+
+.ag-linea {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--cal-linea);
+  pointer-events: none;
+}
+
+.ag-b {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--f);
+  color: var(--t);
+  box-shadow: inset 3px 0 0 var(--c);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.ag-b:hover {
+  filter: brightness(0.97);
+  z-index: 2;
+}
+
+.ag-b b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ag-b b .cal-ti {
+  color: var(--c);
+}
+
+.ag-b small {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ag-b.corto {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+}
+
+.ag-b.apagado,
+.ag-dl-b.apagado {
+  opacity: 0.25;
+}
+
+/* Celular: un día a la vez (se muestra en el @media de abajo) */
+.ag-movil {
+  display: none;
+}
+
+.ag-dtabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--cal-hover);
+  border-radius: 14px;
+  margin: 4px 0 12px;
+}
+
+.ag-dtabs button {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--cal-suave);
+  cursor: pointer;
+}
+
+.ag-dtabs button b {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  color: var(--color-texto-oscuro);
+}
+
+.ag-dtabs button.hoy,
+.ag-dtabs button.hoy b {
+  color: var(--color-acento-hover);
+}
+
+.ag-dtabs button.on {
+  background: white;
+  box-shadow: 0 1px 4px rgba(43, 37, 48, 0.12);
+}
+
+.ag-dtabs button i {
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-acento-oscuro);
+  opacity: 0.45;
+}
+
+.ag-movil-todo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.ag-movil-todo .ag-chip {
+  height: 34px;
+  font-size: 0.86rem;
+  padding: 0 12px;
+}
+
+.ag-dl {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ag-dl-h {
+  width: 44px;
+  flex: none;
+  padding-top: 9px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto-oscuro);
+  line-height: 1.2;
+}
+
+.ag-dl-h small {
+  display: block;
+  font-weight: 600;
+  font-size: 0.76rem;
+  color: var(--cal-suave);
+}
+
+.ag-dl-b {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--f);
+  color: var(--t);
+  box-shadow: inset 4px 0 0 var(--c);
+}
+
+.ag-dl-b b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 0.98rem;
+}
+
+.ag-dl-b b .cal-ti {
+  color: var(--c);
+}
+
+.ag-dl-b small {
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
+.ag-agregar {
+  width: 100%;
+  margin-top: 14px;
+  border-style: dashed;
+}
+
+/* ===================== 2. El calendario ===================== */
+.cal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-top > b {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--color-texto-oscuro);
+}
+
+.cal-flechas button {
+  width: 30px;
+  height: 30px;
+}
+
+/* Los doce meses: dos filas de seis */
+.cal-tabs-meses {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.cal-tabs-meses button {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cal-suave);
+  cursor: pointer;
+}
+
+.cal-tabs-meses button:hover {
+  background: var(--cal-hover);
+}
+
+.cal-tabs-meses button.on {
+  background: var(--color-acento-claro);
+  color: var(--color-acento-oscuro);
+}
+
+.cal-mes {
+  margin-top: 14px;
+}
+
+.cal-mes-cab b {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--color-texto-oscuro);
+}
+
+.cal-mes-cab span {
+  font-size: 0.78rem;
+  color: var(--cal-suave);
+}
+
+.cal-sem,
+.cal-dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.cal-sem {
+  margin-top: 4px;
+}
+
+.cal-sem span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cal-suave);
+  padding: 3px 0;
+}
+
+/* Un día */
+.cal-d {
+  --C1: var(--c1); --C2: var(--c2); --C3: var(--c3);
+  --F1: var(--f1); --F2: var(--f2); --F3: var(--f3);
+  --T1: var(--t1); --T2: var(--t2); --T3: var(--t3);
+  position: relative;
+  height: 33px;
+  margin: 1px 2px;
+  display: grid;
+  place-items: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  border-radius: 9px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cal-d:hover {
+  background: var(--cal-hover);
+}
+
+.cal-d.finde {
+  color: var(--cal-suave);
+}
+
+.cal-d.pasado {
+  opacity: 0.5;
+}
+
+/* La semana que se ve en la grilla */
+.cal-d.semana {
+  background: var(--cal-hover);
+}
+
+.cal-d.marca {
+  background: var(--f);
+  color: var(--t);
+  font-weight: 800;
+  opacity: 1;
+}
+
+/* Dos cosas el mismo día: partido en diagonal; tres: en franjas. Cada ícono
+   va en la parte de su color. */
+.cal-d.dos,
+.cal-d.tres {
+  --G1: color-mix(in srgb, var(--C1) 30%, var(--F1));
+  --G2: color-mix(in srgb, var(--C2) 30%, var(--F2));
+  --G3: color-mix(in srgb, var(--C3) 30%, var(--F3));
+  color: var(--color-texto-oscuro);
+}
+
+.cal-d.dos {
+  background: linear-gradient(to bottom right, var(--G1) calc(50% - 0.8px), white calc(50% - 0.8px) calc(50% + 0.8px), var(--G2) calc(50% + 0.8px));
+}
+
+.cal-d.tres {
+  background: linear-gradient(var(--G1) calc(33.33% - 0.7px), white calc(33.33% - 0.7px) calc(33.33% + 0.7px), var(--G2) calc(33.33% + 0.7px) calc(66.67% - 0.7px), white calc(66.67% - 0.7px) calc(66.67% + 0.7px), var(--G3) calc(66.67% + 0.7px));
+}
+
+.cal-ti {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  color: var(--c);
+}
+
+.cal-d .cal-ti {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+}
+
+.cal-d.marca .ti1 { top: 3px; right: 4px; color: var(--c); }
+.cal-d.dos .ti1 { right: auto; left: 4px; color: var(--T1); }
+.cal-d.dos .ti2 { bottom: 3px; right: 4px; color: var(--T2); }
+.cal-d.tres .cal-ti { right: 3px; width: 7px; height: 7px; }
+.cal-d.tres .ti1 { top: calc(16.67% - 3.5px); color: var(--T1); }
+.cal-d.tres .ti2 { top: calc(50% - 3.5px); color: var(--T2); }
+.cal-d.tres .ti3 { top: calc(83.33% - 3.5px); color: var(--T3); }
+.cal-d .cal-ti.tn { opacity: 0.55; }
+
+/* Algo de varios días: más suave y punteado */
+.cal-d.marca.rango {
+  background: color-mix(in srgb, var(--f) 55%, white);
+  outline: 1.5px dashed color-mix(in srgb, var(--c) 70%, transparent);
+  outline-offset: -1.5px;
+}
+
+.cal-d.r1 { --G1: color-mix(in srgb, var(--F1) 50%, white); }
+.cal-d.r2 { --G2: color-mix(in srgb, var(--F2) 50%, white); }
+.cal-d.r3 { --G3: color-mix(in srgb, var(--F3) 50%, white); }
+
+/* Puntito con el color del paciente (en las listas) */
+.cal-punto {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+/* Puntito = ese día hay turnos fijos */
+.cal-fijos {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--color-acento-oscuro);
+  opacity: 0.45;
+}
+
+.cal-d.hoy {
+  box-shadow: inset 0 0 0 2px var(--cal-hoy);
+  color: var(--color-acento-oscuro);
+  font-weight: 800;
+  opacity: 1;
+}
+
+.cal-d.hoy.rango {
+  outline: none;
+}
+
+.cal-d.sel,
+.cal-d.sel:hover {
+  background: var(--color-texto-oscuro);
+  color: white;
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+}
+
+.cal-d.sel .cal-ti { color: white; }
+.cal-d.sel .cal-fijos { background: white; opacity: 0.8; }
+
+/* Búsqueda: se apagan los días sin coincidencias */
+.cal-d.apagado {
+  opacity: 0.22;
+}
+
+.cal-d.coincide {
+  box-shadow: 0 0 0 2px var(--color-acento-oscuro);
+  opacity: 1;
+}
+
+.cal-buscar,
+.cal-pac {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cal-hover);
+  border: 1px solid transparent;
+  border-radius: 50px;
+  padding: 0 14px;
+  height: 40px;
+  color: var(--cal-suave);
+}
+
+.cal-buscar {
+  margin-top: 18px;
+}
+
+.cal-buscar:focus-within,
+.cal-pac:focus-within {
+  border-color: var(--color-acento);
+  background: white;
+}
+
+.cal-buscar input,
+.cal-pac input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.92rem;
+  color: var(--color-texto);
+}
+
+.cal-buscar button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.cal-sub {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cal-suave);
+  margin: 18px 0 4px;
+}
+
+.cal-vacio {
+  font-size: 0.86rem;
+  color: var(--cal-suave);
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+
+.cal-aviso {
+  background: #FBEFD3;
+  color: #7A5510;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin: 12px 0 0;
+}
+
+.cal-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--cal-linea);
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.cal-fila:hover .cal-fila-q b {
+  color: var(--color-acento-oscuro);
+}
+
+.cal-fila-d {
+  width: 44px;
+  flex: none;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--cal-suave);
+  line-height: 1.15;
+}
+
+.cal-fila-d b {
+  display: block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-texto-oscuro);
+}
+
+.cal-fila-d b.rango {
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.cal-fila.cerca .cal-fila-d b {
+  color: var(--color-acento-hover);
+}
+
+.cal-fila-q {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-fila-q b {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-texto-oscuro);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-fila-q small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--cal-suave);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cal-fila-q small span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-fila-falta {
+  font-size: 0.76rem;
+  color: var(--cal-suave);
+  white-space: nowrap;
+}
+
+/* Turno fijo (en el globo y en los resultados de búsqueda) */
+.cal-fijo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 4px 7px 12px;
+  border-radius: 10px;
+  background: var(--f, var(--cal-hover));
+  color: var(--t, inherit);
+  box-shadow: inset 3px 0 0 var(--c, transparent);
+  margin-top: 6px;
+  font-size: 0.88rem;
+}
+
+.cal-fijo b {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cal-fijo span {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-fijo small {
+  display: block;
+  font-size: 0.76rem;
+  opacity: 0.8;
+}
+
+.cal-fijo button,
+.cal-pop-ya button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 0;
+  background: none;
+  color: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.cal-fijo button:hover,
+.cal-pop-ya button:hover {
+  opacity: 1;
+  background: rgba(43, 37, 48, 0.07);
+}
+
+/* Botones */
+.cal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 50px;
+  border: 1.5px solid var(--cal-linea);
+  background: white;
+  color: var(--color-texto-oscuro);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cal-btn:hover {
+  background: #FDFAF6;
+  box-shadow: 0 6px 16px rgba(43, 37, 48, 0.08);
+}
+
+.cal-btn.pri {
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+  color: white;
+}
+
+.cal-btn.pri:hover {
+  background: var(--color-acento-hover);
+  border-color: var(--color-acento-hover);
+}
+
+.cal-btn.plano {
+  border-color: transparent;
+}
+
+/* ===================== El globo del día ===================== */
+.cal-fondo {
+  display: none;
+}
+
+.cal-pop {
+  position: fixed;
+  z-index: 1100;
+  width: 360px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--cal-linea);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 18px 50px -18px rgba(60, 30, 45, 0.4), 0 2px 6px -2px rgba(60, 30, 45, 0.08);
+}
+
+.cal-pop::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: var(--y, 40px);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-left: 1px solid var(--cal-linea);
+  border-bottom: 1px solid var(--cal-linea);
+  transform: rotate(45deg);
+}
+
+.cal-pop.a-izq::before {
+  left: auto;
+  right: -7px;
+  border: 0;
+  border-right: 1px solid var(--cal-linea);
+  border-top: 1px solid var(--cal-linea);
+}
+
+.cal-pop-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cal-pop-cab h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--color-texto-oscuro);
+  margin: 0;
+}
+
+.cal-x {
+  width: 30px;
+  height: 30px;
+}
+
+.cal-pop-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cal-suave);
+  margin: 16px 0 6px;
+}
+
+.cal-pop-sub small {
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-acento-oscuro);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.cal-pop-fijos {
+  padding-bottom: 4px;
+}
+
+.cal-pop-ya {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.cal-pop-ya > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 4px 6px 11px;
+  border-radius: 10px;
+  background: var(--f);
+  color: var(--t);
+  font-size: 0.88rem;
+}
+
+.cal-pop-ya > div.rango {
+  background: color-mix(in srgb, var(--f) 55%, white);
+  outline: 1px dashed color-mix(in srgb, var(--c) 70%, transparent);
+  outline-offset: -1px;
+}
+
+.cal-pop-ya > div.editando {
+  box-shadow: 0 0 0 2px var(--c);
+}
+
+.cal-pop-ya span {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-pop-ya small {
+  display: block;
+  font-size: 0.76rem;
+  opacity: 0.85;
+}
+
+.cal-pop-ya .cal-detalle {
+  white-space: pre-wrap;
+  margin-top: 2px;
+}
+
+.cal-ayuda-form {
+  font-size: 0.8rem;
+  color: var(--cal-suave);
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+.cal-otro {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 7px;
+  border-radius: 50px;
+  background: #FAF0CC;
+  color: #6E5300;
+  font-weight: 700;
+}
+
+.cal-otro .cal-ti {
+  color: #C9A227;
+}
+
+.cal-in {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--cal-linea);
+  border-radius: 10px;
+  background: #fafafa;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.92rem;
+  color: var(--color-texto);
+}
+
+.cal-in:focus {
+  outline: none;
+  border-color: var(--color-acento);
+  background: white;
+  box-shadow: 0 0 0 3px var(--color-acento-claro);
+}
+
+.cal-in:disabled {
+  opacity: 0.5;
+}
+
+.cal-ta {
+  height: auto;
+  padding: 9px 12px;
+  resize: vertical;
+  margin-top: 10px;
+}
+
+.cal-pop .cal-pac {
+  margin-top: 10px;
+  border-radius: 10px;
+  border-color: var(--cal-linea);
+  background: #fafafa;
+}
+
+.cal-pac-lista {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background: white;
+  border: 1px solid var(--cal-linea);
+  border-radius: 12px;
+  box-shadow: 0 14px 34px -14px rgba(60, 30, 45, 0.35);
+  padding: 5px;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.cal-pac-lista button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.cal-pac-lista button:hover {
+  background: var(--cal-hover);
+}
+
+.cal-pac-lista button.nuevo {
+  color: var(--color-acento-oscuro);
+  font-weight: 700;
+  border-top: 1px solid var(--cal-linea);
+  border-radius: 0 0 8px 8px;
+}
+
+.cal-pac-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  height: 40px;
+  padding: 0 6px 0 14px;
+  border-radius: 10px;
+  background: var(--color-acento-claro);
+  border: 1.5px solid var(--color-acento-medio);
+  color: var(--color-acento-oscuro);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.cal-pac-chip span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-pac-chip small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: white;
+  border-radius: 50px;
+  padding: 2px 8px;
+}
+
+.cal-pac-chip button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  color: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cal-fila-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cal-fila-form label,
+.cal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cal-suave);
+}
+
+.cal-label {
+  margin-top: 10px;
+}
+
+.cal-varios {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  min-height: 40px;
+  margin-top: 8px;
+}
+
+.cal-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.cal-check input[type="checkbox"] {
+  accent-color: var(--color-acento);
+  margin: 0;
+}
+
+.cal-in-chico {
+  width: auto;
+  height: 36px;
+}
+
+.cal-pop-acc {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ===================== Tamaños ===================== */
+/* Una sola columna: la semana arriba y el calendario abajo, este con sus
+   dos meses lado a lado. */
+@media (max-width: 1100px) {
+  .ag {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-lado {
+    position: static;
+    max-height: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+  }
+
+  .ag-lado > .cal-top,
+  .ag-lado > .cal-tabs-meses,
+  .ag-lado > .cal-buscar,
+  .ag-lado > .cal-sub,
+  .ag-lado > .cal-vacio,
+  .ag-lado > .cal-fila,
+  .ag-lado > .cal-fijo {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Tablet y celular: el globo pasa a ser una hoja que sube desde abajo. */
+@media (max-width: 899px) {
+  .cal-fondo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1099;
+    background: rgba(43, 37, 48, 0.35);
+  }
+
+  .cal-pop.abajo {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    max-height: 88vh;
+    border-radius: 22px 22px 0 0;
+    padding: 18px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .cal-pop.abajo::before {
+    display: none;
+  }
+}
+
+/* Celular: la semana pasa a un día a la vez y el calendario a un mes debajo del otro. */
+@media (max-width: 700px) {
+  .ag-zona,
+  .ag-lado {
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  .ag-lado {
+    display: block;
+  }
+
+  .ag-scroll,
+  .ag-ayuda {
+    display: none;
+  }
+
+  .ag-movil {
+    display: block;
+    margin-top: 10px;
+  }
+
+  .ag-barra {
+    gap: 8px;
+  }
+
+  .ag-barra h2 {
+    font-size: 1.05rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ag-barra .cal-btn {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+
+  .cal-d {
+    height: 40px;
+    font-size: 0.92rem;
+  }
+
+  .cal-pop-acc .cal-btn {
+    flex: 1;
+  }
+}
