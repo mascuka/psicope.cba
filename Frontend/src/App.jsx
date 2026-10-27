@@ -1,22 +1,28 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import DireccionCanonica from "./components/DireccionCanonica";
 
-// Importación de Páginas
+import Loader from "./components/Loader";
+
+// Importación de Páginas. Home va directo (es la que más se visita); el
+// resto se baja recién al entrar -- antes todo iba en un solo archivo de
+// ~3 MB (panel admin, asistente de IA, librerías de PDF incluidos) que
+// cualquier visitante tenía que bajar para ver la portada.
 import Home from "./pages/Home";
-import QuienSoy from "./pages/QuienSoy";
-import Materiales from "./pages/Materiales";
-import Psicopedagogiando from "./pages/Psicopedagogiando";
-import Login from "./pages/Login";
-import RestablecerContrasena from "./pages/RestablecerContrasena";
-import Perfil from "./pages/Perfil"; 
-import MisCompras from "./pages/MisCompras";
-import RegistroForm from "./pages/registroUsuario/RegistroForm";
-import Success from "./pages/Success"; // <--- Nueva Importación
-import Turnos from "./pages/Turnos";
-import PanelAdmin from "./pages/admin/PanelAdmin";
+const QuienSoy = lazy(() => import("./pages/QuienSoy"));
+const Materiales = lazy(() => import("./pages/Materiales"));
+const Psicopedagogiando = lazy(() => import("./pages/Psicopedagogiando"));
+const Login = lazy(() => import("./pages/Login"));
+const RestablecerContrasena = lazy(() => import("./pages/RestablecerContrasena"));
+const Perfil = lazy(() => import("./pages/Perfil"));
+const MisCompras = lazy(() => import("./pages/MisCompras"));
+const RegistroForm = lazy(() => import("./pages/registroUsuario/RegistroForm"));
+const Success = lazy(() => import("./pages/Success"));
+const Turnos = lazy(() => import("./pages/Turnos"));
+const PanelAdmin = lazy(() => import("./pages/admin/PanelAdmin"));
 
 export default function App() {
   const navigate = useNavigate();
@@ -35,6 +41,7 @@ export default function App() {
       <DireccionCanonica />
       <Navbar />
       <main className="main-content">
+        <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/quien-soy" element={<QuienSoy />} />
@@ -60,6 +67,7 @@ export default function App() {
             } 
           />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>

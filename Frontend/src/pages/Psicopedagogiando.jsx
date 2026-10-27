@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
 import { FaEdit, FaTrash, FaPlus, FaSearch, FaTimes, FaExternalLinkAlt, FaSave, FaPlay, FaInstagram, FaRegImage, FaNewspaper, FaDownload } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import logoImage from "../assets/logo.png";
+import logoImage from "../assets/logo-web.png";
 import Loader from "../components/Loader";
-import AsistenteIA from "../components/AsistenteIA";
+// Solo lo ve el admin: que el resto de las visitas no baje su código.
+const AsistenteIA = lazy(() => import("../components/AsistenteIA"));
 import useSEO from "../hooks/useSEO";
 import "./psicopedagogiando.css";
 
@@ -440,7 +441,7 @@ export default function Psicopedagogiando() {
               }}>
                   <FaPlus /> Nuevo Post
               </button>
-              <AsistenteIA onPublicar={publicarDesdeIA} />
+              <Suspense fallback={null}><AsistenteIA onPublicar={publicarDesdeIA} /></Suspense>
             </>
           )}
         </div>

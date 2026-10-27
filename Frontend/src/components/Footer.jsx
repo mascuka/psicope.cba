@@ -1,7 +1,7 @@
 import React from "react";
 import { FaInstagram, FaWhatsapp, FaHeart } from "react-icons/fa";
 import "./footer.css";
-import logoImage from "../assets/logo.png";
+import logoImage from "../assets/logo-web.png";
 
 export default function Footer() {
   return (

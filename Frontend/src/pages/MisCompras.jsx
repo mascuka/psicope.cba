@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/supabaseClient";
 import Swal from 'sweetalert2'; 
-import { FaDownload, FaCalendarAlt, FaEdit, FaArrowLeft, FaShoppingBag, FaEnvelope } from 'react-icons/fa';
-import * as Icons from 'react-icons/fa';
+// El ícono del título es siempre la bolsa: antes se elegía por nombre
+// (mc_icono) importando los ~1600 íconos de react-icons/fa, que terminaban
+// en el archivo principal que baja cualquier visita.
+import { FaDownload, FaCalendarAlt, FaEdit, FaArrowLeft, FaShoppingBag, FaEnvelope, FaTrash } from 'react-icons/fa';
 import Loader from "../components/Loader";
 import "./perfil.css";
 
@@ -18,7 +20,6 @@ export default function MisCompras() {
   // Estados para textos dinámicos desde contenido_mis_compras
   const [titulo, setTitulo] = useState("Mis Compras");
   const [subtitulo, setSubtitulo] = useState("Aquí tienes todos tus materiales adquiridos");
-  const [iconName, setIconName] = useState("FaShoppingBag");
 
   useEffect(() => {
     fetchData();
@@ -53,7 +54,6 @@ export default function MisCompras() {
         config.forEach(item => {
           if (item.id === 'mc_titulo') setTitulo(item.contenido);
           if (item.id === 'mc_subtitulo') setSubtitulo(item.contenido);
-          if (item.id === 'mc_icono') setIconName(item.contenido);
         });
       }
 
@@ -61,7 +61,7 @@ export default function MisCompras() {
       if (user) {
         const { data, error } = await supabase
           .from("compras")
-          .select(`id, fecha, nombre_material, precio_pagado, materiales ( archivo_url, nombre_descarga )`)
+          .select(`id, fecha, material_id, nombre_material, precio_pagado, materiales ( archivo_url, nombre_descarga )`)
           .eq("usuario_id", user.id)
           .eq("status", "approved")
           .order('fecha', { ascending: false });
@@ -159,14 +159,9 @@ export default function MisCompras() {
     if (!usuario?.email) return;
     setEnviandoId(compra.id);
     try {
+      // El resto (email, nombre, archivo) lo saca la función de la base.
       const { error } = await supabase.functions.invoke("notificar-compra-material", {
-        body: {
-          email: usuario.email,
-          nombre: usuario.nombre,
-          nombre_material: compra.nombre_material,
-          archivo_url: compra.materiales?.archivo_url,
-          nombre_descarga: compra.materiales?.nombre_descarga,
-        },
+        body: { material_id: compra.material_id },
       });
       if (error) throw error;
       Swal.fire({
@@ -205,8 +200,6 @@ export default function MisCompras() {
     }
   };
 
-  const DynamicIcon = Icons[iconName] || FaShoppingBag;
-
   if (loading) return <div className="perfil-wrapper"><Loader /></div>;
 
   return (
@@ -225,7 +218,7 @@ export default function MisCompras() {
             flexWrap: 'wrap'
           }}>
             <h2 className="perfil-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <DynamicIcon /> {titulo}
+              <FaShoppingBag /> {titulo}
             </h2>
             
             {/* BOTÓN EDITAR - Visible solo para admin */}
@@ -300,7 +293,7 @@ export default function MisCompras() {
                         cursor: 'pointer'
                       }}
                     >
-                      <Icons.FaTrash size={14} />
+                      <FaTrash size={14} />
                     </button>
                   )}
                 </div>

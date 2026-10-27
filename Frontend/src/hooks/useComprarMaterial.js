@@ -79,14 +79,10 @@ export function useComprarMaterial({ user, isAdmin, onCompraRegistrada }) {
     onCompraRegistrada?.(material.id);
 
     try {
+      // El resto (email, nombre, archivo) lo saca la función de la base: desde
+      // el navegador solo se puede pedir el mail de algo ya acreditado.
       await supabase.functions.invoke("notificar-compra-material", {
-        body: {
-          email: user.email || perfil?.email,
-          nombre: perfil?.nombre,
-          nombre_material: material.nombre,
-          archivo_url: material.archivo_url,
-          nombre_descarga: material.nombre_descarga,
-        },
+        body: { material_id: material.id },
       });
     } catch (mailErr) {
       console.warn("No se pudo enviar el email de compra:", mailErr);

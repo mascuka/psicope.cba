@@ -28,7 +28,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const origin = req.headers.get("origin") || "https://TU-DOMINIO.com";
+    // Solo a la web propia (o localhost al desarrollar): el Origin lo puede
+    // inventar cualquiera que llame a la función a mano, y el link de
+    // recuperación lleva la sesión de la cuenta -- no puede volver a otro sitio.
+    const ORIGENES_PERMITIDOS = ["https://psicope-cba.com.ar", "http://localhost:5173", "http://127.0.0.1:5173"];
+    const origenPedido = req.headers.get("origin") || "";
+    const origin = ORIGENES_PERMITIDOS.includes(origenPedido) ? origenPedido : ORIGENES_PERMITIDOS[0];
     const redirectTo = `${origin}/restablecer-contrasena`;
 
     // Si el correo no está registrado, generateLink tira error -- no lo
@@ -58,6 +63,9 @@ Deno.serve(async (req) => {
           },
         });
 
+        // Todo en una sola línea: denomailer manda los "\n" sueltos del
+        // template tal cual, eso rompe la firma DKIM y Gmail rechaza el mail
+        // (550 5.7.30). Mismo arreglo que notificar-compra-material.
         const html = `
           <h2>Recuperá tu contraseña</h2>
           <p>Recibimos un pedido para restablecer la contraseña de tu cuenta en Psicope.cba.</p>
@@ -69,7 +77,7 @@ Deno.serve(async (req) => {
           <p style="font-size:13px;color:#888">Si no pediste esto, podés ignorar este mensaje tranquilamente -- tu contraseña actual sigue funcionando igual.</p>
           <hr/>
           <p style="font-size:13px;color:#888">Este mensaje se generó automáticamente desde la web.</p>
-        `;
+        `.replace(/\s*\r?\n\s*/g, " ").trim();
 
         // La hora al final del asunto rompe el agrupado en un solo hilo
         // que hace Gmail (y otros webmails) cuando el asunto es IDÉNTICO

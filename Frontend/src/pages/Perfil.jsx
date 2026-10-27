@@ -50,7 +50,6 @@ export default function Perfil() {
       const { data: { user } } = await supabase.auth.getUser();
       
       const { error } = await supabase.from("usuarios").update({
-          email: perfil.email,
           telefono: perfil.telefono,
           pais: perfil.pais
       }).eq("id", user.id);
@@ -97,15 +96,9 @@ export default function Perfil() {
 
           <div className="info-row">
             <label><FaEnvelope /> Email</label>
-            {editMode ? (
-              <input 
-                className="perfil-input" 
-                value={perfil.email} 
-                onChange={e => setPerfil({...perfil, email: e.target.value})} 
-              />
-            ) : (
-              <p>{perfil.email}</p>
-            )}
+            {/* No se edita: es el de la cuenta, y con él se asocian las compras
+                (ver migración proteger_rol_y_email_usuarios). */}
+            <p>{perfil.email}</p>
           </div>
 
           <div className="info-row">

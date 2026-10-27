@@ -4,16 +4,23 @@ import {
   FaPlus, FaTrash, FaEye, FaSearch, FaEdit, FaShoppingCart, FaDownload, FaTag
 } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { PDFDocument } from "pdf-lib";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import JSZip from "jszip";
 import Loader from "../components/Loader";
 import { useComprarMaterial } from "../hooks/useComprarMaterial";
 import useSEO from "../hooks/useSEO";
 import "./materiales.css";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+// Las librerías de PDF y ZIP solo las usa el admin al cargar materiales:
+// se bajan recién ahí (pesan ~1 MB), no en cada visita a Materiales.
+const cargarPdfjs = async () => {
+  const [pdfjsLib, { default: workerUrl }] = await Promise.all([
+    import("pdfjs-dist"),
+    import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+  ]);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+  return pdfjsLib;
+};
+const cargarPdfLib = () => import("pdf-lib").then((m) => m.PDFDocument);
+const cargarJSZip = () => import("jszip").then((m) => m.default);
 
 const PAGINAS_MUESTRA = 4; // cantidad de hojas que se usan para el PDF de "muestra"
 const ANCHO_PORTADA_PX = 900; // ancho al que se renderiza la imagen de portada
@@ -107,7 +114,10 @@ export default function Materiales() {
   // Renderiza la primera hoja del PDF como imagen JPG, para usarla de portada.
   const generarPortadaDesdePDF = async (file) => {
     const bytes = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    const pdfjsLib = await cargarPdfjs();
+    // isEvalSupported: false cierra la falla conocida de pdfjs-dist que deja
+    // correr código armado dentro de un PDF (la que marca npm audit).
+    const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
     const pagina = await pdf.getPage(1);
     const viewportBase = pagina.getViewport({ scale: 1 });
     const escala = ANCHO_PORTADA_PX / viewportBase.width;
@@ -125,6 +135,7 @@ export default function Materiales() {
   // Arma un PDF nuevo con las primeras N hojas del material, para usarlo de muestra.
   const generarMuestraDesdePDF = async (file, titulo) => {
     const bytes = await file.arrayBuffer();
+    const PDFDocument = await cargarPdfLib();
     const origen = await PDFDocument.load(bytes, { ignoreEncryption: true });
     const totalPaginas = origen.getPageCount();
     const cantidad = Math.min(PAGINAS_MUESTRA, totalPaginas);
@@ -269,6 +280,7 @@ export default function Materiales() {
   // usando su nombre de descarga; ese .zip pasa a ser el "archivo" propio
   // del pack, igual que cualquier material (mismo botón, misma descarga).
   const generarZipPack = async (materialesIncluidos, nombrePack) => {
+    const JSZip = await cargarJSZip();
     const zip = new JSZip();
     let agregados = 0;
 
@@ -317,6 +329,7 @@ export default function Materiales() {
   const renombrarTituloPdf = async (file, tituloNuevo) => {
     try {
       const bytes = await file.arrayBuffer();
+      const PDFDocument = await cargarPdfLib();
       const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
       pdfDoc.setTitle(tituloNuevo || "Material");
       pdfDoc.setAuthor("Lic. Brenda Grossi");

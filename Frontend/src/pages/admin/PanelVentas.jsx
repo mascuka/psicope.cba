@@ -15,6 +15,11 @@ const formatoMoneda = (n) => `$${Math.round(Number(n || 0)).toLocaleString("es-A
 const pad2 = (n) => String(n).padStart(2, "0");
 const claveDia = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+// El nombre y el email los escribe el comprador (invitado, sin cuenta):
+// escaparlos antes de meterlos en el html del Swal, o un nombre armado con
+// <img onerror=...> correría código con la sesión de admin.
+const escaparHtml = (texto) => String(texto ?? "")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 export default function PanelVentas() {
@@ -92,7 +97,7 @@ export default function PanelVentas() {
   const eliminarVenta = async (compra) => {
     const res = await Swal.fire({
       title: "¿Eliminar esta venta?",
-      html: `<strong>${compra.nombre_material}</strong><br/>${compra.nombre_usuario || compra.email_usuario}<br/>Esto la saca del historial y del contador de ventas del material -- no se puede deshacer.`,
+      html: `<strong>${escaparHtml(compra.nombre_material)}</strong><br/>${escaparHtml(compra.nombre_usuario || compra.email_usuario)}<br/>Esto la saca del historial y del contador de ventas del material -- no se puede deshacer.`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#D48CA6",

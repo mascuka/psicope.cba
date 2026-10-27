@@ -6,24 +6,71 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// El nombre lo escribe el comprador invitado: que no meta HTML en el mail.
+const escaparHtml = (texto: unknown) => String(texto ?? "")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+// denomailer manda el HTML tal cual, con los saltos de línea "\n" sueltos
+// del template (sin "\r"). Gmail firma el mensaje (DKIM) y después le
+// normaliza esos saltos, así que la firma deja de coincidir y Gmail del
+// otro lado lo rechaza: "550 5.7.30 DKIM authentication didn't pass".
+// En una sola línea no queda ningún salto suelto.
+const aplanarHtml = (html: string) => html.replace(/\s*\r?\n\s*/g, " ").trim();
+
 Deno.serve(async (req) => {
   // Preflight de CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  try {
-    const { email, nombre, nombre_material, archivo_url, nombre_descarga } = await req.json();
+  const noAutorizado = (status: number) => new Response(JSON.stringify({ error: "No autorizado" }), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 
-    if (!email || !archivo_url) {
-      throw new Error("Faltan datos obligatorios (email o archivo_url)");
-    }
+  try {
+    const body = await req.json();
+    let { email, nombre, nombre_material, archivo_url, nombre_descarga } = body;
 
     // Cliente con permisos de administrador (server-side, nunca en el navegador)
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Antes cualquiera (sin sesión) podía pedir el link firmado de cualquier
+    // PDF pago (los archivo_url se leen públicos en "materiales") y que le
+    // llegara por mail. Ahora hay dos formas de llamarla:
+    // - mp-webhook y adquirir-material-gratis, con la clave de service_role,
+    //   DESPUÉS de verificar el pago: se confía en los datos que mandan.
+    // - El navegador, con la sesión del usuario (material gratis logueado y
+    //   "Reenviar por correo" de Mis Compras): solo manda material_id, y el
+    //   resto sale de la base. El mail va siempre a la cuenta de la sesión,
+    //   y solo si ya tiene ese material acreditado.
+    const authHeader = req.headers.get("Authorization") || "";
+    if (authHeader !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) {
+      const { data: { user } } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+      if (!user?.email) return noAutorizado(401);
+
+      const { data: compra } = await supabaseAdmin
+        .from("compras")
+        .select("materiales ( nombre, archivo_url, nombre_descarga )")
+        .eq("usuario_id", user.id)
+        .eq("material_id", body.material_id)
+        .eq("status", "approved")
+        .limit(1)
+        .maybeSingle();
+      if (!compra?.materiales) return noAutorizado(403);
+
+      const { data: perfil } = await supabaseAdmin.from("usuarios").select("nombre").eq("id", user.id).maybeSingle();
+      email = user.email;
+      nombre = perfil?.nombre;
+      ({ nombre: nombre_material, archivo_url, nombre_descarga } = compra.materiales);
+    }
+
+    if (!email || !archivo_url) {
+      throw new Error("Faltan datos obligatorios (email o archivo_url)");
+    }
 
     // "archivo_url" puede venir como nombre de archivo suelto o como URL
     // completa (mismo criterio que descargarArchivoSeguro en el frontend).
@@ -50,10 +97,11 @@ Deno.serve(async (req) => {
       .createSignedUrl(fileName, 60 * 60 * 24 * 7, { download: nombreArchivoFinal });
     if (signError) throw signError;
 
-    const html = `
+    // Todo en una sola línea (ver aplanarHtml).
+    const html = aplanarHtml(`
       <h2>¡Gracias por tu compra!</h2>
-      <p>Hola ${nombre || ""},</p>
-      <p>Ya tenés disponible tu material: <strong>${nombre_material || "tu material"}</strong></p>
+      <p>Hola ${escaparHtml(nombre)},</p>
+      <p>Ya tenés disponible tu material: <strong>${escaparHtml(nombre_material || "tu material")}</strong></p>
       <p style="margin:24px 0;">
         <a href="${signed.signedUrl}" style="background:#EFE3D8;color:#2B2530;padding:12px 26px;border-radius:30px;text-decoration:none;font-weight:bold;display:inline-block;">
           Descargar material
@@ -62,7 +110,7 @@ Deno.serve(async (req) => {
       <p style="font-size:13px;color:#888">Te recomendamos descargar el material ahora y guardarlo en tu dispositivo: este link es temporal y más adelante podría dejar de funcionar.</p>
       <hr/>
       <p style="font-size:13px;color:#888">Este mensaje se generó automáticamente desde la web.</p>
-    `;
+    `);
 
     // Se manda con el Gmail real de Brenda (vía SMTP + contraseña de
     // aplicación), no con Resend: Resend en modo de prueba (sin dominio

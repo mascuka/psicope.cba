@@ -5,6 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Todo lo de la solicitud lo escribe un visitante cualquiera desde Turnos:
+// sin escapar, podía meter links o HTML armado en el mail que le llega a
+// Brenda.
+const escaparHtml = (texto: unknown) => String(texto ?? "")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 Deno.serve(async (req) => {
   // Preflight de CORS
   if (req.method === "OPTIONS") {
@@ -39,12 +45,12 @@ Deno.serve(async (req) => {
 
     const html = `
       <h2>Nueva solicitud de turno</h2>
-      <p><strong>Nombre:</strong> ${nombre} ${apellido || ""}</p>
-      <p><strong>Teléfono:</strong> ${telefono}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Obra social:</strong> ${obra_social || "No indicó"}</p>
-      <p><strong>Sede de preferencia:</strong> ${sede_nombre || "No indicó"}</p>
-      <p><strong>Motivo de la consulta:</strong><br/>${motivo ? motivo.replace(/\n/g, "<br/>") : "No indicó"}</p>
+      <p><strong>Nombre:</strong> ${escaparHtml(nombre)} ${escaparHtml(apellido)}</p>
+      <p><strong>Teléfono:</strong> ${escaparHtml(telefono)}</p>
+      <p><strong>Email:</strong> ${escaparHtml(email)}</p>
+      <p><strong>Obra social:</strong> ${escaparHtml(obra_social || "No indicó")}</p>
+      <p><strong>Sede de preferencia:</strong> ${escaparHtml(sede_nombre || "No indicó")}</p>
+      <p><strong>Motivo de la consulta:</strong><br/>${motivo ? escaparHtml(motivo).replace(/\n/g, "<br/>") : "No indicó"}</p>
       <hr/>
       <p style="font-size:13px;color:#888">Este mensaje se generó automáticamente desde la web.</p>
     `;

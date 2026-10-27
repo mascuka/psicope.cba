@@ -83,7 +83,11 @@ Deno.serve(async (req) => {
     }]);
     if (pendienteError) throw pendienteError;
 
-    const origin = req.headers.get("origin") || "https://TU-DOMINIO.com";
+    // Solo a la web propia (o localhost al desarrollar): el Origin lo puede
+    // inventar cualquiera que llame a la función a mano.
+    const ORIGENES_PERMITIDOS = ["https://psicope-cba.com.ar", "http://localhost:5173", "http://127.0.0.1:5173"];
+    const origenPedido = req.headers.get("origin") || "";
+    const origin = ORIGENES_PERMITIDOS.includes(origenPedido) ? origenPedido : ORIGENES_PERMITIDOS[0];
     const esLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
 
     const body = {

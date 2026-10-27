@@ -4,7 +4,7 @@ import { supabase } from "../supabase/supabaseClient";
 import { FaEdit, FaUserCircle, FaShoppingBag, FaSignOutAlt, FaBars, FaTimes, FaUserShield } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "./Navbar.css";
-import logoImage from "../assets/logo.png";
+import logoImage from "../assets/logo-web.png";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);

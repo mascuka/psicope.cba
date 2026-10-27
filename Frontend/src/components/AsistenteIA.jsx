@@ -5,6 +5,25 @@ import { FaMagic, FaTimes, FaShareSquare, FaSpinner, FaTrash, FaBookOpen, FaExcl
 import "./AsistenteIA.css";
 import logoImage from "../assets/logo.png";
 
+// Las tipografías de los posteos solo las usa el asistente: se piden recién
+// cuando se abre (antes iban en index.html y las bajaba cada visita).
+const URL_FUENTES_POSTEOS = "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&family=Poppins:wght@700;800&family=Nunito:wght@700;800&family=Comfortaa:wght@700&family=Patrick+Hand&family=Karla:wght@600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,600&family=Fraunces:wght@700;900&family=Caveat:wght@600;700&display=swap";
+let fuentesPosteosPromesa = null;
+const cargarFuentesPosteos = () => {
+  if (!fuentesPosteosPromesa) {
+    fuentesPosteosPromesa = new Promise((resolve) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = URL_FUENTES_POSTEOS;
+      link.onload = resolve;
+      link.onerror = resolve;
+      document.head.appendChild(link);
+    });
+  }
+  return fuentesPosteosPromesa;
+};
+cargarFuentesPosteos();
+
 const MAX_SLOTS = 1;
 // Tamaño del "recuadro" agarrable de cada texto (ver JSX, ia-frame-texto) --
 // no se calcula pixel a pixel a partir de las líneas reales (cada estilo
@@ -1450,6 +1469,7 @@ const componerImagenPost = async (imagenUrl, principal, secundario, fondoIdx = 0
     // secundaria -- "italic" adelante del shorthand asegura que cargue esa
     // variante puntual, no la redonda.)
     const prefijoItalica = fuentes.texto.italica ? "italic " : "";
+    await cargarFuentesPosteos();
     await Promise.all([
       document.fonts.load(`${fuentes.titulo.peso} 80px '${fuentes.titulo.familia}'`),
       document.fonts.load(`${prefijoItalica}${fuentes.texto.peso} 40px '${fuentes.texto.familia}'`),
