@@ -91,9 +91,11 @@ export default function Login() {
       console.error(error);
       Swal.fire({
         title: "Error",
-        text: error.message === "Invalid login credentials" 
-          ? "Credenciales incorrectas" 
-          : "Hubo un problema al iniciar sesión",
+        text: error.message === "Invalid login credentials"
+          ? "Credenciales incorrectas"
+          : error.message === "Email not confirmed"
+            ? "Todavía no confirmaste tu cuenta: tocá el botón del mail que te mandamos al registrarte (revisá también spam)."
+            : "Hubo un problema al iniciar sesión",
         icon: "error",
         confirmButtonColor: "#D48CA6"
       });

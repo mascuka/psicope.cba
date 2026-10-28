@@ -81,6 +81,63 @@
   color: #bbb;
 }
 
+/* Contraseña con el ojito para mostrarla */
+.password-campo {
+  position: relative;
+  display: flex;
+}
+
+.password-campo input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.password-ojo {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.password-ojo:hover {
+  color: var(--color-texto-oscuro);
+}
+
+/* Si la repetición coincide o no: el color del borde y el aviso de abajo */
+.form-group input.input-ok,
+.form-group input.input-ok:focus {
+  border-color: #6BAA75;
+}
+
+.form-group input.input-error,
+.form-group input.input-error:focus {
+  border-color: #D9534F;
+}
+
+.password-aviso {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 5px;
+}
+
+.password-aviso.ok {
+  color: #4F8F5A;
+}
+
+.password-aviso.error {
+  color: #C9302C;
+}
+
 .form-grid-custom {
   display: grid;
   grid-template-columns: 1fr 1fr;

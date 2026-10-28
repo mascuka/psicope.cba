@@ -28,6 +28,31 @@
 .modal-header {
   padding: 15px 25px;
   border-bottom: 1px solid var(--color-borde-sutil, #EFE3D8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-cerrar {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.modal-cerrar:hover {
+  background: #f3eee8;
+  color: var(--color-texto-oscuro, #2B2530);
 }
 
 .modal-header h3 {

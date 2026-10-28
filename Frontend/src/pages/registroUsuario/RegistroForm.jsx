@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "../../supabase/supabaseClient";
 import Swal from 'sweetalert2';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import TermsModal from './TermsModal';
 import './registro.css';
 
@@ -18,6 +19,7 @@ export default function RegistroForm() {
   const [loading, setLoading] = useState(false);
   const [isTermsChecked, setIsTermsChecked] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [verPassword, setVerPassword] = useState(false);
 
   const [form, setForm] = useState({
     nombre: '',
@@ -64,68 +66,39 @@ export default function RegistroForm() {
     setLoading(true);
     
     try {
-      // 1. Crear usuario en Auth con metadata
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: {
-          data: {
-            nombre: form.nombre,
-            pais: form.pais,
-            fecha_nacimiento: form.fecha_nacimiento
-          }
-        }
-      });
-
-      if (authError) {
-        console.error("❌ Error en Auth:", authError);
-        throw authError;
-      }
-
-      // 2. Insertar datos en la tabla usuarios
-      if (authData.user) {
-        const userData = {
-          id: authData.user.id,
+      // La cuenta la crea la función del servidor: así el mail de
+      // confirmación sale del Gmail de Brenda (no de supabase.io, en
+      // inglés) y el perfil lo arma la base sola, sin depender de que haya
+      // sesión (no la hay hasta confirmar el email).
+      const { error } = await supabase.functions.invoke("registrar-usuario", {
+        body: {
           nombre: form.nombre,
           email: form.email,
+          password: form.password,
           fecha_nacimiento: form.fecha_nacimiento,
           pais: form.pais,
           telefono: form.telefono || null,
-          rol: 'normal'
-        };
+        },
+      });
 
-        const { error: profileError } = await supabase
-          .from("usuarios")
-          .insert([userData])
-          .select();
-
-        if (profileError) {
-          console.error("❌ Error al insertar perfil:", profileError);
-          throw profileError;
-        }
-
-        Swal.fire({
-          title: "¡Cuenta creada!",
-          text: "Confirma tu email para ingresar.",
-          icon: "success",
-          confirmButtonColor: "#D48CA6"
-        });
-        navigate("/login");
+      if (error) {
+        let mensaje = null;
+        try { mensaje = (await error.context.json()).error; } catch { /* sin detalle */ }
+        throw new Error(mensaje || "Hubo un problema al crear la cuenta. Probá de nuevo en unos minutos.");
       }
+
+      Swal.fire({
+        title: "¡Cuenta creada!",
+        text: `Te mandamos un mail a ${form.email} para confirmarla. Revisá también la carpeta de spam.`,
+        icon: "success",
+        confirmButtonColor: "#D48CA6"
+      });
+      navigate("/login");
     } catch (error) {
-      console.error("❌ Error completo:", error);
-      
-      let mensajeError = "Hubo un problema al guardar tus datos.";
-      
-      if (error.message?.includes("duplicate key")) {
-        mensajeError = "Este correo ya está registrado.";
-      } else if (error.message) {
-        mensajeError += ` Detalle: ${error.message}`;
-      }
-      
+      console.error("Error al registrar:", error);
       Swal.fire({
         title: "Error",
-        text: mensajeError,
+        text: error.message,
         icon: "error",
         confirmButtonColor: "#D48CA6"
       });
@@ -172,17 +145,39 @@ export default function RegistroForm() {
           <div className="form-grid-custom">
              <div className="form-group">
                <label>Contraseña</label>
-               <input type="password" name="password" value={form.password} onChange={handleChange} required />
+               <div className="password-campo">
+                 <input type={verPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} required minLength={6} placeholder="Mínimo 6 caracteres" />
+                 <button type="button" className="password-ojo" onClick={() => setVerPassword(v => !v)} aria-label={verPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                   {verPassword ? <FaEyeSlash /> : <FaEye />}
+                 </button>
+               </div>
              </div>
              <div className="form-group">
                <label>Repetir</label>
-               <input type="password" name="password2" value={form.password2} onChange={handleChange} required />
+               <div className="password-campo">
+                 <input
+                   type={verPassword ? "text" : "password"}
+                   name="password2"
+                   value={form.password2}
+                   onChange={handleChange}
+                   required
+                   className={form.password2 ? (form.password2 === form.password ? "input-ok" : "input-error") : ""}
+                 />
+                 <button type="button" className="password-ojo" onClick={() => setVerPassword(v => !v)} aria-label={verPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                   {verPassword ? <FaEyeSlash /> : <FaEye />}
+                 </button>
+               </div>
+               {form.password2 && (
+                 form.password2 === form.password
+                   ? <span className="password-aviso ok">✓ Coinciden</span>
+                   : <span className="password-aviso error">No coinciden</span>
+               )}
              </div>
           </div>
 
           <div className="terms-container">
-            <input type="checkbox" checked={isTermsChecked} onChange={(e) => setIsTermsChecked(e.target.checked)} required />
-            <span>Acepto los <strong className="terms-link" onClick={() => setIsTermsModalOpen(true)}>términos</strong></span>
+            <input id="acepto-terminos" type="checkbox" checked={isTermsChecked} onChange={(e) => setIsTermsChecked(e.target.checked)} required />
+            <label htmlFor="acepto-terminos">Acepto los <strong className="terms-link" onClick={(e) => { e.preventDefault(); setIsTermsModalOpen(true); }}>términos</strong></label>
           </div>
 
           <div className="registro-actions">
@@ -195,7 +190,12 @@ export default function RegistroForm() {
           </div>
         </form>
       </div>
-      {isTermsModalOpen && <TermsModal onClose={() => setIsTermsModalOpen(false)} />}
+      {isTermsModalOpen && (
+        <TermsModal
+          onClose={() => setIsTermsModalOpen(false)}
+          onAceptar={() => { setIsTermsChecked(true); setIsTermsModalOpen(false); }}
+        />
+      )}
     </div>
   );
 }
