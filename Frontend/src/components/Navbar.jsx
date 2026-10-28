@@ -59,6 +59,17 @@ export default function Navbar() {
 
   const getSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();
+    // getSession lee la sesión guardada en el navegador sin preguntarle al
+    // servidor: si la cuenta se borró, seguía apareciendo "logueado" como
+    // "Usuario" sin perfil. getUser sí lo verifica; si la cuenta ya no
+    // existe, se cierra la sesión local.
+    if (session) {
+      const { error } = await supabase.auth.getUser();
+      if (error?.status === 401 || error?.status === 403 || error?.code === "user_not_found") {
+        await supabase.auth.signOut({ scope: "local" });
+        return;
+      }
+    }
     const currentUser = session?.user ?? null;
     setUser(currentUser);
     if (currentUser) {
