@@ -12,7 +12,7 @@ import "./psicopedagogiando.css";
 export default function Psicopedagogiando() {
   useSEO(
     "Psicopedagogiando | Contenido y Novedades | Psicope.cba - Córdoba",
-    "Contenido psicopedagógico, novedades y recursos de Brenda Grossi, psicopedagoga en Córdoba. Tips para acompañar el aprendizaje de niños y adolescentes."
+    "Contenido psicopedagógico, novedades y recursos de Brenda Grossi, psicopedagoga en Córdoba. Tips para acompañar el aprendizaje de niños y niñas."
   );
   const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState([]);

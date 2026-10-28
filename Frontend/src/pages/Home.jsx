@@ -24,7 +24,7 @@ const IconoArcoiris = () => (
 export default function Home() {
   useSEO(
     "Psicopedagoga en Córdoba | Lic. Brenda Grossi - Psicope.cba",
-    "Psicopedagoga en Córdoba Capital. Evaluación y tratamiento psicopedagógico para niños, niñas y adolescentes con dificultades de aprendizaje. Atención particular y por obra social."
+    "Psicopedagoga en Córdoba Capital. Evaluación y tratamiento psicopedagógico para niños y niñas de 6 a 12 años con dificultades de aprendizaje. Atención particular y por obra social."
   );
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
@@ -77,8 +77,8 @@ export default function Home() {
     // array, así que se actualiza solo con lo que se edite acá -- nada
     // de lo hecho para Google se pierde ni se desincroniza.
     faq: [
-      { pregunta: "¿Qué hace una psicopedagoga?", respuesta: "Una psicopedagoga evalúa y trata los procesos de aprendizaje de niños, niñas y adolescentes. Detecta fortalezas y dificultades (lectura, escritura, cálculo, atención, memoria), arma un plan de intervención personalizado y trabaja en conjunto con la familia y la escuela para acompañar el aprendizaje." },
-      { pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?", respuesta: "Cuando un niño, niña o adolescente muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado." },
+      { pregunta: "¿Qué hace una psicopedagoga?", respuesta: "Una psicopedagoga evalúa y trata los procesos de aprendizaje de niños y niñas. Detecta fortalezas y dificultades (lectura, escritura, cálculo, atención, memoria), arma un plan de intervención personalizado y trabaja en conjunto con la familia y la escuela para acompañar el aprendizaje." },
+      { pregunta: "¿Cuándo conviene consultar a una psicopedagoga en Córdoba?", respuesta: "Cuando un niño o niña muestra dificultades sostenidas para leer, escribir, calcular, prestar atención o organizarse en las tareas escolares, o cuando la escuela sugiere una evaluación. También sirve como acompañamiento preventivo, no hace falta esperar a que haya un problema instalado." },
       { pregunta: "¿Atendés solo particular o también con obra social?", respuesta: "Atiendo tanto de forma particular como por obra social, en consultorio en Córdoba Capital. Podés consultar por WhatsApp para confirmar la cobertura específica de tu obra social." },
       { pregunta: "¿Qué dificultades de aprendizaje se pueden evaluar y tratar?", respuesta: "Trabajo especialmente con Dificultades Específicas del Aprendizaje como dislexia, discalculia y disgrafía, además de evaluación cognitiva (WISC-V) y fortalecimiento de funciones ejecutivas (organización, memoria de trabajo, autorregulación)." },
       { pregunta: "¿Cómo pido un turno?", respuesta: "Podés solicitar un turno directamente desde la sección \"Solicitar Turno\" de este sitio, o escribiendo por WhatsApp. El consultorio está en Santa Fe 133, Córdoba Capital." },
