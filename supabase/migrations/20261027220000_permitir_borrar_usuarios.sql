@@ -22,3 +22,28 @@ alter table public.turnos
 alter table public.usuarios drop constraint if exists usuarios_id_fkey;
 alter table public.usuarios
   add constraint usuarios_id_fkey foreign key (id) references auth.users(id) on delete cascade not valid;
+
+-- Excepción: mascuka410@gmail.com es la cuenta con la que Santiago prueba
+-- registros y compras. Al borrarla se borran también sus compras,
+-- solicitudes y turnos (de la cuenta o hechos como invitado con ese email),
+-- para que no queden ventas ni turnos de prueba en el panel de Brenda.
+create or replace function public.borrar_datos_cuenta_de_prueba()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if lower(old.email) = 'mascuka410@gmail.com' then
+    delete from public.compras where usuario_id = old.id or lower(email_usuario) = lower(old.email);
+    delete from public.solicitudes_turno where creado_por = old.id or lower(email) = lower(old.email);
+    delete from public.turnos where creado_por = old.id or lower(email_contacto) = lower(old.email);
+  end if;
+  return old;
+end;
+$$;
+
+drop trigger if exists borrar_datos_cuenta_de_prueba on auth.users;
+create trigger borrar_datos_cuenta_de_prueba
+  before delete on auth.users
+  for each row execute function public.borrar_datos_cuenta_de_prueba();
