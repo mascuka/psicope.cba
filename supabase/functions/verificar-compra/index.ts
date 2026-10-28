@@ -35,7 +35,13 @@ Deno.serve(async (req) => {
       query = query.eq("payment_id", payment_id);
     } else {
       if (!material_id || !email || !desde) throw new Error("Faltan datos");
-      query = query.eq("material_id", material_id).eq("email_usuario", email).gte("fecha", desde);
+      // Solo compras de los últimos 30 minutos, aunque "desde" venga más
+      // viejo: el polling arranca justo antes del pago, y sin este tope
+      // cualquiera que supiera el email de un comprador y qué material
+      // compró podía conseguir el payment_id (y con él, la descarga).
+      const minimo = new Date(Date.now() - 30 * 60 * 1000);
+      const desdeEfectivo = new Date(desde) > minimo ? new Date(desde) : minimo;
+      query = query.eq("material_id", material_id).eq("email_usuario", email).gte("fecha", desdeEfectivo.toISOString());
     }
     const { data: compra } = await query.order("fecha", { ascending: false }).limit(1).maybeSingle();
 

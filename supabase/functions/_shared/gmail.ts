@@ -9,6 +9,13 @@
 // Acá el mensaje va armado a mano y en base64, que no deja nada para
 // "arreglar".
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// Tope de mails por día (24 horas corridas), entre todas las funciones:
+// protege la cuenta de Gmail de Brenda si alguien pide materiales gratis
+// en masa para direcciones ajenas. Gmail personal corta en ~500 por día.
+const LIMITE_MAILS_POR_DIA = 100;
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -53,6 +60,22 @@ const htmlATexto = (html: string) => html
   .trim();
 
 export async function enviarMailGmail({ para, asunto, html }: { para: string; asunto: string; html: string }) {
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+  const haceUnDia = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count, error: errorConteo } = await supabaseAdmin
+    .from("mails_enviados")
+    .select("id", { count: "exact", head: true })
+    .gte("creado_en", haceUnDia);
+  // Si no se puede contar (por ejemplo, la tabla todavía no existe), el
+  // mail sale igual: el tope es una protección, no debe frenar ventas.
+  if (errorConteo) console.error("No se pudo contar mails_enviados:", errorConteo);
+  else if ((count ?? 0) >= LIMITE_MAILS_POR_DIA) {
+    throw new Error(`Se alcanzó el tope de ${LIMITE_MAILS_POR_DIA} mails por día`);
+  }
+
   const usuario = Deno.env.get("GMAIL_USER")!;
   const limite = `limite_${crypto.randomUUID()}`;
 
@@ -127,4 +150,7 @@ export async function enviarMailGmail({ para, asunto, html }: { para: string; as
   } finally {
     conexion.close();
   }
+
+  const { error: errorRegistro } = await supabaseAdmin.from("mails_enviados").insert({ destinatario: para });
+  if (errorRegistro) console.error("No se pudo registrar el mail enviado:", errorRegistro);
 }
