@@ -1,0 +1,2 @@
+# Permisos locales de Claude Code (de cada compu, no van al repositorio)
+.claude/settings.local.json

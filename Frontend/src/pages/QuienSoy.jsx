@@ -162,7 +162,7 @@ export default function QuienSoy() {
             "addressRegion": "Córdoba",
             "addressCountry": "AR",
           },
-          "sameAs": ["https://www.instagram.com/psicope.cba/"],
+          "sameAs": ["https://www.instagram.com/psicope.cba/", "https://www.linkedin.com/in/lic-brenda-grossi/"],
         })}
       </script>
       <div className="quien-soy-card">
