@@ -46,11 +46,15 @@ Deno.serve(async (req) => {
 
     const { data: signed, error: signError } = await supabaseAdmin.storage
       .from("materiales-privados")
-      .createSignedUrl(fileName, 120, { download: nombreDescarga });
+      .createSignedUrl(fileName, 120);
     if (signError) throw signError;
+    // El nombre de descarga se agrega a mano: la versión actual de
+    // supabase-js lo codifica dos veces y las tildes salían como "%C3%B3"
+    // (ver notificar-compra-material).
+    const signedUrl = `${signed.signedUrl}&download=${encodeURIComponent(nombreDescarga)}`;
 
     return new Response(
-      JSON.stringify({ signedUrl: signed.signedUrl, nombreMaterial: compra.nombre_material }),
+      JSON.stringify({ signedUrl, nombreMaterial: compra.nombre_material }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

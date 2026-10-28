@@ -90,15 +90,19 @@ Deno.serve(async (req) => {
     // recién varios días después -- por eso dura 7 días.
     const { data: signed, error: signError } = await supabaseAdmin.storage
       .from("materiales-privados")
-      .createSignedUrl(fileName, 60 * 60 * 24 * 7, { download: nombreArchivoFinal });
+      .createSignedUrl(fileName, 60 * 60 * 24 * 7);
     if (signError) throw signError;
+    // El nombre de descarga se agrega a mano: la versión actual de
+    // supabase-js lo codifica dos veces (URLSearchParams y después
+    // encodeURI), y el archivo bajaba como "Estimulaci%C3%B3n cognitiva.pdf".
+    const linkDescarga = `${signed.signedUrl}&download=${encodeURIComponent(nombreArchivoFinal)}`;
 
     const html = `
       <h2>¡Gracias por tu compra!</h2>
       <p>Hola ${escaparHtml(nombre)},</p>
       <p>Ya tenés disponible tu material: <strong>${escaparHtml(nombre_material || "tu material")}</strong></p>
       <p style="margin:24px 0;">
-        <a href="${signed.signedUrl}" style="background:#EFE3D8;color:#2B2530;padding:12px 26px;border-radius:30px;text-decoration:none;font-weight:bold;display:inline-block;">
+        <a href="${linkDescarga}" style="background:#EFE3D8;color:#2B2530;padding:12px 26px;border-radius:30px;text-decoration:none;font-weight:bold;display:inline-block;">
           Descargar material
         </a>
       </p>

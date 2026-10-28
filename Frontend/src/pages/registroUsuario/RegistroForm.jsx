@@ -161,16 +161,14 @@ export default function RegistroForm() {
                    value={form.password2}
                    onChange={handleChange}
                    required
-                   className={form.password2 ? (form.password2 === form.password ? "input-ok" : "input-error") : ""}
+                   className={form.password2 && form.password2 === form.password ? "input-ok" : ""}
                  />
                  <button type="button" className="password-ojo" onClick={() => setVerPassword(v => !v)} aria-label={verPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
                    {verPassword ? <FaEyeSlash /> : <FaEye />}
                  </button>
                </div>
-               {form.password2 && (
-                 form.password2 === form.password
-                   ? <span className="password-aviso ok">✓ Coinciden</span>
-                   : <span className="password-aviso error">No coinciden</span>
+               {form.password2 && form.password2 === form.password && (
+                 <span className="password-aviso">✓ Coinciden</span>
                )}
              </div>
           </div>

@@ -70,11 +70,10 @@
   background: #fafafa;
 }
 
+/* Igual que el login: al enfocar solo se aclara el fondo, sin borde rosa. */
 .form-group input:focus,
 .form-group select:focus {
-  border-color: var(--color-acento);
   background: white;
-  box-shadow: 0 0 0 3px rgba(212, 140, 166, 0.1);
 }
 
 .form-group input::placeholder {
@@ -113,29 +112,17 @@
   color: var(--color-texto-oscuro);
 }
 
-/* Si la repetición coincide o no: el color del borde y el aviso de abajo */
+/* Cuando la repetición coincide: borde y aviso en verde */
 .form-group input.input-ok,
 .form-group input.input-ok:focus {
   border-color: #6BAA75;
-}
-
-.form-group input.input-error,
-.form-group input.input-error:focus {
-  border-color: #D9534F;
 }
 
 .password-aviso {
   font-size: 0.8rem;
   font-weight: 700;
   margin-left: 5px;
-}
-
-.password-aviso.ok {
   color: #4F8F5A;
-}
-
-.password-aviso.error {
-  color: #C9302C;
 }
 
 .form-grid-custom {
@@ -163,7 +150,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: var(--color-acento);
+  accent-color: var(--color-texto-oscuro);
 }
 
 .terms-container label,
