@@ -158,6 +158,15 @@ export default function MisCompras() {
   const reenviarPorCorreo = async (compra) => {
     if (!usuario?.email) return;
     setEnviandoId(compra.id);
+    // El envío tarda unos segundos (Gmail): sin este cartel no se notaba
+    // que había arrancado. El de éxito o error de abajo lo reemplaza.
+    Swal.fire({
+      title: 'Enviando…',
+      text: `Te estamos mandando "${compra.nombre_material}" a ${usuario.email}`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
     try {
       // El resto (email, nombre, archivo) lo saca la función de la base.
       const { error } = await supabase.functions.invoke("notificar-compra-material", {
@@ -167,7 +176,7 @@ export default function MisCompras() {
       Swal.fire({
         icon: 'success',
         title: '¡Enviado con éxito!',
-        text: 'Puede tardar unos minutos en llegarte por correo.',
+        text: `Revisá ${usuario.email} (también la carpeta de spam). Puede tardar unos minutos en llegar.`,
         confirmButtonColor: '#D48CA6',
       });
     } catch (error) {

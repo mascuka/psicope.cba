@@ -1,5 +1,5 @@
 import React from "react";
-import { FaInstagram, FaWhatsapp, FaHeart } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaWhatsapp, FaHeart } from "react-icons/fa";
 import "./footer.css";
 import logoImage from "../assets/logo-web.png";
 
@@ -29,7 +29,16 @@ export default function Footer() {
           >
             <FaInstagram /> Instagram
           </a>
-          
+
+          <a
+            href="https://www.facebook.com/profile.php?id=61593570895263"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="social-link facebook"
+          >
+            <FaFacebook /> Facebook
+          </a>
+
           <a 
             href="https://wa.me/5493516575488" 
             target="_blank" 
